@@ -20,21 +20,21 @@ final class GameUpdate {
     void update(double dt) {
         if (!Double.isFinite(dt) || dt < 0) return;
         double remaining = Math.min(dt, 0.05);
-        MasterCat.GameState initial = game.currentState;
+        MasterCat.GameState initial = game.state();
         do {
             double step = Math.min(remaining, 1.0 / 60);
             updateStep(step);
             remaining -= step;
-        } while (remaining > 1e-12 && game.currentState == initial);
+        } while (remaining > 1e-12 && game.state() == initial);
     }
 
     private void updateStep(double dt) {
-        if (game.currentState == MasterCat.GameState.PLAYING || game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+        if (game.state() == MasterCat.GameState.PLAYING || game.state() == MasterCat.GameState.BOSS_FIGHT) {
             game.landingTimer = Math.max(0, game.landingTimer - dt);
         }
-        if (game.currentState == MasterCat.GameState.PLAYING) {
+        if (game.state() == MasterCat.GameState.PLAYING) {
             updatePlaying(dt);
-        } else if (game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+        } else if (game.state() == MasterCat.GameState.BOSS_FIGHT) {
             updateBossFight(dt);
         }
     }
@@ -142,7 +142,7 @@ final class GameUpdate {
         
         // === AGGIORNA SFERE DRAGON BALL NEL BOSS FIGHT ===
         updateDragonBallSpheres(dt);
-        if (game.currentState != MasterCat.GameState.BOSS_FIGHT) return;
+        if (game.state() != MasterCat.GameState.BOSS_FIGHT) return;
         
         // Animazioni del gatto e del boss
         game.bodyBounce += dt * 8;
@@ -235,6 +235,7 @@ final class GameUpdate {
             PlayerHitbox.Bounds cat = PlayerHitbox.normal(game);
             if (o.intersects(cat.x(), cat.y(), cat.width(), cat.height())) {
                 game.gameOver(); // Game over
+                return;
             }
             if (o.isOffScreen()) {
                 it.remove();
@@ -410,7 +411,7 @@ final class GameUpdate {
             sphere.update(dt);
             
             // === COLLISIONE CON IL BOSS (solo durante boss fight) ===
-            if (game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+            if (game.state() == MasterCat.GameState.BOSS_FIGHT) {
                 // Boss dimensions: width=150, height=200 (con immagine)
                 double bossWidth = 150; 
                 double bossHeight = 200; 

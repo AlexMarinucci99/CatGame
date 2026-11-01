@@ -25,12 +25,12 @@ final class GameInput {
             }
 
             if (code == KeyCode.P) {
-                if (game.currentState == MasterCat.GameState.PAUSED) game.resumeGame();
+                if (game.state() == MasterCat.GameState.PAUSED) game.resumeGame();
                 else game.pauseGame();
                 return;
             }
             
-            switch (game.currentState) {
+            switch (game.state()) {
                 case MENU:
                     if (code == KeyCode.SPACE) {
                         game.startGame();
@@ -126,7 +126,7 @@ final class GameInput {
         // Gestione rilascio tasti per movimento fluido
     void onKeyReleased(KeyCode code) {
             held.remove(code);
-            switch (game.currentState) {
+            switch (game.state()) {
                 case BOSS_FIGHT:
                     if (code == KeyCode.LEFT || code == KeyCode.A) {
                         game.leftPressed = held.contains(KeyCode.LEFT) || held.contains(KeyCode.A);
@@ -153,7 +153,7 @@ final class GameInput {
     }
 
     void onMenuClick(double mouseX, double mouseY) {
-        if (game.currentState != MasterCat.GameState.MENU) return;
+        if (game.state() != MasterCat.GameState.MENU) return;
         if (mouseX >= game.settingsButtonX && mouseX <= game.settingsButtonX + game.settingsButtonWidth &&
             mouseY >= game.settingsButtonY && mouseY <= game.settingsButtonY + game.settingsButtonHeight) {
             game.settingsMenuOpen = !game.settingsMenuOpen;
@@ -175,7 +175,7 @@ final class GameInput {
     }
 
     void onMenuDrag(double mouseX, double mouseY) {
-        if (game.currentState == MasterCat.GameState.MENU && game.settingsMenuOpen &&
+        if (game.state() == MasterCat.GameState.MENU && game.settingsMenuOpen &&
             SettingsLayout.optionRow(game, SettingsLayout.Option.VOLUME).contains(mouseX, mouseY) &&
             mouseX >= SettingsLayout.volumeTrack(game).x() - 10) {
             updateVolume(mouseX);

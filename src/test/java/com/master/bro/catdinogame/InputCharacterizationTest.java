@@ -22,11 +22,11 @@ class InputCharacterizationTest {
         assertTrue(game.settingsMenuOpen);
         input.onKeyReleased(KeyCode.SPACE);
         input.onKeyPressed(KeyCode.SPACE);
-        assertEquals(MasterCat.GameState.PLAYING, game.currentState);
+        assertEquals(MasterCat.GameState.PLAYING, game.state());
         game.resetToMenu();
         input.onKeyReleased(KeyCode.T);
         input.onKeyPressed(KeyCode.T);
-        assertEquals(MasterCat.GameState.BOSS_FIGHT, game.currentState);
+        assertEquals(MasterCat.GameState.BOSS_FIGHT, game.state());
         assertEquals(10_000, game.score);
         assertEquals(50.0, game.energy);
     }
@@ -102,6 +102,6 @@ class InputCharacterizationTest {
         game.gameOver();
         input.onKeyReleased(KeyCode.R);
         input.onKeyPressed(KeyCode.R);
-        assertEquals(MasterCat.GameState.MENU, game.currentState);
+        assertEquals(MasterCat.GameState.MENU, game.state());
     }
 }

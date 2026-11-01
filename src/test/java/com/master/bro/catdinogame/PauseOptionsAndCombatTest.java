@@ -28,13 +28,13 @@ class PauseOptionsAndCombatTest {
         int scoreBeforePause = game.score;
         input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
-        assertEquals(MasterCat.GameState.PAUSED, game.currentState);
+        assertEquals(MasterCat.GameState.PAUSED, game.state());
         time.addAndGet(20_000);
         game.updater.update(20);
         assertEquals(scoreBeforePause, game.score);
         input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
-        assertEquals(MasterCat.GameState.PLAYING, game.currentState);
+        assertEquals(MasterCat.GameState.PLAYING, game.state());
         assertEquals(30_000, game.lastObstacleTime);
         game.updater.update(0);
         assertTrue(game.obstacles.isEmpty());
@@ -54,7 +54,7 @@ class PauseOptionsAndCombatTest {
         game.updater.update(1.0);
         double timeBeforePause = game.bossTimer;
         input.onFocusLost();
-        assertEquals(MasterCat.GameState.PAUSED, game.currentState);
+        assertEquals(MasterCat.GameState.PAUSED, game.state());
         assertFalse(game.leftPressed);
         assertFalse(game.rightPressed);
         game.updater.update(30);
@@ -75,13 +75,13 @@ class PauseOptionsAndCombatTest {
         input.onKeyPressed(KeyCode.P);
         input.onKeyReleased(KeyCode.R);
         input.onKeyPressed(KeyCode.R);
-        assertEquals(MasterCat.GameState.PLAYING, game.currentState);
+        assertEquals(MasterCat.GameState.PLAYING, game.state());
         assertEquals(0, game.score);
         input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         input.onKeyReleased(KeyCode.Q);
         input.onKeyPressed(KeyCode.Q);
-        assertEquals(MasterCat.GameState.MENU, game.currentState);
+        assertEquals(MasterCat.GameState.MENU, game.state());
     }
 
     @Test
@@ -115,7 +115,7 @@ class PauseOptionsAndCombatTest {
         assertEquals(game.catY, normal.y() + normal.height());
         game.obstacles.add(new Obstacle(112, 460, 10, 20, 0, false));
         game.updater.update(0);
-        assertEquals(MasterCat.GameState.GAME_OVER, game.currentState);
+        assertEquals(MasterCat.GameState.GAME_OVER, game.state());
 
         game.startBossFight();
         PlayerHitbox.Bounds boss = PlayerHitbox.boss(game);
@@ -124,7 +124,7 @@ class PauseOptionsAndCombatTest {
         game.bossProjectiles.add(game.new BossProjectile(boss.x() - 15, boss.centerY(),
                 game.bossX, game.bossY, 0));
         game.updater.update(0);
-        assertEquals(MasterCat.GameState.GAME_OVER, game.currentState);
+        assertEquals(MasterCat.GameState.GAME_OVER, game.state());
     }
 
     @Test
@@ -136,7 +136,7 @@ class PauseOptionsAndCombatTest {
         game.bossProjectiles.add(game.new BossProjectile(game.catX, game.catY - 30,
                 game.bossX, game.bossY, 0));
         game.updater.update(0);
-        assertEquals(MasterCat.GameState.VICTORY, game.currentState);
+        assertEquals(MasterCat.GameState.VICTORY, game.state());
     }
 
     @Test

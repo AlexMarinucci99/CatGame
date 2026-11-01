@@ -16,7 +16,7 @@ final class GameRenderer {
     GameRenderer(MasterCat game) { this.game = game; }
 
     void render(GraphicsContext gc) {
-        switch (game.currentState) {
+        switch (game.state()) {
             case MENU:
                 renderMenu(gc);
                 break;

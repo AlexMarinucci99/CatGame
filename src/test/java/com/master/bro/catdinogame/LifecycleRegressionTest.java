@@ -26,9 +26,9 @@ class LifecycleRegressionTest {
   in.onKeyReleased(javafx.scene.input.KeyCode.SPACE);
   in.onKeyPressed(javafx.scene.input.KeyCode.SPACE);assertEquals(-12,g.velocityY);
   in.onKeyPressed(javafx.scene.input.KeyCode.P);
-  in.onKeyPressed(javafx.scene.input.KeyCode.P);assertEquals(MasterCat.GameState.PAUSED,g.currentState);
+  in.onKeyPressed(javafx.scene.input.KeyCode.P);assertEquals(MasterCat.GameState.PAUSED,g.state());
   in.onKeyReleased(javafx.scene.input.KeyCode.P);
-  in.onKeyPressed(javafx.scene.input.KeyCode.P);assertEquals(MasterCat.GameState.PLAYING,g.currentState);
+  in.onKeyPressed(javafx.scene.input.KeyCode.P);assertEquals(MasterCat.GameState.PLAYING,g.state());
  }
  @Test void movementAliasesAndFocusLossTrackPhysicalKeys() {
   MasterCat g=game();g.startBossFight();GameInput in=new GameInput(g);
@@ -61,5 +61,10 @@ class LifecycleRegressionTest {
   double x=a.dragonBallSpheres.get(0).x;
   for(double dt:new double[]{-1,Double.NaN,Double.POSITIVE_INFINITY})a.updater.update(dt);
   assertEquals(x,a.dragonBallSpheres.get(0).x);
+ }
+ @Test void terminalStatesCannotBeOverwrittenByLateCallbacks() {
+  MasterCat g=game();g.startBossFight();g.victory();g.gameOver();
+  assertEquals(MasterCat.GameState.VICTORY,g.state());
+  g.resetToMenu();g.gameOver();g.victory();assertEquals(MasterCat.GameState.MENU,g.state());
  }
 }

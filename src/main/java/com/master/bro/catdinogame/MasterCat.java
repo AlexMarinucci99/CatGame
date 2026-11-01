@@ -45,7 +45,7 @@ public class MasterCat extends Application {
 
     // Game States
     enum GameState { MENU, PLAYING, BOSS_FIGHT, PAUSED, GAME_OVER, VICTORY }
-    GameState currentState = GameState.MENU;
+    private GameState currentState = GameState.MENU;
     GameState pausedFrom = GameState.MENU;
     long pausedAtMillis;
     LongSupplier clock = System::currentTimeMillis;
@@ -134,6 +134,8 @@ public class MasterCat extends Application {
     final GameAudio audio = new GameAudio();
     private final GameRenderer renderer = new GameRenderer(this);
     final GameUpdate updater = new GameUpdate(this);
+
+    GameState state() { return currentState; }
 
     long nowMillis() { return clock.getAsLong(); }
 
@@ -299,6 +301,7 @@ public class MasterCat extends Application {
     }
     
     void gameOver() {
+        if (currentState != GameState.PLAYING && currentState != GameState.BOSS_FIGHT) return;
         currentState = GameState.GAME_OVER;
         // Torna alla musica del menu
         audio.switchToMenuMusic();
@@ -306,6 +309,7 @@ public class MasterCat extends Application {
     }
     
     void victory() {
+        if (currentState != GameState.BOSS_FIGHT) return;
         try {
             System.out.println("🏆 VITTORIA! Passaggio alla schermata della vittoria...");
             currentState = GameState.VICTORY;
