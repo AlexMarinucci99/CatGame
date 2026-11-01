@@ -1,7 +1,7 @@
 # Testing status
 
 - Baseline source comparison: original `1ffe89b` versus refactored `1e06e21`, documented in `GAMEPLAY_BASELINE.md`.
-- Local Linux: Java 21 compilation with cached OpenJFX Linux jars; 15 JUnit test bodies executed in a headless test runner. The local environment has no Maven command.
-- Local graphical smoke: JavaFX window opened at 1366×768, original images and media initialized, then the process was stopped by a nine-second timeout. This is startup evidence, not a complete playthrough or proof that audio was audible.
-- GitHub Actions: `mvn clean verify` matrix for Ubuntu, Windows and macOS. Record the result of the milestone branch run before merge.
-- Interactive acceptance still needed: verify opening obstacle feel, normal and double jumps, white-strip removal, boss progression, music and controls on target desktops.
+- Local Linux: Java 21 offline Maven compilation and package; 25 JUnit test bodies passed through a headless runner. Offline Maven Surefire itself needs an uncached provider, so the GitHub Actions matrix runs the actual `mvn clean verify` gate.
+- Local JavaFX rendering: captured and inspected the settings panel, boss attack warning, and pause overlay at 1366×768 and 1200×600 using packaged images. The Linux launch script also opened the game at 1366×768 and initialized audio. This verifies startup and layout rendering, not a complete playthrough or audible output.
+- Automated coverage includes pause/resume timing, focus-loss movement release, restart/menu controls, hitbox alignment, boss warning delay, settings interactions, obstacle progression, and sphere collisions.
+- Interactive acceptance still needed: play the complete run, judge hitbox fairness and warning time, verify volume and full-screen interactions, and listen to audio on the target desktop.

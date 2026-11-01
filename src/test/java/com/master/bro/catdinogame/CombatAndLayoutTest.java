@@ -37,7 +37,6 @@ class CombatAndLayoutTest {
         for (int type = 0; type < 4; type++) {
             MasterCat game = game();
             game.currentState = MasterCat.GameState.BOSS_FIGHT;
-            game.lastBossAttackTime = System.currentTimeMillis();
             game.bossProjectiles.add(game.new BossProjectile(350, 400, 150, 450, type));
             MasterCat.DragonBallSphere sphere = game.new DragonBallSphere(350, 400);
             game.dragonBallSpheres.add(sphere);
@@ -56,8 +55,8 @@ class CombatAndLayoutTest {
         game.settingsButtonX = 1010;
         game.settingsButtonY = 530;
         SettingsLayout.Bounds panel = SettingsLayout.panel(game);
-        assertEquals(410, panel.width());
-        assertEquals(410, panel.height());
+        assertEquals(430, panel.width());
+        assertEquals(500, panel.height());
         assertTrue(panel.contains(panel.x() + 10, panel.y() + 10));
         assertFalse(panel.contains(panel.x() - 1, panel.y() + 10));
         assertTrue(panel.x() + panel.width() <= game.WIDTH);

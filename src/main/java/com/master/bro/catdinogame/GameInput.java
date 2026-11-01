@@ -3,7 +3,7 @@ package com.master.bro.catdinogame;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 
-/** Installs the original keyboard and menu mouse handlers. */
+/** Handles gameplay keys, pause, focus loss, and interactive menu settings. */
 final class GameInput {
     private final MasterCat game;
     GameInput(MasterCat game) { this.game = game; }
@@ -18,6 +18,12 @@ final class GameInput {
             // Controllo musica globale (funziona in tutti gli stati)
             if (code == KeyCode.M) {
                 game.audio.toggleMusic();
+                return;
+            }
+
+            if (code == KeyCode.P) {
+                if (game.currentState == MasterCat.GameState.PAUSED) game.resumeGame();
+                else game.pauseGame();
                 return;
             }
             
@@ -98,6 +104,10 @@ final class GameInput {
                         game.rightPressed = true;
                     }
                     break;
+                case PAUSED:
+                    if (code == KeyCode.R) game.startGame();
+                    else if (code == KeyCode.Q) game.resetToMenu();
+                    break;
                 case GAME_OVER:
                     // Ritorna al menu con qualsiasi tasto
                     game.resetToMenu();
@@ -123,6 +133,7 @@ final class GameInput {
                     break;
                 case MENU:
                 case PLAYING:
+                case PAUSED:
                 case GAME_OVER:
                 case VICTORY:
                     // Nessuna azione speciale per questi stati
@@ -130,31 +141,54 @@ final class GameInput {
             }
     }
 
+    void onFocusLost() {
+        game.leftPressed = false;
+        game.rightPressed = false;
+        game.pauseGame();
+    }
+
+    void onMenuClick(double mouseX, double mouseY) {
+        if (game.currentState != MasterCat.GameState.MENU) return;
+        if (mouseX >= game.settingsButtonX && mouseX <= game.settingsButtonX + game.settingsButtonWidth &&
+            mouseY >= game.settingsButtonY && mouseY <= game.settingsButtonY + game.settingsButtonHeight) {
+            game.settingsMenuOpen = !game.settingsMenuOpen;
+            return;
+        }
+        if (!game.settingsMenuOpen) return;
+
+        if (SettingsLayout.optionRow(game, SettingsLayout.Option.MUSIC).contains(mouseX, mouseY)) {
+            game.audio.toggleMusic();
+        } else if (SettingsLayout.optionRow(game, SettingsLayout.Option.EFFECTS).contains(mouseX, mouseY)) {
+            game.reducedEffects = !game.reducedEffects;
+        } else if (SettingsLayout.optionRow(game, SettingsLayout.Option.FULLSCREEN).contains(mouseX, mouseY)) {
+            game.toggleFullscreen();
+        } else if (SettingsLayout.optionRow(game, SettingsLayout.Option.VOLUME).contains(mouseX, mouseY)) {
+            if (mouseX >= SettingsLayout.volumeTrack(game).x() - 10) updateVolume(mouseX);
+        } else if (!SettingsLayout.panel(game).contains(mouseX, mouseY)) {
+            game.settingsMenuOpen = false;
+        }
+    }
+
+    void onMenuDrag(double mouseX, double mouseY) {
+        if (game.currentState == MasterCat.GameState.MENU && game.settingsMenuOpen &&
+            SettingsLayout.optionRow(game, SettingsLayout.Option.VOLUME).contains(mouseX, mouseY) &&
+            mouseX >= SettingsLayout.volumeTrack(game).x() - 10) {
+            updateVolume(mouseX);
+        }
+    }
+
+    private void updateVolume(double mouseX) {
+        SettingsLayout.Bounds track = SettingsLayout.volumeTrack(game);
+        game.audio.setVolume((mouseX - track.x()) / track.width());
+    }
+
 
     void install(Scene scene) {
         scene.setOnKeyPressed(e -> onKeyPressed(e.getCode()));
         scene.setOnKeyReleased(e -> onKeyReleased(e.getCode()));
 
-        // === GESTIONE CLICK MOUSE PER MENU A TENDINA ===
-        // === GESTIONE CLICK MOUSE PER MENU A TENDINA ===
-        scene.setOnMouseClicked(e -> {
-            if (game.currentState == MasterCat.GameState.MENU) {
-                double mouseX = e.getX();
-                double mouseY = e.getY();
-                
-                // Check se click è sul pulsante Impostazioni
-                if (mouseX >= game.settingsButtonX && mouseX <= game.settingsButtonX + game.settingsButtonWidth &&
-                    mouseY >= game.settingsButtonY && mouseY <= game.settingsButtonY + game.settingsButtonHeight) {
-                    game.settingsMenuOpen = !game.settingsMenuOpen; // Toggle menu
-                }
-                // Check se click è fuori dal menu per chiuderlo
-                else if (game.settingsMenuOpen) {
-                    if (!SettingsLayout.panel(game).contains(mouseX, mouseY)) {
-                        game.settingsMenuOpen = false; // Chiudi menu se click fuori
-                    }
-                }
-            }
-        });
+        scene.setOnMouseClicked(e -> onMenuClick(e.getX(), e.getY()));
+        scene.setOnMouseDragged(e -> onMenuDrag(e.getX(), e.getY()));
 
     }
 }
