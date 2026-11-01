@@ -6,10 +6,11 @@ cd "$ROOT_DIR"
 
 APP_NAME="CatGame"
 MAIN_CLASS="com.master.bro.catdinogame.GameLauncher"
-APP_VERSION="${APP_VERSION:-0.1.0}"
-case "$APP_VERSION" in
-  *[!0-9.]*|.*|*.) echo "APP_VERSION must contain only numeric components (for example 0.1.0): $APP_VERSION" >&2; exit 2 ;;
-esac
+APP_VERSION="${APP_VERSION:-1.0.0}"
+if [[ ! "$APP_VERSION" =~ ^[1-9][0-9]*(\.[0-9]+){0,2}$ ]]; then
+  echo "APP_VERSION must have one to three numeric components and start above zero (for example 1.0.0): $APP_VERSION" >&2
+  exit 2
+fi
 
 DIST="$ROOT_DIR/target/distributions"
 INPUT="$ROOT_DIR/target/package-input"

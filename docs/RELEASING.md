@@ -27,11 +27,11 @@ Creare il tag soltanto dopo che il packaging manuale è riuscito e i pacchetti s
 ```bash
 git switch main
 git pull --ff-only
-git tag -a v0.1.0-beta.1 -m "CatGame 0.1.0 beta 1"
-git push origin v0.1.0-beta.1
+git tag -a v1.0.0-beta.1 -m "CatGame 1.0.0 beta 1"
+git push origin v1.0.0-beta.1
 ```
 
-Il tag conserva il suffisso prerelease per GitHub. jpackage accetta soltanto una versione numerica, quindi `v0.1.0-beta.1` diventa `0.1.0` nel nome e nei metadati del pacchetto. Dopo i quattro job, il workflow carica installer, ZIP e `SHA256SUMS.txt` in una GitHub Release **draft prerelease**.
+Il tag conserva il suffisso prerelease per GitHub. jpackage accetta soltanto una versione numerica da uno a tre componenti e richiede che la prima sia maggiore di zero; quindi `v1.0.0-beta.1` diventa `1.0.0` nel nome e nei metadati del pacchetto. Dopo i quattro job, il workflow carica installer, ZIP e `SHA256SUMS.txt` in una GitHub Release **draft prerelease**.
 
 Controllare i file, i checksum, le note generate e la compatibilità sui sistemi target nella bozza. Pubblicare la prerelease manualmente dalla pagina GitHub Releases solo dopo questa verifica. Per una versione successiva si ripete lo stesso processo con un nuovo tag su un commit già presente su `main`.
 

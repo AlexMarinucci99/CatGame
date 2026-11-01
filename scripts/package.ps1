@@ -4,9 +4,9 @@ Set-Location $RootDir
 
 $AppName = 'CatGame'
 $MainClass = 'com.master.bro.catdinogame.GameLauncher'
-$AppVersion = if ($env:APP_VERSION) { $env:APP_VERSION } else { '0.1.0' }
-if ($AppVersion -notmatch '^\d+(\.\d+)*$') {
-    throw "APP_VERSION must contain only numeric components (for example 0.1.0): $AppVersion"
+$AppVersion = if ($env:APP_VERSION) { $env:APP_VERSION } else { '1.0.0' }
+if ($AppVersion -notmatch '^[1-9]\d*(\.\d+){0,2}$') {
+    throw "APP_VERSION must have one to three numeric components and start above zero (for example 1.0.0): $AppVersion"
 }
 
 $Dist = Join-Path $RootDir 'target/distributions'
