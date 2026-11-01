@@ -1,76 +1,698 @@
-# CatGame (MasterCat)
 
-CatGame is a full-screen JavaFX arcade game. Guide the cat through incoming parcels, survive the boss encounter, and defeat the courier before time runs out.
+# CatGame — MasterCat
 
-## Requirements
+![Java](https://img.shields.io/badge/Java-21-orange)
+![JavaFX](https://img.shields.io/badge/JavaFX-21.0.2-blue)
+![Maven](https://img.shields.io/badge/Build-Maven-blue)
+![Platforms](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+[![Build and Test](https://github.com/AlexMarinucci99/CatGame/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexMarinucci99/CatGame/actions/workflows/ci.yml)
 
-- Java Development Kit 21
-- Apache Maven 3.9 or newer on `PATH`
-- A graphical desktop session and working audio output
-- Internet access on the first build so Maven can download JavaFX and plugins
+**CatGame**, conosciuto anche come **MasterCat**, è un videogioco arcade 2D sviluppato in Java con JavaFX.
 
-JavaFX 21.0.2 is resolved through Maven for the host platform. The repository does not include a JavaFX SDK or a portable executable JAR.
+Il giocatore controlla un gatto che deve sopravvivere a una serie di ostacoli, utilizzare attacchi energetici e affrontare uno scontro finale contro un boss.
 
-## Run
+Il progetto comprende animazioni del personaggio, effetti grafici, gestione dell'energia, musiche dedicate e un sistema di gioco a difficoltà progressiva.
 
-Run the script for your operating system from a terminal. The scripts work from any current directory and accept repository paths with spaces.
+Il codice sorgente è disponibile pubblicamente e il gioco può essere avviato su **Windows, Linux e macOS**.
 
-| System | Command |
-| --- | --- |
-| Windows | `run-windows.bat` |
-| Linux | `./run-linux.sh` |
-| macOS | `./run-macos.sh` |
+---
 
-The scripts build the project with Maven and launch `GameLauncher` through the JavaFX Maven plugin. Install the JDK and Maven first; check `java -version` and `mvn -version` if the script reports a missing command. On Linux, JavaFX Media may also require system multimedia libraries provided by the distribution.
+## Indice
 
-## Controls
+- [Caratteristiche](#caratteristiche)
+- [Requisiti di sistema](#requisiti-di-sistema)
+- [Scaricare CatGame](#scaricare-catgame)
+- [Installazione e avvio su Windows](#installazione-e-avvio-su-windows)
+- [Installazione e avvio su Linux](#installazione-e-avvio-su-linux)
+- [Installazione e avvio su macOS](#installazione-e-avvio-su-macos)
+- [Comandi di gioco](#comandi-di-gioco)
+- [Come funziona il gioco](#come-funziona-il-gioco)
+- [Impostazioni e accessibilità](#impostazioni-e-accessibilità)
+- [Compilazione e sviluppo](#compilazione-e-sviluppo)
+- [Struttura del progetto](#struttura-del-progetto)
+- [Risoluzione dei problemi](#risoluzione-dei-problemi)
+- [Compatibilità e test](#compatibilità-e-test)
+- [Autore e risorse](#autore-e-risorse)
 
-| Key or input | Action |
-| --- | --- |
-| Space | Start from menu; jump and double jump during play and boss fight |
-| C | Fire an energy sphere when energy is full (50) |
-| X | Activate a shield during the boss fight when at least 25 energy is available |
-| Left / Right or A / D | Move horizontally during the boss fight |
-| P | Pause or resume during play and the boss fight |
-| R / Q while paused | Restart from the beginning / return to the menu |
-| M | Toggle music in every state |
-| U or Esc | Toggle full-screen mode in every state |
-| I | Toggle the settings panel on the menu |
-| T | Debug shortcut from the menu directly to the boss fight |
-| Mouse | Open the menu settings panel; click music, effects, and full-screen options; click or drag the volume slider |
-| Any other key | Return to the menu after game over or victory |
+---
 
-Global `M`, `U`, and `Esc` controls take precedence over the “any other key” action on end screens.
+## Caratteristiche
 
-## Progression
+- Gioco arcade 2D con difficoltà progressiva.
+- Personaggio animato con salto e doppio salto.
+- Ostacoli normali e doppi.
+- Sistema di energia e attacchi a distanza.
+- Boss finale con attacchi, barriere e limite di tempo.
+- Scudo energetico durante il combattimento finale.
+- Animazioni del personaggio e del nastro trasportatore.
+- Effetti visivi e avvisi degli attacchi del boss.
+- Musiche dedicate alle diverse fasi di gioco.
+- Menu delle impostazioni.
+- Pausa, riavvio e gestione della perdita di focus.
+- Modalità grafica con effetti ridotti.
+- Supporto multipiattaforma tramite JavaFX e Maven.
 
-The normal level advances score and speed at a 60 Hz reference rate, starts obstacles after about 4.5 seconds, then reduces their arrival interval steadily to 1.5 seconds by 10,000 points while their travel speed also increases. Normal and double jumps use time-consistent motion. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. A warning identifies each boss attack shortly before it launches. Collision with a parcel can end a run; the cat's collision area is centered on its visible sprite. Energy spheres can destroy normal and double parcels, every boss projectile type, and barrier blocks. The boss fight also provides a five-second shield for 25 energy.
+## Requisiti di sistema
 
-The game has menu, normal play, boss fight, pause, game over, and victory screens. Losing window focus pauses an active run and releases movement keys. Music pauses with gameplay. Menu settings control music, master volume, full screen, and a reduced-effects mode. Settings persist while the game remains open.
+Per compilare e avviare CatGame sono necessari:
 
-The normal level runs on an animated parcel conveyor. The cat uses six running frames, airborne poses, and a small landing response; the boss encounter also animates horizontal movement. These visuals freeze during pause. Reduced-effects mode uses the original still character and a static conveyor.
+| Componente | Requisito |
+|---|---|
+| Sistema operativo | Windows, Linux o macOS |
+| Java | JDK 21 consigliato |
+| Apache Maven | Versione 3.9 o successiva consigliata |
+| JavaFX | 21.0.2, scaricato automaticamente |
+| Git | Opzionale |
+| Connessione Internet | Necessaria per il primo download delle dipendenze |
+| Ambiente grafico | Desktop con supporto JavaFX |
+| Audio | Dispositivo audio e librerie multimediali compatibili |
 
-## Build and development
+### Cosa bisogna installare?
 
-```sh
+Prima di avviare il gioco, installare:
+
+**1. Java Development Kit (JDK) 21**
+
+Scaricare Eclipse Temurin 21:
+
+https://adoptium.net/temurin/releases/?version=21
+
+Selezionare il proprio sistema operativo, l'architettura del processore e il pacchetto **JDK**, non JRE.
+
+**2. Apache Maven**
+
+Scaricare Maven:
+
+https://maven.apache.org/download.cgi
+
+Per l'installazione manuale utilizzare la distribuzione binaria (`Binary zip` o `Binary tar.gz`).
+
+**3. Git (facoltativo)**
+
+https://git-scm.com/downloads
+
+Git serve per clonare e aggiornare la repository. In alternativa è possibile scaricare direttamente il progetto in formato ZIP.
+
+> **Importante:** non è necessario scaricare separatamente JavaFX. Maven gestisce automaticamente le dipendenze JavaFX compatibili con il sistema operativo utilizzato.
+
+---
+
+## Scaricare CatGame
+
+### Metodo 1 — Tramite Git
+
+Aprire il terminale e digitare:
+
+```bash
+git clone https://github.com/AlexMarinucci99/CatGame.git
+cd CatGame
+```
+
+### Metodo 2 — Download ZIP
+
+1. Aprire la [repository GitHub](https://github.com/AlexMarinucci99/CatGame).
+2. Selezionare **Code**.
+3. Fare clic su **Download ZIP**.
+4. Estrarre l'archivio.
+5. Aprire la cartella estratta `CatGame-main`.
+
+Non è necessario scaricare manualmente i file sorgente uno alla volta.
+
+---
+
+## Installazione e avvio su Windows
+
+### 1. Installare Java 21
+
+Scaricare il JDK 21 dal sito:
+
+https://adoptium.net/temurin/releases/?version=21
+
+Selezionare:
+
+- Sistema operativo: Windows
+- Architettura: x64, oppure quella del proprio dispositivo
+- Versione: 21
+- Pacchetto: JDK
+- Formato: `.msi`
+
+Avviare l'installer e completare l'installazione.
+
+Quando disponibili, abilitare le opzioni per configurare `PATH` e `JAVA_HOME`.
+
+Aprire PowerShell e verificare:
+
+```powershell
+java -version
+javac -version
+```
+
+Entrambi i comandi devono funzionare e mostrare una versione compatibile.
+
+### 2. Installare Apache Maven
+
+Scaricare la distribuzione binaria ZIP da:
+
+https://maven.apache.org/download.cgi
+
+Procedura:
+
+1. Estrarre l'archivio di Maven.
+2. Spostare la cartella in una posizione stabile, ad esempio `C:\Tools\`.
+3. Aprire **Modifica le variabili d'ambiente di sistema**.
+4. Aggiungere al `PATH` la cartella `bin` di Maven, ad esempio:
+
+```text
+C:\Tools\apache-maven-3.9.x\bin
+```
+
+Sostituire `3.9.x` con la versione effettivamente scaricata.
+
+Se Java non è stato configurato automaticamente, impostare `JAVA_HOME` sulla cartella di installazione del JDK e aggiungere `%JAVA_HOME%\bin` al `PATH`.
+
+Chiudere e riaprire PowerShell, poi verificare:
+
+```powershell
+mvn -version
+```
+
+Verificare che Maven utilizzi il JDK corretto.
+
+### 3. Avviare CatGame
+
+Aprire la cartella del progetto.
+
+È possibile avviare il file:
+
+```text
+run-windows.bat
+```
+
+In alternativa, aprire PowerShell nella cartella principale ed eseguire:
+
+```powershell
+.\run-windows.bat
+```
+
+Lo script controlla la presenza di Java e Maven, compila il progetto e avvia il gioco.
+
+Al primo avvio Maven scaricherà le dipendenze necessarie.
+
+---
+
+## Installazione e avvio su Linux
+
+CatGame utilizza JavaFX e può essere eseguito su distribuzioni Linux compatibili.
+
+### 1. Installare Java e Maven
+
+Su Ubuntu, Linux Mint e distribuzioni basate su Debian, se i pacchetti sono disponibili nei repository configurati:
+
+```bash
+sudo apt update
+sudo apt install openjdk-21-jdk maven git
+```
+
+Su Fedora:
+
+```bash
+sudo dnf install java-21-openjdk-devel maven git
+```
+
+Se la distribuzione non fornisce il JDK 21, installare Eclipse Temurin 21 dal sito ufficiale:
+
+https://adoptium.net/temurin/releases/?version=21
+
+Se la versione di Maven distribuita dal sistema è precedente alla versione consigliata, è possibile installare una distribuzione aggiornata seguendo:
+
+https://maven.apache.org/install.html
+
+### 2. Verificare l'installazione
+
+Aprire il terminale:
+
+```bash
+java -version
+javac -version
+mvn -version
+```
+
+Verificare che Java sia compatibile e che Maven utilizzi il JDK corretto.
+
+Se necessario, configurare la variabile `JAVA_HOME` in base al percorso del JDK installato.
+
+### 3. Scaricare il progetto
+
+```bash
+git clone https://github.com/AlexMarinucci99/CatGame.git
+cd CatGame
+```
+
+Se il progetto è già stato scaricato tramite ZIP, aprire invece il terminale nella cartella estratta.
+
+### 4. Avviare il gioco
+
+```bash
+./run-linux.sh
+```
+
+Se il sistema segnala che lo script non dispone dei permessi di esecuzione:
+
+```bash
+chmod +x run-linux.sh
+./run-linux.sh
+```
+
+Lo script esegue la compilazione e avvia automaticamente JavaFX.
+
+**Nota:** su alcune distribuzioni potrebbero essere necessarie librerie di sistema aggiuntive per la riproduzione audio e il funzionamento del backend multimediale JavaFX.
+
+Il gioco richiede una sessione desktop grafica; un terminale privo di display non è sufficiente.
+
+---
+
+## Installazione e avvio su macOS
+
+CatGame può essere compilato e avviato su macOS utilizzando Java 21 e Maven.
+
+### 1. Installare Java 21
+
+Scaricare Eclipse Temurin:
+
+https://adoptium.net/temurin/releases/?version=21
+
+Selezionare:
+
+- Sistema operativo: macOS
+- Versione: 21
+- Pacchetto: JDK
+- Architettura: AArch64 per Apple Silicon, x64 per Mac Intel
+- Formato: `.pkg`
+
+Eseguire il programma di installazione.
+
+Verificare dal Terminale:
+
+```bash
+java -version
+javac -version
+```
+
+Per selezionare il JDK 21 nella sessione corrente, se necessario:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+### 2. Installare Maven
+
+Se Homebrew è già installato:
+
+```bash
+brew install maven
+```
+
+Per informazioni su Homebrew:
+
+https://brew.sh
+
+In alternativa, installare Maven manualmente dal sito ufficiale:
+
+https://maven.apache.org/download.cgi
+
+Per l'installazione manuale, estrarre l'archivio e aggiungere la cartella `bin` di Maven al `PATH`.
+
+Verificare:
+
+```bash
+mvn -version
+```
+
+### 3. Scaricare CatGame
+
+```bash
+git clone https://github.com/AlexMarinucci99/CatGame.git
+cd CatGame
+```
+
+In alternativa, estrarre lo ZIP scaricato da GitHub.
+
+### 4. Avviare il gioco
+
+```bash
+./run-macos.sh
+```
+
+Se necessario, assegnare i permessi di esecuzione:
+
+```bash
+chmod +x run-macos.sh
+./run-macos.sh
+```
+
+Il gioco verrà compilato e avviato tramite Maven.
+
+---
+
+## Comandi di gioco
+
+### Controlli principali
+
+| Comando | Funzione |
+|---|---|
+| `SPAZIO` | Avvia la partita dal menu |
+| `SPAZIO` | Salto e doppio salto durante il gioco |
+| `C` | Lancia una sfera energetica con energia piena |
+| `X` | Attiva lo scudo durante il boss fight |
+| `←` / `A` | Movimento verso sinistra nel boss fight |
+| `→` / `D` | Movimento verso destra nel boss fight |
+| `P` | Mette in pausa o riprende la partita |
+| `M` | Attiva o disattiva la musica |
+| `U` / `ESC` | Attiva o disattiva la modalità a schermo intero |
+| `I` | Apre o chiude le impostazioni nel menu |
+
+### Durante la pausa
+
+| Comando | Funzione |
+|---|---|
+| `P` | Riprende la partita |
+| `R` | Riavvia una nuova partita |
+| `Q` | Torna al menu principale |
+
+### Altri comandi
+
+- Nelle schermate di vittoria o sconfitta, un tasto non riservato ai controlli globali permette di tornare al menu.
+- Dal menu è possibile utilizzare il mouse per modificare le impostazioni.
+- Il tasto `T`, nel menu principale, attiva una scorciatoia di debug che porta direttamente al boss fight.
+
+> La scorciatoia `T` è destinata principalmente allo sviluppo e ai test.
+
+---
+
+## Come funziona il gioco
+
+### Fase 1 — Sopravvivenza
+
+Il giocatore deve evitare i pacchi e gli altri ostacoli che si muovono verso il personaggio.
+
+Durante questa fase:
+
+- Il punteggio aumenta progressivamente.
+- Gli ostacoli diventano più veloci.
+- La frequenza degli ostacoli cresce nel tempo.
+- Il giocatore può utilizzare il doppio salto.
+- L'energia si ricarica durante la partita.
+- Una barra di energia piena consente di lanciare una sfera energetica.
+
+Il personaggio dispone di animazioni di corsa, salto e atterraggio.
+
+### Fase 2 — Boss fight
+
+Raggiunti **10.000 punti**, inizia il combattimento finale.
+
+| Parametro | Valore |
+|---|---|
+| Vita iniziale del boss | 2.000 |
+| Tempo massimo | 120 secondi |
+| Energia iniziale del giocatore | 50 |
+| Costo dello scudo | 25 energia |
+| Durata dello scudo | 5 secondi |
+| Comparsa della barriera | Dopo 60 secondi |
+
+Durante il combattimento:
+
+- Il giocatore può muoversi orizzontalmente.
+- Il boss utilizza attacchi differenti.
+- Gli attacchi vengono anticipati da avvisi visivi.
+- Le sfere energetiche possono distruggere proiettili nemici e parti della barriera.
+- Lo scudo fornisce protezione temporanea.
+- Il giocatore deve sconfiggere il boss prima della scadenza del timer.
+
+### Vittoria e sconfitta
+
+La partita termina con una vittoria quando il boss viene sconfitto entro il limite di tempo.
+
+Il giocatore può perdere in seguito a collisioni o al mancato completamento del boss fight entro il tempo disponibile.
+
+Dopo la conclusione è possibile tornare al menu e iniziare una nuova partita.
+
+---
+
+## Impostazioni e accessibilità
+
+Dal menu principale è possibile accedere al pannello delle impostazioni tramite il tasto `I` oppure utilizzando il mouse.
+
+Le opzioni disponibili comprendono:
+
+- Attivazione e disattivazione della musica.
+- Regolazione del volume.
+- Attivazione e disattivazione del fullscreen.
+- Modalità con effetti grafici ridotti.
+
+La modalità con effetti ridotti utilizza una rappresentazione più semplice del personaggio e del nastro trasportatore.
+
+Le impostazioni vengono mantenute durante la sessione corrente del gioco.
+
+Quando la finestra perde il focus durante una partita attiva, il gioco entra automaticamente in pausa e rilascia gli input di movimento.
+
+---
+
+## Compilazione e sviluppo
+
+CatGame è un progetto Maven.
+
+Il file `pom.xml` contiene le dipendenze, la configurazione di compilazione e il plugin JavaFX.
+
+### Compilare ed eseguire i test
+
+Dalla cartella principale:
+
+```bash
 mvn clean verify
+```
+
+### Avviare il gioco direttamente con Maven
+
+```bash
 mvn javafx:run
 ```
 
-The Maven project is at the repository root. Production sources and resources are under `src/main`; focused tests are under `src/test`. `MasterCat` owns the game state and animation loop. `GameInput` installs controls; `GameUpdate` handles frame updates, physics, spawning, and collisions; `GameRenderer` draws the screens; `SettingsLayout` shares menu geometry between rendering and mouse input; `PlayerHitbox` defines the cat's collision area. `GameAssets` loads images, `GameAudio` owns music players, and `Obstacle` and `BarrierBlock` are independent entities. `GameLauncher` is the entry point. Scoring and jump physics use a 60 Hz reference rate so play is consistent across display refresh rates.
+### Compilare senza eseguire i test
 
-The GitHub Actions workflow compiles and tests on Ubuntu, Windows, and macOS with Java 21. Its first matrix run passed on all three systems. It does not exercise a live graphical session or audio device.
+```bash
+mvn -DskipTests package
+```
 
-## Troubleshooting
+Gli script di avvio utilizzano Maven con la compilazione del progetto e l'esecuzione tramite il plugin JavaFX.
 
-- **Java or Maven not found:** Install a Java 21 JDK and Maven, then ensure both commands are on `PATH`.
-- **Dependency download failure:** Check Maven Central access and retry the build.
-- **No graphical display:** Start the game from a desktop session; a headless shell cannot validate the window.
-- **No audio:** Check OS audio support and JavaFX Media dependencies. The game can continue if audio initialization fails.
-- **Missing image:** Maven packages files from `src/main/resources`. The renderer uses its original fallback drawings for optional images. The optional boss projectile textures are absent from this repository and intentionally remain absent.
+Il file JAR generato nella cartella `target/` non è distribuito come applicazione autonoma pronta per il doppio clic.
 
-## Compatibility and assets
+Per avviare il gioco utilizzare gli script dedicati oppure `mvn javafx:run`.
 
-Compilation and headless logic checks were performed on Linux with Java 21 and cached Maven dependencies. JavaFX screenshots verified the menu, boss warning, and pause layouts at 1366×768. The GitHub Actions matrix runs `mvn clean verify` on three operating systems. A complete interactive playthrough and audible playback still need validation on a target desktop. See [the refactor audit](docs/REFACTOR_AUDIT.md) for the original comparison.
+### Tecnologie
 
-The original image and audio files were left byte-for-byte unchanged. The new running atlas is generated from the original cat reference; its prompts and layout are documented in [ART_ASSETS.md](docs/ART_ASSETS.md). Original asset provenance and reuse terms are not documented in the original repository; verify rights before redistributing them. JavaFX is obtained from the OpenJFX Maven artifacts under its own license. `legacy-assets/cat.png` is an unused repository image retained pending provenance review.
+| Tecnologia | Utilizzo |
+|---|---|
+| Java 21 | Linguaggio e runtime |
+| JavaFX 21.0.2 | Grafica, interfaccia e multimedia |
+| Apache Maven | Gestione delle dipendenze e build |
+| JUnit 5 | Test automatizzati |
+| GitHub Actions | Compilazione e test multipiattaforma |
+
+---
+
+## Struttura del progetto
+
+```text
+CatGame/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── ART_ASSETS.md
+│   ├── GAMEPLAY_BASELINE.md
+│   ├── IMPROVEMENT_ROADMAP.md
+│   ├── REFACTOR_AUDIT.md
+│   └── TESTING.md
+├── legacy-assets/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/master/bro/catdinogame/
+│   │   └── resources/
+│   │       ├── audio/
+│   │       └── images/
+│   └── test/
+├── .gitignore
+├── CHANGELOG.md
+├── pom.xml
+├── run-windows.bat
+├── run-linux.sh
+├── run-macos.sh
+└── README.md
+```
+
+### Componenti principali
+
+| Classe | Responsabilità |
+|---|---|
+| `GameLauncher` | Punto di ingresso dell'applicazione |
+| `MasterCat` | Stato principale e coordinamento del gioco |
+| `GameUpdate` | Aggiornamento di fisica, ostacoli e combattimento |
+| `GameRenderer` | Rendering delle schermate e degli elementi grafici |
+| `GameInput` | Gestione dei controlli |
+| `GameAssets` | Caricamento delle risorse grafiche |
+| `GameAudio` | Gestione della musica e delle risorse audio |
+| `PlayerAnimation` | Animazioni del personaggio |
+| `PlayerHitbox` | Area di collisione del personaggio |
+| `Obstacle` | Rappresentazione degli ostacoli |
+| `BarrierBlock` | Blocchi della barriera |
+| `ConveyorRenderer` | Rendering del nastro trasportatore |
+| `SettingsLayout` | Layout delle impostazioni |
+
+Per ulteriori dettagli consultare:
+
+- [Architettura](docs/ARCHITECTURE.md)
+- [Roadmap di miglioramento](docs/IMPROVEMENT_ROADMAP.md)
+- [Test e verifiche](docs/TESTING.md)
+- [Registro delle modifiche](CHANGELOG.md)
+
+---
+
+## Risoluzione dei problemi
+
+### Java non viene riconosciuto
+
+Se compare un errore simile a:
+
+```text
+java: command not found
+```
+
+oppure:
+
+```text
+'java' non è riconosciuto come comando
+```
+
+Verificare che il JDK sia installato e che la cartella `bin` sia presente nel `PATH`.
+
+Controllare anche la variabile `JAVA_HOME`.
+
+### Maven non viene riconosciuto
+
+Se `mvn -version` non funziona:
+
+1. Verificare che Maven sia stato installato.
+2. Controllare che la cartella `bin` di Maven sia nel `PATH`.
+3. Riavviare il terminale.
+4. Riprovare il comando.
+
+### Errore di versione Java
+
+CatGame viene compilato per Java 21.
+
+Verificare:
+
+```bash
+java -version
+javac -version
+mvn -version
+```
+
+Se sono presenti più installazioni Java, configurare `JAVA_HOME` in modo che Maven utilizzi un JDK compatibile.
+
+### Le dipendenze non vengono scaricate
+
+Al primo avvio Maven deve scaricare librerie e plugin.
+
+Controllare:
+
+- Connessione Internet.
+- Accesso ai repository Maven.
+- Eventuali firewall o proxy.
+- Configurazione Maven locale.
+
+In seguito riprovare:
+
+```bash
+mvn clean javafx:run
+```
+
+### Il gioco non mostra la finestra
+
+Verificare che sia disponibile una sessione grafica funzionante.
+
+Su Linux, avviare il gioco da un ambiente desktop anziché da una sessione esclusivamente testuale.
+
+Verificare eventuali errori JavaFX riportati nel terminale.
+
+### Problemi audio
+
+JavaFX Media utilizza componenti multimediali che possono dipendere dal sistema operativo.
+
+Controllare il dispositivo audio, il volume e le librerie multimediali disponibili.
+
+Su Linux potrebbero essere necessari pacchetti GStreamer aggiuntivi.
+
+### Lo script Linux o macOS non parte
+
+Eseguire:
+
+```bash
+chmod +x run-linux.sh
+```
+
+oppure:
+
+```bash
+chmod +x run-macos.sh
+```
+
+Quindi ripetere l'avvio con lo script appropriato.
+
+---
+
+## Compatibilità e test
+
+Il progetto include un workflow GitHub Actions che esegue compilazione e test su:
+
+- Windows
+- Ubuntu Linux
+- macOS
+
+La configurazione utilizza Java 21 ed esegue:
+
+```bash
+mvn -B -ntp clean verify
+```
+
+È possibile consultare gli esiti delle esecuzioni nella sezione [Actions](https://github.com/AlexMarinucci99/CatGame/actions).
+
+**Nota:** il superamento dei test automatici non garantisce da solo il corretto funzionamento grafico e audio su ogni computer.
+
+Per una verifica completa sono necessari anche test interattivi sul sistema operativo di destinazione.
+
+---
+
+## Autore e risorse
+
+**Sviluppato e mantenuto da Alessandro Marinucci.**
+
+- GitHub: [AlexMarinucci99](https://github.com/AlexMarinucci99)
+- Repository: [CatGame](https://github.com/AlexMarinucci99/CatGame)
+- Segnalazioni: [GitHub Issues](https://github.com/AlexMarinucci99/CatGame/issues)
+
+Il progetto contiene immagini, animazioni e tracce audio.
+
+Le informazioni disponibili sull'origine degli asset sono riportate in [ART_ASSETS.md](docs/ART_ASSETS.md).
+
+I termini di utilizzo e redistribuzione delle risorse originali devono essere verificati prima di un'eventuale distribuzione pubblica.
+
+---
+
+**CatGame — MasterCat**
+
+Progetto JavaFX multipiattaforma in continua evoluzione.
