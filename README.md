@@ -685,7 +685,7 @@ Per una verifica completa sono necessari anche test interattivi sul sistema oper
 - Repository: [CatGame](https://github.com/AlexMarinucci99/CatGame)
 - Segnalazioni: [GitHub Issues](https://github.com/AlexMarinucci99/CatGame/issues)
 
-Il progetto contiene immagini, animazioni e tracce audio.
+Il progetto contiene immagini, animazioni e tracce audio tutte con copyright.
 
 Le informazioni disponibili sull'origine degli asset sono riportate in [ART_ASSETS.md](docs/ART_ASSETS.md).
 
