@@ -79,6 +79,7 @@ final class GameUpdate {
         updateObstacles(dt);
     }
       private void updateBossFight(double dt) {
+        game.specialCharge = Math.min(game.SPECIAL_CHARGE_SECONDS, game.specialCharge + dt);
         // Timer della boss fight
         game.bossTimer += dt;
         
@@ -145,6 +146,8 @@ final class GameUpdate {
         // === AGGIORNA SFERE DRAGON BALL NEL BOSS FIGHT ===
         updateDragonBallSpheres(dt);
         if (game.state() != MasterCat.GameState.BOSS_FIGHT) return;
+        updateSpecialParcel(dt);
+        if (game.state() != MasterCat.GameState.BOSS_FIGHT) return;
         
         // Animazioni del gatto e del boss
         game.bodyBounce += dt * 8;
@@ -193,14 +196,17 @@ final class GameUpdate {
                 // Crea due ostacoli ravvicinati per richiedere doppio salto
                 Obstacle obstacle1 = new Obstacle(game.WIDTH, game.GROUND_HEIGHT - obstacleSize, obstacleSize, obstacleSize, obstacleSpeed, false);
                 obstacle1.setBlockImages(game.assets.blockNormalImage, game.assets.blockDoubleImage);
+                obstacle1.parcelSprites = game.assets.parcelSprites;
                 game.obstacles.add(obstacle1);
                 
                 Obstacle obstacle2 = new Obstacle(game.WIDTH + 150, game.GROUND_HEIGHT - obstacleSize, obstacleSize, obstacleSize, obstacleSpeed, true); // AUMENTATO: distanza da 120 a 150
                 obstacle2.setBlockImages(game.assets.blockNormalImage, game.assets.blockDoubleImage);
+                obstacle2.parcelSprites = game.assets.parcelSprites;
                 game.obstacles.add(obstacle2);
             } else {
                 Obstacle obstacle = new Obstacle(game.WIDTH, game.GROUND_HEIGHT - obstacleSize, obstacleSize, obstacleSize, obstacleSpeed, false);
                 obstacle.setBlockImages(game.assets.blockNormalImage, game.assets.blockDoubleImage);
+                obstacle.parcelSprites = game.assets.parcelSprites;
                 game.obstacles.add(obstacle);
             }
             obstacleElapsedMillis = 0;
@@ -448,4 +454,24 @@ final class GameUpdate {
         }
     }
     
+    private void updateSpecialParcel(double dt) {
+        ExplosiveParcel parcel=game.specialParcel;
+        if(parcel==null)return;
+        parcel.update(dt);
+        if(parcel.intersects(game.bossX-75,game.bossY-200,150,200)) {
+            parcel.explode();
+            double damage=game.MAX_BOSS_HEALTH/2;
+            game.bossHealth=Math.max(0,game.bossHealth-damage);
+            game.damageIndicators.add(game.new DamageIndicator(game.bossX,game.bossY-140,"-"+(int)damage));
+            if(game.bossHealth<=0) {game.victory();return;}
+        }
+        var blocks=game.bossBarrier.iterator();
+        while(blocks.hasNext()) {
+            BarrierBlock block=blocks.next();
+            if(parcel.intersects(block.x,block.y,block.width,block.height)) {
+                blocks.remove();parcel.explode();break;
+            }
+        }
+        if(parcel.expired(game.WIDTH,game.HEIGHT))game.specialParcel=null;
+    }
 }

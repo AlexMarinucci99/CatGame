@@ -28,7 +28,8 @@ The scripts build the project with Maven and launch `GameLauncher` through the J
 | Key or input | Action |
 | --- | --- |
 | Space | Start from menu; jump and double jump during play and boss fight |
-| C | Fire an energy sphere when energy is full (50) |
+| Left mouse button | Fire an energy sphere when energy is full (50) |
+| Right mouse button | In the boss fight, launch the explosive parcel once its separate 30-second charge is full |
 | X | Activate a shield during the boss fight when at least 25 energy is available |
 | Left / Right or A / D | Move horizontally during the boss fight |
 | P | Pause or resume during play and the boss fight |
@@ -44,7 +45,7 @@ Global `M`, `U`, and `Esc` controls take precedence over the “any other key”
 
 ## Progression
 
-The normal level advances score and speed at a 60 Hz reference rate, starts obstacles after about 4.5 seconds, then reduces their arrival interval steadily to 1.5 seconds by 10,000 points while their travel speed also increases. Normal and double jumps use time-consistent motion. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. A warning identifies each boss attack shortly before it launches. Collision with a parcel can end a run; the cat's collision area is centered on its visible sprite. Energy spheres can destroy normal and double parcels, every boss projectile type, and barrier blocks. The boss fight also provides a five-second shield for 25 energy.
+The normal level advances score and speed at a 60 Hz reference rate, starts obstacles after about 4.5 seconds, then reduces their arrival interval steadily to 1.5 seconds by 10,000 points while their travel speed also increases. Normal and double jumps use time-consistent motion. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. A warning identifies each boss attack shortly before it launches. Collision with a parcel can end a run; the cat's collision area is centered on its visible sprite. Energy spheres can destroy normal and double parcels, every boss projectile type, and barrier blocks. The boss fight also provides a five-second shield for 25 energy. Its special parcel charges over 30 seconds of active simulation, follows an arc toward the boss, and deals 1,000 damage (half maximum boss health) on a direct hit. A barrier can intercept it; a blocked or missed throw consumes the charge. The special uses the right mouse button and does not consume the normal energy bar.
 
 The game has menu, normal play, boss fight, pause, game over, and victory screens. Losing window focus pauses an active run and releases movement keys. Music pauses with gameplay. Menu settings control music, master volume, full screen, and a reduced-effects mode. Settings persist while the game remains open.
 

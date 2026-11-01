@@ -28,3 +28,9 @@
 - Made boss gravity time-based at the existing 60 Hz reference.
 - Applied a shared bounded simulation delta and simulation-time obstacle scheduling.
 - Restricted state writes and guarded terminal transitions; added regression evidence in docs/MILESTONE_2.md.
+
+## Energy combat update
+
+- Moved energy firing from C to the primary mouse button in both gameplay modes.
+- Added animated flight/impact sprites, refreshed delivery-parcel art, and a restrained normal-level HUD.
+- Added a separate 30-second boss special: secondary mouse launches an explosive parcel for 1,000 damage on direct boss contact; barriers can intercept it.
