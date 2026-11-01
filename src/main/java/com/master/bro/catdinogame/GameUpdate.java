@@ -15,7 +15,20 @@ final class GameUpdate {
         progressionClock.reset();
     }
 
+    // Drop excess stall time uniformly, then bound collision/motion steps.
+    // Every subsystem receives the same accepted simulation time.
     void update(double dt) {
+        if (!Double.isFinite(dt) || dt < 0) return;
+        double remaining = Math.min(dt, 0.05);
+        MasterCat.GameState initial = game.currentState;
+        do {
+            double step = Math.min(remaining, 1.0 / 60);
+            updateStep(step);
+            remaining -= step;
+        } while (remaining > 1e-12 && game.currentState == initial);
+    }
+
+    private void updateStep(double dt) {
         if (game.currentState == MasterCat.GameState.PLAYING || game.currentState == MasterCat.GameState.BOSS_FIGHT) {
             game.landingTimer = Math.max(0, game.landingTimer - dt);
         }

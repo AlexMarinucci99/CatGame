@@ -9,8 +9,8 @@ class LifecycleRegressionTest {
  @Test void explosionStaysUntilItsHalfSecondLifetimeEnds() {
   MasterCat g=game();g.startGame();var s=g.new DragonBallSphere(500,450);
   g.dragonBallSpheres.add(s);s.destroy();
-  g.updater.update(.25);assertTrue(g.dragonBallSpheres.contains(s));
-  s.destroy();g.updater.update(.24);assertTrue(g.dragonBallSpheres.contains(s));
+  for(int i=0;i<15;i++)g.updater.update(1.0/60);assertTrue(g.dragonBallSpheres.contains(s));
+  s.destroy();for(int i=0;i<14;i++)g.updater.update(1.0/60);assertTrue(g.dragonBallSpheres.contains(s));
   g.updater.update(.02);assertTrue(g.dragonBallSpheres.isEmpty());
  }
  @Test void explodingSphereCannotDestroyAnotherBarrierBlock() {
@@ -38,5 +38,28 @@ class LifecycleRegressionTest {
   in.onKeyPressed(javafx.scene.input.KeyCode.P); // deliberate new press resumes
   in.onKeyReleased(javafx.scene.input.KeyCode.P);
   in.onKeyPressed(javafx.scene.input.KeyCode.A);assertTrue(g.leftPressed);
+ }
+ @Test void ballisticGravityMatchesSixtyHzAtEveryRefreshRate() throws Exception {
+  for(int hz:new int[]{30,60,120,144}) {
+   MasterCat g=game();var p=g.new BossProjectile(500,100,400,100,0);
+   set(p,"trackingTimer",2.0);set(p,"velocityX",0.0);set(p,"velocityY",100.0);
+   for(int n=0;n<hz;n++)p.update(1.0/hz);
+   assertEquals(212.81,p.y,1e-8);
+  }
+ }
+ private static void set(Object o,String name,double value) throws Exception {
+  var f=o.getClass().getDeclaredField(name);f.setAccessible(true);f.setDouble(o,value);
+ }
+ @Test void stallsAndInvalidDeltasCannotAdvanceOnlySomeSubsystems() {
+  MasterCat a=game(),b=game();a.startGame();b.startGame();
+  a.dragonBallSpheres.add(a.new DragonBallSphere(500,300));
+  b.dragonBallSpheres.add(b.new DragonBallSphere(500,300));
+  a.updater.update(10);b.updater.update(.05);
+  assertEquals(b.score,a.score);assertEquals(b.energy,a.energy,1e-9);
+  assertEquals(b.conveyorTravel,a.conveyorTravel,1e-9);
+  assertEquals(b.dragonBallSpheres.get(0).x,a.dragonBallSpheres.get(0).x,1e-9);
+  double x=a.dragonBallSpheres.get(0).x;
+  for(double dt:new double[]{-1,Double.NaN,Double.POSITIVE_INFINITY})a.updater.update(dt);
+  assertEquals(x,a.dragonBallSpheres.get(0).x);
  }
 }

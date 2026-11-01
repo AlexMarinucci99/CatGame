@@ -62,7 +62,7 @@ class PauseOptionsAndCombatTest {
         input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         game.updater.update(0.1);
-        assertEquals(timeBeforePause + 0.1, game.bossTimer, 1e-9);
+        assertEquals(timeBeforePause + 0.05, game.bossTimer, 1e-9);
     }
 
     @Test
