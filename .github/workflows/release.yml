@@ -1,0 +1,162 @@
+name: Native packages
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package ${{ matrix.platform }} (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            arch: x64
+            runs-on: ubuntu-latest
+          - platform: windows
+            arch: x64
+            runs-on: windows-latest
+          - platform: macos
+            arch: arm64
+            runs-on: macos-15
+          - platform: macos
+            arch: x64
+            runs-on: macos-15-intel
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Install WiX Toolset
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install wixtoolset --version=3.14.1.20250415 --no-progress -y
+
+      - name: Verify project
+        run: mvn -B -ntp clean verify
+
+      - name: Package Windows installer and portable app-image
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && github.ref_name || '0.1.0' }}
+        run: |
+          if ($env:APP_VERSION -match '^v?(\d+\.\d+\.\d+)(?:[-+].*)?$') { $env:APP_VERSION = $Matches[1] }
+          ./scripts/package.ps1
+
+      - name: Package Linux DEB and portable app-image
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          APP_VERSION: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && github.ref_name || '0.1.0' }}
+        run: |
+          if [[ "$APP_VERSION" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+)([-+].*)?$ ]]; then APP_VERSION="${BASH_REMATCH[1]}"; fi
+          export APP_VERSION
+          chmod +x scripts/package.sh
+          ./scripts/package.sh
+
+      - name: Package macOS DMG and portable app-image
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APP_VERSION: ${{ github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && github.ref_name || '0.1.0' }}
+        run: |
+          if [[ "$APP_VERSION" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+)([-+].*)?$ ]]; then APP_VERSION="${BASH_REMATCH[1]}"; fi
+          export APP_VERSION
+          chmod +x scripts/package.sh
+          ./scripts/package.sh
+
+      - name: Verify release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$RUNNER_OS" in
+            Linux) test -n "$(find target/distributions -maxdepth 1 -name '*.deb' -print -quit)" ;;
+            Windows) test -n "$(find target/distributions -maxdepth 1 -name '*.exe' -print -quit)" ;;
+            macOS) test -n "$(find target/distributions -maxdepth 1 -name '*.dmg' -print -quit)" ;;
+          esac
+          test -n "$(find target/distributions -maxdepth 1 -name '*.zip' -print -quit)"
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            test -d target/distributions/app-image/CatGame.app
+          else
+            test -d target/distributions/app-image/CatGame
+          fi
+          find target/distributions -maxdepth 1 -type f -print
+
+      - name: Upload native packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: catgame-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            target/distributions/*.deb
+            target/distributions/*.exe
+            target/distributions/*.dmg
+            target/distributions/*.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  release-draft:
+    name: Draft GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Require tag commit on main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
+            echo 'Refusing release: the tagged commit is not contained in main.' >&2
+            exit 1
+          }
+
+      - name: Download packages
+        uses: actions/download-artifact@v7
+        with:
+          pattern: catgame-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate SHA-256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-assets
+          test -n "$(find . -maxdepth 1 -type f -print -quit)"
+          sha256sum -- * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create prerelease draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release-assets/* \
+            --draft --prerelease --verify-tag \
+            --title "CatGame $GITHUB_REF_NAME" \
+            --generate-notes
