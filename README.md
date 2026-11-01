@@ -55,7 +55,7 @@ mvn javafx:run
 
 The Maven project is at the repository root. Production sources and resources are under `src/main`; focused tests are under `src/test`. `MasterCat` owns the game state and animation loop. `GameInput` installs controls; `GameUpdate` handles frame updates, physics, spawning, and collisions; `GameRenderer` draws the screens. `GameAssets` loads images, `GameAudio` owns music players, and `Obstacle` and `BarrierBlock` are independent entities. `GameLauncher` is the entry point. The project intentionally retains the original frame-based physics and scoring formulas.
 
-The GitHub Actions workflow compiles and tests on Ubuntu, Windows, and macOS with Java 21. It does not exercise a live graphical session or audio device.
+The GitHub Actions workflow compiles and tests on Ubuntu, Windows, and macOS with Java 21. Its first matrix run passed on all three systems. It does not exercise a live graphical session or audio device.
 
 ## Troubleshooting
 
@@ -67,6 +67,6 @@ The GitHub Actions workflow compiles and tests on Ubuntu, Windows, and macOS wit
 
 ## Compatibility and assets
 
-Compilation and headless logic checks were performed on Linux with Java 21 using the original JavaFX SDK jars. Maven and an interactive graphical session were unavailable in that environment, so the Maven build, window rendering, audio playback, and Windows/macOS launchers await CI or interactive validation. See [the refactor audit](docs/REFACTOR_AUDIT.md) for details.
+Compilation and headless logic checks were performed on Linux with Java 21 using the original JavaFX SDK jars. Maven was unavailable locally, but [the three-platform Maven CI run](https://github.com/AlexMarinucci99/CatGame/actions/runs/41294615779) completed successfully. Window rendering, audio playback, and the launch scripts still need interactive validation. See [the refactor audit](docs/REFACTOR_AUDIT.md) for details.
 
 The original image and audio files were left byte-for-byte unchanged. Their provenance and reuse terms are not documented in the original repository; verify rights before redistributing them. JavaFX is obtained from the OpenJFX Maven artifacts under its own license. `legacy-assets/cat.png` is an unused repository image retained pending provenance review.

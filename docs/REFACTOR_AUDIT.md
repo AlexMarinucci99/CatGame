@@ -69,9 +69,9 @@ The exact path-by-path list of 161 deleted tracked files is in [REMOVED_FILES.tx
 
 | Platform | Compile | Automated behavior checks | Graphical/audio runtime |
 | --- | --- | --- | --- |
-| Linux | Original and refactored sources compiled with Java 21 and vendored JavaFX jars | All six JUnit test bodies passed in a local headless runner; the Maven/JUnit runner was unavailable locally | Not tested interactively |
-| Windows | CI matrix configured; result pending | CI result pending | Not tested interactively |
-| macOS | CI matrix configured; result pending | CI result pending | Not tested interactively |
+| Linux | Original and refactored sources compiled with Java 21 and vendored JavaFX jars; [Ubuntu Maven CI passed](https://github.com/AlexMarinucci99/CatGame/actions/runs/41294615779) | All six test bodies passed in a local headless runner and in CI | Not tested interactively |
+| Windows | [Maven CI passed](https://github.com/AlexMarinucci99/CatGame/actions/runs/41294615779) | Six JUnit checks passed in CI | Not tested interactively |
+| macOS | [Maven CI passed](https://github.com/AlexMarinucci99/CatGame/actions/runs/41294615779) | Six JUnit checks passed in CI | Not tested interactively |
 
 The original update formulas and constants were copied into `GameUpdate` without modification. Input handlers and render calls were extracted without changing their order. Image/audio loading and two independent entities also compiled. This supports source-level preservation and the headless checks, but does not prove pixel-perfect, audio-identical, or full gameplay identity; interactive regression testing remains necessary.
 
