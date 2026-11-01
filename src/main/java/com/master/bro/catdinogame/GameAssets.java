@@ -3,6 +3,8 @@ package com.master.bro.catdinogame;
 import javafx.scene.image.Image;
 
 final class GameAssets {
+    SpriteAtlas parcelSprites;
+    SpriteAtlas energySprites;
     Image catImage;
     Image catRunImage;
     Image menuBackgroundImage;
@@ -18,6 +20,8 @@ final class GameAssets {
 
     void loadResources() {
         System.out.println("🔍 Caricamento risorse grafiche...");
+        parcelSprites = loadAtlas("/images/blocks/parcels-v2.png",2,1);
+        energySprites = loadAtlas("/images/effects/energy-impact-v1.png",4,2);
         try (var stream = getClass().getResourceAsStream("/images/player/cat-run-v1.png")) {
             if (stream != null) catRunImage = new Image(stream);
         } catch (Exception e) {
@@ -223,4 +227,11 @@ final class GameAssets {
         System.out.println("🎨 Caricamento risorse completato!");
     }
 
+    private SpriteAtlas loadAtlas(String path,int columns,int rows) {
+        try(var stream=getClass().getResourceAsStream(path)) {
+            if(stream==null)return null;
+            Image image=new Image(stream);
+            return image.isError()?null:new SpriteAtlas(image,columns,rows);
+        } catch(Exception e) {return null;}
+    }
 }

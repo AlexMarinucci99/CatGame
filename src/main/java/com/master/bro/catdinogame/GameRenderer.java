@@ -570,6 +570,7 @@ final class GameRenderer {
         }
         
         // === HUD DELLA BOSS FIGHT ===
+        if(game.specialParcel!=null)game.specialParcel.render(gc,game);
         renderBossFightHUD(gc);
         renderBossAttackWarning(gc);
     }
@@ -600,9 +601,9 @@ final class GameRenderer {
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText("ENERGIA", leftX + 18 * scale, topY + 84 * scale);
         gc.setFill(game.energy >= game.MAX_ENERGY ? Color.rgb(137, 190, 194) : Color.WHITE);
-        gc.fillText(game.energy >= game.MAX_ENERGY ? "C  PRONTA" :
+        gc.fillText(game.energy >= game.MAX_ENERGY ? "CLIC SX  PRONTA" :
                 String.format("%.0f / %.0f", game.energy, game.MAX_ENERGY),
-                leftX + panelWidth - 105 * scale, topY + 84 * scale);
+                leftX + panelWidth - 145 * scale, topY + 84 * scale);
         hudBar(gc, leftX + 18 * scale, topY + 96 * scale,
                 panelWidth - 36 * scale, 12 * scale,
                 game.energy / game.MAX_ENERGY, Color.rgb(93, 157, 163));
@@ -620,6 +621,19 @@ final class GameRenderer {
                 panelWidth - 36 * scale, 12 * scale,
                 game.bossHealth / game.MAX_BOSS_HEALTH, Color.rgb(174, 88, 98));
 
+        double specialY = topY + panelHeight + 12 * scale;
+        hudPanel(gc,leftX,specialY,panelWidth,76*scale);
+        gc.setFill(Color.rgb(190,200,209));
+        gc.setFont(Font.font("Arial",FontWeight.BOLD,11*scale));
+        gc.fillText("SPECIALE · PACCO ESPLOSIVO",leftX+18*scale,specialY+22*scale);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial",FontWeight.NORMAL,12*scale));
+        gc.fillText(game.specialCharge>=game.SPECIAL_CHARGE_SECONDS ? "PRONTO · CLIC DESTRO" :
+                String.format("Pronto tra %.0f s",Math.ceil(game.SPECIAL_CHARGE_SECONDS-game.specialCharge)),
+                leftX+18*scale,specialY+43*scale);
+        hudBar(gc,leftX+18*scale,specialY+55*scale,panelWidth-36*scale,8*scale,
+                game.specialCharge/game.SPECIAL_CHARGE_SECONDS,Color.rgb(176,125,80));
+
         double stripWidth = Math.min(650 * scale, game.WIDTH - 2 * margin);
         double stripX = (game.WIDTH - stripWidth) / 2;
         double stripY = game.HEIGHT - 58 * scale;
@@ -628,7 +642,7 @@ final class GameRenderer {
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText("A / D   MUOVI", stripX + 18 * scale, stripY + 26 * scale);
         gc.fillText("SPAZIO   SALTA", stripX + 160 * scale, stripY + 26 * scale);
-        gc.fillText("C   SFERA", stripX + 336 * scale, stripY + 26 * scale);
+        gc.fillText("SX   ONDA", stripX + 336 * scale, stripY + 26 * scale);
         gc.setFill(game.shieldActive ? Color.rgb(156, 193, 159) : Color.rgb(183, 194, 205));
         gc.fillText(game.shieldActive
                 ? String.format("SCUDO  %.1fs", Math.max(0, game.SHIELD_DURATION - game.shieldTimer))
@@ -762,88 +776,31 @@ final class GameRenderer {
     }
 
     private void drawMinimalHUD(GraphicsContext gc) {
-        // === PUNTEGGIO INGRANDITO IN ALTO A SINISTRA ===
-
-        
-        // === BARRA ENERGIA DINAMICA E GRAFICA COME NEL BOSS FIGHT ===
-        double energyBarX = 20;
-        double energyBarY = 55;
-        double energyBarWidth = 300; // Aumentata per essere più prominente
-        double energyBarHeight = 20; // Più alta come nel boss fight
-        
-        // Testo energia sopra la barra
+        double scale=Math.max(0.78,Math.min(1.25,game.uniformScale));
+        double margin=22*scale;
+        double width=Math.min(330*scale,(game.WIDTH-3*margin)/2);
+        double right=game.WIDTH-margin-width;
+        hudPanel(gc,margin,margin,width,109*scale);
+        hudPanel(gc,right,margin,width,109*scale);
+        gc.setFont(Font.font("Arial",FontWeight.BOLD,12*scale));
+        gc.setFill(Color.rgb(174,187,199));
+        gc.fillText("ONDA ENERGETICA",margin+18*scale,margin+25*scale);
+        gc.fillText("AVANZAMENTO",right+18*scale,margin+25*scale);
         gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Impact", FontWeight.BOLD, 18));
-        String energyText = String.format("ENERGIA: %.0f/%.0f", game.energy, game.MAX_ENERGY);
-        if (game.energy >= game.MAX_ENERGY) {
-            energyText += " [PREMI C]";
-        }
-        gc.fillText(energyText, energyBarX, energyBarY - 5);
-        
-      
-        
-        // Energia attuale con gradiente dinamico
-        if (game.energy > 0) {
-            double energyPercent = game.energy / game.MAX_ENERGY;
-            Color energyColor = energyPercent >= 1.0 ? Color.CYAN : Color.LIGHTBLUE;
-            
-            // Effetto pulsante quando energia è al massimo
-            if (energyPercent >= 1.0 && !game.reducedEffects) {
-                double pulse = Math.sin(System.currentTimeMillis() * 0.01) * 0.3 + 0.7;
-                energyColor = Color.rgb((int)(255 * pulse), (int)(255 * pulse), 255);
-            }
-            
-            gc.setFill(energyColor);
-            gc.fillRect(energyBarX, energyBarY, energyBarWidth * energyPercent, energyBarHeight);
-            
-            // Effetto brillante quando energia è al massimo
-            if (energyPercent >= 1.0) {
-                gc.setFill(Color.rgb(255, 255, 255, 0.4));
-                gc.fillRect(energyBarX, energyBarY, energyBarWidth * energyPercent, energyBarHeight / 2);
-            }
-        }
-        
-        // Bordo barra energia
-        gc.setStroke(Color.WHITE);
-        gc.setLineWidth(1);
-        gc.strokeRect(energyBarX, energyBarY, energyBarWidth, energyBarHeight);
-        
-        // === BARRA PROGRESSO VITTORIA SPOSTATA PIU' IN BASSO ===
-        double progressBarWidth = 300;
-        double progressBarHeight = 15;
-        double progressX = 20;
-        double progressY = 100; // SPOSTATA: più in basso per fare spazio all'energia più grande
-        
-        // Testo progresso sopra la barra
-        gc.setFill(Color.GOLD);
-        gc.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, 16));
-        gc.fillText("Obiettivo: " + game.score + "/" + game.WINNING_SCORE, progressX, progressY - 8);
-        
-        // Sfondo barra progresso
-        gc.setFill(Color.rgb(40, 40, 40, 0.8));
-        gc.fillRoundRect(progressX, progressY, progressBarWidth, progressBarHeight, 8, 8);
-        
-        // Progresso con gradiente
-        double progress = Math.min(1.0, (double)game.score / game.WINNING_SCORE);
-        if (progress > 0) {
-            Color progressColor = progress >= 1.0 ? Color.GOLD : Color.LIME;
-            LinearGradient progressGradient = new LinearGradient(
-                0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0, progressColor.brighter()),
-                new Stop(1, progressColor.darker())
-            );
-            gc.setFill(progressGradient);
-            gc.fillRoundRect(progressX + 2, progressY + 2, (progressBarWidth - 4) * progress, progressBarHeight - 4, 6, 6);
-        }
-        
-        // Bordo della barra progresso
-        gc.setStroke(Color.GOLD);
-        gc.setLineWidth(1);
-        gc.strokeRoundRect(progressX, progressY, progressBarWidth, progressBarHeight, 8, 8);
+        gc.setFont(Font.font("Arial",FontWeight.BOLD,17*scale));
+        gc.fillText(game.energy>=game.MAX_ENERGY ? "PRONTA · CLIC SINISTRO" :
+                String.format("Ricarica %.0f%%",game.energy/game.MAX_ENERGY*100),
+                margin+18*scale,margin+55*scale);
+        gc.fillText(String.format("%d / %d",game.score,game.WINNING_SCORE),right+18*scale,margin+55*scale);
+        hudBar(gc,margin+18*scale,margin+73*scale,width-36*scale,10*scale,
+                game.energy/game.MAX_ENERGY,Color.rgb(93,157,163));
+        hudBar(gc,right+18*scale,margin+73*scale,width-36*scale,10*scale,
+                (double)game.score/game.WINNING_SCORE,Color.rgb(153,155,127));
+        gc.setFill(Color.rgb(181,193,204));
+        gc.setFont(Font.font("Arial",FontWeight.NORMAL,11*scale));
+        gc.fillText("SPAZIO  Salto / doppio salto     P  Pausa",margin,game.HEIGHT-18*scale);
     }
 
-    // Classe Obstacle migliorata con supporto per immagini
-    // === CLASSE BLOCCO BARRIERA BOSS ===
     private void renderSettingsDropdown(GraphicsContext gc) {
         SettingsLayout.Bounds bounds = SettingsLayout.panel(game);
         double x = bounds.x();
@@ -867,9 +824,9 @@ final class GameRenderer {
         settingsSection(gc, x, y, scale, 84, "COMANDI");
         settingsRow(gc, x, y, scale, 109, "SPAZIO", "Salto");
         settingsRow(gc, x, y, scale, 139, "SPAZIO x2", "Doppio salto");
-        settingsRow(gc, x, y, scale, 169, "C", "Sfera di energia");
-        settingsRow(gc, x, y, scale, 199, "A / D", "Movimento boss");
-        settingsRow(gc, x, y, scale, 229, "X", "Scudo boss");
+        settingsRow(gc, x, y, scale, 169, "MOUSE SX", "Onda energetica");
+        settingsRow(gc, x, y, scale, 199, "A / D", "Movimento · X scudo");
+        settingsRow(gc, x, y, scale, 229, "MOUSE DX", "Pacco speciale (boss)");
         settingsRow(gc, x, y, scale, 259, "P", "Pausa / riprendi");
 
         settingsSection(gc, x, y, scale, 286, "OPZIONI");

@@ -11,3 +11,15 @@ Create a production-ready 2D game sprite sheet using the attached character as t
 ## Cleanup prompt
 
 Edit this six-frame game sprite sheet only to make it clean for runtime compositing. Preserve exactly the six cat poses, character identity, cell layout, colors, size and illustration detail. Remove ALL brown background haze, glow, vignette, floor shadows, diffuse aura, and every pixel outside each cat silhouette. The area around each cat and between all cells must be genuinely alpha-zero transparent with clean antialiased cutout edges. The cat interiors must be fully opaque. No halo or background color around fur. No added content, labels, text, grid, borders, or lighting effects. Keep the 3-column by 2-row layout and 1536x1024 dimensions.
+
+# Energy combat assets
+
+Generated with the built-in imagegen tool; original files remain available as fallbacks.
+
+- `images/effects/energy-impact-v1.png`: 4 columns × 2 rows. Top row loops energy flight; bottom row plays impact/debris once. Runtime playback uses the complete cells and fades impacts over their existing lifetime.
+- `images/blocks/parcels-v2.png`: two columns showing a single cardboard delivery box and a stacked pair, with smile branding, black packing tape and shipping labels. Alpha bounds are computed once when loaded, then aligned to the conveyor.
+- The special parcel reuses the box art with a red MC badge drawn in Canvas.
+
+Energy prompt: Production game VFX sprite atlas for a dark illustrated 2D action game. Exactly 8 cells in a 4-column by 2-row grid. Truly transparent alpha background, no floor, labels or grid lines. Top row four consecutive frames of a compact golden amber energy orb flying right, cream core, restrained warm flame contours and short trailing strokes. Bottom row four stages of an orb striking and destroying a cardboard delivery parcel: contact spark and fragments, expanding impact, dissipating fragments, sparse fading embers/cardboard. No intact box in bottom row. Fixed center, generous transparent cell padding, professional hand-painted style, readable at 40–90 pixels, glow confined to the effect.
+
+Parcel prompt: Game prop sprite atlas showing only ordinary cardboard delivery packages. Exactly two equal square cells side by side, transparent alpha. Cell 1 one closed Amazon delivery box; cell 2 two matching boxes stacked to the same total height. Kraft corrugated cardboard, black smile logo on front, black branded tape and shipping label. Consistent three-quarter view, polished hand-painted warehouse illustration, crisp at 50 pixels. Centered cells with transparent padding and the same bottom baseline. No ground, cast shadows, glow, borders or extra items.

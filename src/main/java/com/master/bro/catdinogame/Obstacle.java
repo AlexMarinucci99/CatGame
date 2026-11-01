@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 class Obstacle {
+    SpriteAtlas parcelSprites;
     double x, y, width, height, speed;
     boolean isPartOfDouble; // Se fa parte di un ostacolo doppio
     private Image normalBlockImage;
@@ -32,6 +33,9 @@ class Obstacle {
     }
 
     void render(GraphicsContext gc) {
+        if(parcelSprites!=null) {
+            parcelSprites.grounded(gc,isPartOfDouble?1:0,x,y,width,height);return;
+        }
         // === PRIORITÀ: IMMAGINE PERSONALIZZATA ===
         Image imageToUse = isPartOfDouble ? doubleBlockImage : normalBlockImage;
         
