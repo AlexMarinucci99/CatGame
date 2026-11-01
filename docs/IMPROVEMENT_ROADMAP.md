@@ -10,7 +10,7 @@ Introduce an owned game model, a validated state transition controller, and inje
 
 ## Milestone 3 — Animation foundation
 
-Add visual-only animation states, easing and bounded transient effects without changing hitboxes. Add reduced-effects setting. Acceptance: normal/double jump, shield and impacts show clear feedback; effects never alter collision results; frame-time measurements stay within an agreed budget on reference hardware.
+The first animation pass now includes a six-frame running atlas, airborne poses, a small landing response, an animated normal-level conveyor, and reduced-effects controls. Further work should refine shield and impact feedback without changing hitboxes and measure frame times on reference hardware.
 
 ## Milestone 4 — Presentation and audio
 

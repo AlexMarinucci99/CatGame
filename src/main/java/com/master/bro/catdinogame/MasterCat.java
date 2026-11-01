@@ -70,6 +70,10 @@ public class MasterCat extends Application {
     
     // Variabili per animazione gatto (solo bodyBounce utilizzato)
     double bodyBounce = 0;
+    double conveyorTravel;
+    double runFramePhase;
+    double landingTimer;
+    boolean facingLeft;
     
     // Sistema energia e onda
     double energy = 0;
@@ -218,6 +222,10 @@ public class MasterCat extends Application {
         score = 0;
         gameSpeed = 1.0;
         updater.resetProgression();
+        conveyorTravel = 0;
+        runFramePhase = 0;
+        landingTimer = 0;
+        facingLeft = false;
         energy = 0;
         waveActive = false;
         waveTimer = 0;
@@ -248,6 +256,9 @@ public class MasterCat extends Application {
         bossX = WIDTH - 200; // Posizione del boss sul lato destro
         bossY = GROUND_HEIGHT; // STESSO LIVELLO DEL GIOCATORE
         bossAnimationTimer = 0;
+        runFramePhase = 0;
+        landingTimer = 0;
+        facingLeft = false;
         lastBossAttackAt = 0;
         bossWarningEndsAt = 0;
         pendingBossAttackType = -1;

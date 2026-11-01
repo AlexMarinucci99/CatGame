@@ -48,6 +48,8 @@ The normal level advances score and speed at a 60 Hz reference rate, starts obst
 
 The game has menu, normal play, boss fight, pause, game over, and victory screens. Losing window focus pauses an active run and releases movement keys. Music pauses with gameplay. Menu settings control music, master volume, full screen, and a reduced-effects mode. Settings persist while the game remains open.
 
+The normal level runs on an animated parcel conveyor. The cat uses six running frames, airborne poses, and a small landing response; the boss encounter also animates horizontal movement. These visuals freeze during pause. Reduced-effects mode uses the original still character and a static conveyor.
+
 ## Build and development
 
 ```sh
@@ -71,4 +73,4 @@ The GitHub Actions workflow compiles and tests on Ubuntu, Windows, and macOS wit
 
 Compilation and headless logic checks were performed on Linux with Java 21 and cached Maven dependencies. JavaFX screenshots verified the menu, boss warning, and pause layouts at 1366×768. The GitHub Actions matrix runs `mvn clean verify` on three operating systems. A complete interactive playthrough and audible playback still need validation on a target desktop. See [the refactor audit](docs/REFACTOR_AUDIT.md) for the original comparison.
 
-The original image and audio files were left byte-for-byte unchanged. Their provenance and reuse terms are not documented in the original repository; verify rights before redistributing them. JavaFX is obtained from the OpenJFX Maven artifacts under its own license. `legacy-assets/cat.png` is an unused repository image retained pending provenance review.
+The original image and audio files were left byte-for-byte unchanged. The new running atlas is generated from the original cat reference; its prompts and layout are documented in [ART_ASSETS.md](docs/ART_ASSETS.md). Original asset provenance and reuse terms are not documented in the original repository; verify rights before redistributing them. JavaFX is obtained from the OpenJFX Maven artifacts under its own license. `legacy-assets/cat.png` is an unused repository image retained pending provenance review.

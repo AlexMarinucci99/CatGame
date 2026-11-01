@@ -16,6 +16,9 @@ final class GameUpdate {
     }
 
     void update(double dt) {
+        if (game.currentState == MasterCat.GameState.PLAYING || game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+            game.landingTimer = Math.max(0, game.landingTimer - dt);
+        }
         if (game.currentState == MasterCat.GameState.PLAYING) {
             updatePlaying(dt);
         } else if (game.currentState == MasterCat.GameState.BOSS_FIGHT) {
@@ -50,6 +53,9 @@ final class GameUpdate {
         
         // Fisica del gatto
         updateCatPhysics(dt);
+        double beltSpeed = ObstaclePacing.speedPixelsPerSecond(game.score);
+        game.conveyorTravel = (game.conveyorTravel + beltSpeed * Math.max(0, Math.min(dt, 0.1))) % 100000;
+        if (game.onGround) game.runFramePhase = PlayerAnimation.advance(game.runFramePhase, dt, beltSpeed);
 
         // Genera ostacoli con difficoltà incrementale e migliore spaziatura - RALLENTATO
         generateObstacles();
@@ -85,9 +91,11 @@ final class GameUpdate {
         // === MOVIMENTO ORIZZONTALE DEL GATTO ===
         if (game.leftPressed && game.catX > 50) { // Limite sinistro
             game.catX -= game.catMoveSpeed * dt;
+            game.facingLeft = true;
         }
         if (game.rightPressed && game.catX < game.WIDTH - 150) { // Limite destro (non troppo vicino al boss)
             game.catX += game.catMoveSpeed * dt;
+            game.facingLeft = false;
         }
         
         // Ricarica energia più veloce durante il boss fight
@@ -129,6 +137,9 @@ final class GameUpdate {
         
         // Fisica del gatto
         updateCatPhysics(dt);
+        if (game.onGround && (game.leftPressed || game.rightPressed)) {
+            game.runFramePhase = PlayerAnimation.advance(game.runFramePhase, dt, game.catMoveSpeed);
+        }
 
         // Genera attacchi del boss
         generateBossAttacks();
@@ -138,6 +149,7 @@ final class GameUpdate {
     }
     
     private void updateCatPhysics(double dt) {
+        boolean wasOnGround = game.onGround;
         // Exact extension of the original discrete 60 Hz rule to fractional frames:
         // n*v0 + gravity*n*(n+1)/2 is the sum of n original frame steps.
         double frames = Math.max(0.0, Math.min(dt, 0.05)) * 60.0;
@@ -145,6 +157,7 @@ final class GameUpdate {
             + game.GRAVITY * frames * (frames + 1.0) / 2.0;
         game.velocityY += game.GRAVITY * frames;
         if (game.catY >= game.GROUND_HEIGHT) {
+            if (!wasOnGround) game.landingTimer = 0.16;
             game.catY = game.GROUND_HEIGHT;
             game.velocityY = 0;
             game.onGround = true;

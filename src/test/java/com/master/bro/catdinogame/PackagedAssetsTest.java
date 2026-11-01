@@ -8,6 +8,7 @@ class PackagedAssetsTest {
     void requiredAssetsAreOnClasspath() {
         String[] resources = {
             "/images/player/cat.png",
+            "/images/player/cat-run-v1.png",
             "/images/backgrounds/menu_background.png",
             "/images/backgrounds/game_background.png",
             "/images/backgrounds/gameover_background.png",

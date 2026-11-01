@@ -361,22 +361,18 @@ final class GameRenderer {
 
         }
 
+        ConveyorRenderer.render(gc, game);
+
         // HUD minimal
         drawMinimalHUD(gc);
 
         // Gatto con immagine caricata - INGRANDITO in gioco - PIÙ VISIBILE
-        if (game.assets.catImage != null) {
+        if (game.assets.catImage != null || game.assets.catRunImage != null) {
             double catWidth = game.scaleSize(PlayerHitbox.NORMAL_SPRITE_SIZE);
-            double catHeight = catWidth;
-            double bounce = game.reducedEffects ? 0 : Math.sin(game.bodyBounce) * 2;
-            double catDrawX = game.catX - catWidth/2;
-            double catDrawY = game.catY + bounce - catHeight;
-            
-            // === RENDERING NORMALE SENZA EFFETTI ===
-            // Disegna il gatto normalmente con piena opacità - NESSUNA SFERA BIANCA
-            gc.setGlobalAlpha(1.0);
-            gc.setGlobalBlendMode(BlendMode.SRC_OVER);
-            gc.drawImage(game.assets.catImage, catDrawX, catDrawY, catWidth, catHeight);
+            gc.setFill(Color.rgb(0, 0, 0, 0.25));
+            gc.fillOval(game.catX - catWidth * 0.28, game.GROUND_HEIGHT - 3,
+                    catWidth * 0.56, 7);
+            PlayerAnimation.render(gc, game, catWidth, true);
         } else {
             // Fallback: disegna un cerchio blu per vedere dove dovrebbe essere il gatto - PIÙ GRANDE
             gc.setFill(Color.BLUE);
@@ -392,6 +388,8 @@ final class GameRenderer {
 
         // Ostacoli migliorati
         for (Obstacle o : game.obstacles) {
+            gc.setFill(Color.rgb(0, 0, 0, 0.24));
+            gc.fillOval(o.x - 3, game.GROUND_HEIGHT - 3, o.width + 6, 6);
             o.render(gc);
         }
     }
@@ -493,8 +491,8 @@ final class GameRenderer {
         double catDrawX = game.catX - catSize/2;
         double catDrawY = game.catY - catSize;
         
-        if (game.assets.catImage != null && !game.assets.catImage.isError()) {
-            gc.drawImage(game.assets.catImage, catDrawX, catDrawY, catSize, catSize);
+        if (game.assets.catImage != null || game.assets.catRunImage != null) {
+            PlayerAnimation.render(gc, game, catSize, game.leftPressed || game.rightPressed);
         } else {
             // Fallback: disegna il gatto come forme geometriche - INGRANDITO
             double bounce = Math.sin(game.bodyBounce) * 3;

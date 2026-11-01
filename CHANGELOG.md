@@ -17,3 +17,6 @@
 - Added a brief, labeled warning before every boss attack without altering its damage or projectile types.
 - Made menu settings interactive: music, master volume, reduced effects, and full screen.
 - Prevented a boss projectile from overriding victory later in the same update frame.
+- Added an animated parcel conveyor beneath the normal level, anchored to the existing ground plane.
+- Added a six-frame running atlas, airborne poses, facing direction, and a visual landing response for the cat.
+- Paused and reduced-effects modes freeze or simplify the new visual motion without changing collisions.
