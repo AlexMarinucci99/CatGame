@@ -8,20 +8,35 @@ import com.master.bro.catdinogame.MasterCat.DragonBallSphere;
 /** Advances gameplay physics, spawning, attacks, and collisions. */
 final class GameUpdate {
     private final MasterCat game;
+    private double obstacleElapsedMillis;
     private final ProgressionClock progressionClock = new ProgressionClock();
     GameUpdate(MasterCat game) { this.game = game; }
 
     void resetProgression() {
         progressionClock.reset();
+        obstacleElapsedMillis = 0;
     }
 
+    // Drop excess stall time uniformly, then bound collision/motion steps.
+    // Every subsystem receives the same accepted simulation time.
     void update(double dt) {
-        if (game.currentState == MasterCat.GameState.PLAYING || game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+        if (!Double.isFinite(dt) || dt < 0) return;
+        double remaining = Math.min(dt, 0.05);
+        MasterCat.GameState initial = game.state();
+        do {
+            double step = Math.min(remaining, 1.0 / 60);
+            updateStep(step);
+            remaining -= step;
+        } while (remaining > 1e-12 && game.state() == initial);
+    }
+
+    private void updateStep(double dt) {
+        if (game.state() == MasterCat.GameState.PLAYING || game.state() == MasterCat.GameState.BOSS_FIGHT) {
             game.landingTimer = Math.max(0, game.landingTimer - dt);
         }
-        if (game.currentState == MasterCat.GameState.PLAYING) {
+        if (game.state() == MasterCat.GameState.PLAYING) {
             updatePlaying(dt);
-        } else if (game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+        } else if (game.state() == MasterCat.GameState.BOSS_FIGHT) {
             updateBossFight(dt);
         }
     }
@@ -58,7 +73,7 @@ final class GameUpdate {
         if (game.onGround) game.runFramePhase = PlayerAnimation.advance(game.runFramePhase, dt, beltSpeed);
 
         // Genera ostacoli con difficoltà incrementale e migliore spaziatura - RALLENTATO
-        generateObstacles();
+        generateObstacles(dt);
         
         // Aggiorna ostacoli
         updateObstacles(dt);
@@ -129,7 +144,7 @@ final class GameUpdate {
         
         // === AGGIORNA SFERE DRAGON BALL NEL BOSS FIGHT ===
         updateDragonBallSpheres(dt);
-        if (game.currentState != MasterCat.GameState.BOSS_FIGHT) return;
+        if (game.state() != MasterCat.GameState.BOSS_FIGHT) return;
         
         // Animazioni del gatto e del boss
         game.bodyBounce += dt * 8;
@@ -165,9 +180,9 @@ final class GameUpdate {
         }
     }
     
-    private void generateObstacles() {
-        long now = game.nowMillis();
-        if (ObstaclePacing.ready(now, game.lastObstacleTime, game.score)) {
+    private void generateObstacles(double dt) {
+        obstacleElapsedMillis += dt * 1000;
+        if (obstacleElapsedMillis > ObstaclePacing.intervalMillis(game.score)) {
             double obstacleSize = 50; // Dimensione fissa appropriata
             double obstacleSpeed = ObstaclePacing.speedPixelsPerSecond(game.score);
             
@@ -188,7 +203,7 @@ final class GameUpdate {
                 obstacle.setBlockImages(game.assets.blockNormalImage, game.assets.blockDoubleImage);
                 game.obstacles.add(obstacle);
             }
-            game.lastObstacleTime = now;
+            obstacleElapsedMillis = 0;
         }
     }
     
@@ -222,6 +237,7 @@ final class GameUpdate {
             PlayerHitbox.Bounds cat = PlayerHitbox.normal(game);
             if (o.intersects(cat.x(), cat.y(), cat.width(), cat.height())) {
                 game.gameOver(); // Game over
+                return;
             }
             if (o.isOffScreen()) {
                 it.remove();
@@ -350,6 +366,7 @@ final class GameUpdate {
         Iterator<DragonBallSphere> sphereIt = game.dragonBallSpheres.iterator();
         while (sphereIt.hasNext()) {
             DragonBallSphere sphere = sphereIt.next();
+            if (sphere.isExploding() || sphere.isDestroyed()) continue;
             boolean sphereHitBarrier = false;
             
             // Controlla collisione con ogni blocco della barriera
@@ -396,7 +413,7 @@ final class GameUpdate {
             sphere.update(dt);
             
             // === COLLISIONE CON IL BOSS (solo durante boss fight) ===
-            if (game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+            if (game.state() == MasterCat.GameState.BOSS_FIGHT) {
                 // Boss dimensions: width=150, height=200 (con immagine)
                 double bossWidth = 150; 
                 double bossHeight = 200; 

@@ -39,8 +39,10 @@ class JumpTimingTest {
         for (int hz : new int[] {30, 60, 120, 144}) {
             MasterCat game = newGame();
             GameInput input = new GameInput(game);
+            input.onKeyReleased(KeyCode.SPACE);
             input.onKeyPressed(KeyCode.SPACE);
             advance(game, hz, 0.2);
+            input.onKeyReleased(KeyCode.SPACE);
             input.onKeyPressed(KeyCode.SPACE);
             assertEquals(-12.0, game.velocityY, 1e-9);
             advance(game, hz, 0.3);

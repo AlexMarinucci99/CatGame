@@ -18,8 +18,8 @@ class CombatAndLayoutTest {
     void energySphereDestroysNormalAndDoubleObstacles() {
         for (boolean partOfDouble : new boolean[] {false, true}) {
             MasterCat game = game();
-            game.currentState = MasterCat.GameState.PLAYING;
-            game.lastObstacleTime = System.currentTimeMillis();
+            game.startGame();
+
             game.obstacles.add(new Obstacle(390, 430, 50, 50, 190, partOfDouble));
             MasterCat.DragonBallSphere sphere = game.new DragonBallSphere(410, 450);
             game.dragonBallSpheres.add(sphere);
@@ -36,7 +36,7 @@ class CombatAndLayoutTest {
     void energySphereDestroysEveryBossProjectileVariant() {
         for (int type = 0; type < 4; type++) {
             MasterCat game = game();
-            game.currentState = MasterCat.GameState.BOSS_FIGHT;
+            game.startBossFight();
             game.bossProjectiles.add(game.new BossProjectile(350, 400, 150, 450, type));
             MasterCat.DragonBallSphere sphere = game.new DragonBallSphere(350, 400);
             game.dragonBallSpheres.add(sphere);

@@ -1,14 +1,17 @@
 package com.master.bro.catdinogame;
 
+import java.util.EnumSet;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 
 /** Handles gameplay keys, pause, focus loss, and interactive menu settings. */
 final class GameInput {
     private final MasterCat game;
+    private final EnumSet<KeyCode> held = EnumSet.noneOf(KeyCode.class);
     GameInput(MasterCat game) { this.game = game; }
 
     void onKeyPressed(KeyCode code) {
+            if (!held.add(code)) return;
             // Controllo fullscreen globale (funziona in tutti gli stati)
             if (code == KeyCode.U || code == KeyCode.ESCAPE) {
                 game.toggleFullscreen();
@@ -22,12 +25,12 @@ final class GameInput {
             }
 
             if (code == KeyCode.P) {
-                if (game.currentState == MasterCat.GameState.PAUSED) game.resumeGame();
+                if (game.state() == MasterCat.GameState.PAUSED) game.resumeGame();
                 else game.pauseGame();
                 return;
             }
             
-            switch (game.currentState) {
+            switch (game.state()) {
                 case MENU:
                     if (code == KeyCode.SPACE) {
                         game.startGame();
@@ -122,13 +125,14 @@ final class GameInput {
 
         // Gestione rilascio tasti per movimento fluido
     void onKeyReleased(KeyCode code) {
-            switch (game.currentState) {
+            held.remove(code);
+            switch (game.state()) {
                 case BOSS_FIGHT:
                     if (code == KeyCode.LEFT || code == KeyCode.A) {
-                        game.leftPressed = false;
+                        game.leftPressed = held.contains(KeyCode.LEFT) || held.contains(KeyCode.A);
                     }
                     if (code == KeyCode.RIGHT || code == KeyCode.D) {
-                        game.rightPressed = false;
+                        game.rightPressed = held.contains(KeyCode.RIGHT) || held.contains(KeyCode.D);
                     }
                     break;
                 case MENU:
@@ -142,13 +146,14 @@ final class GameInput {
     }
 
     void onFocusLost() {
+        held.clear();
         game.leftPressed = false;
         game.rightPressed = false;
         game.pauseGame();
     }
 
     void onMenuClick(double mouseX, double mouseY) {
-        if (game.currentState != MasterCat.GameState.MENU) return;
+        if (game.state() != MasterCat.GameState.MENU) return;
         if (mouseX >= game.settingsButtonX && mouseX <= game.settingsButtonX + game.settingsButtonWidth &&
             mouseY >= game.settingsButtonY && mouseY <= game.settingsButtonY + game.settingsButtonHeight) {
             game.settingsMenuOpen = !game.settingsMenuOpen;
@@ -170,7 +175,7 @@ final class GameInput {
     }
 
     void onMenuDrag(double mouseX, double mouseY) {
-        if (game.currentState == MasterCat.GameState.MENU && game.settingsMenuOpen &&
+        if (game.state() == MasterCat.GameState.MENU && game.settingsMenuOpen &&
             SettingsLayout.optionRow(game, SettingsLayout.Option.VOLUME).contains(mouseX, mouseY) &&
             mouseX >= SettingsLayout.volumeTrack(game).x() - 10) {
             updateVolume(mouseX);
