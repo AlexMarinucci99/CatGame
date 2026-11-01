@@ -1,0 +1,926 @@
+package com.master.bro.catdinogame;
+
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.*;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.image.Image;
+import com.master.bro.catdinogame.MasterCat.BossProjectile;
+import com.master.bro.catdinogame.MasterCat.DamageIndicator;
+import com.master.bro.catdinogame.MasterCat.DragonBallSphere;
+
+/** Draws the original game screens from the live game state. */
+final class GameRenderer {
+    private final MasterCat game;
+    GameRenderer(MasterCat game) { this.game = game; }
+
+    void render(GraphicsContext gc) {
+        switch (game.currentState) {
+            case MENU:
+                renderMenu(gc);
+                break;
+            case PLAYING:
+                renderGame(gc);
+                break;
+            case BOSS_FIGHT:
+                renderBossFight(gc);
+                break;
+            case GAME_OVER:
+                renderGameOver(gc);
+                break;
+            case VICTORY:
+                renderVictory(gc);
+                break;
+        }
+    }
+
+    private void renderMenu(GraphicsContext gc) {
+        // === SFONDO PERSONALIZZATO PER IL MENU ===
+        
+        if (game.assets.menuBackgroundImage != null && !game.assets.menuBackgroundImage.isError()) {
+            // Usa l'immagine di sfondo personalizzata, scalandola per coprire tutto lo schermo
+            gc.drawImage(game.assets.menuBackgroundImage, 0, 0, game.WIDTH, game.HEIGHT);
+        } else {
+            // Fallback: sfondo spaziale generato proceduralmente
+            LinearGradient spaceGradient = new LinearGradient(
+                0, 0, 0, game.HEIGHT,
+                false, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(20, 10, 50)),    // Blu-viola scuro in alto
+                new Stop(0.5, Color.rgb(60, 10, 90)),  // Viola medio al centro
+                new Stop(1, Color.rgb(10, 5, 30))      // Quasi nero con tinta viola in basso
+            );
+            gc.setFill(spaceGradient);
+            gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+            
+            // Stelle piccole e numerose con distribuzione migliorata
+            gc.setFill(Color.rgb(255, 255, 255, 0.9));
+            for (int i = 0; i < 200; i++) {
+                double starX = (i * 127) % game.WIDTH; // Distribuzione pseudo-casuale
+                double starY = (i * 83) % game.HEIGHT;
+                double starSize = 0.8 + (i % 4) * 0.5;
+                gc.fillOval(starX, starY, starSize, starSize);
+            }
+            
+            // Stelle medie più luminose
+            gc.setFill(Color.rgb(255, 255, 220));
+            for (int i = 0; i < 30; i++) {
+                double starX = (i * 191) % game.WIDTH;
+                double starY = (i * 107) % game.HEIGHT;
+                double starSize = 2 + (i % 3);
+                gc.fillOval(starX, starY, starSize, starSize);
+            }
+            
+            // Stelle brillanti con bagliore
+            for (int i = 0; i < 15; i++) {
+                double starX = (i * 239) % game.WIDTH;
+                double starY = (i * 167) % game.HEIGHT;
+                double starSize = 4 + (i % 2);
+                
+                // Bagliore
+                RadialGradient starGlow = new RadialGradient(
+                    0, 0, 0.5, 0.5, 1.0, true, CycleMethod.NO_CYCLE,
+                    new Stop(0, Color.rgb(255, 255, 255, 0.8)),
+                    new Stop(1, Color.rgb(255, 255, 255, 0))
+                );
+                gc.setFill(starGlow);
+                gc.fillOval(starX - 6, starY - 6, starSize + 12, starSize + 12);
+                
+                // Stella centrale
+                gc.setFill(Color.WHITE);
+                gc.fillOval(starX, starY, starSize, starSize);
+            }
+            
+            // Nebulosa distante
+            RadialGradient nebula = new RadialGradient(
+                0, 0, 0.5, 0.5, 1.0, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(100, 50, 150, 0.3)),
+                new Stop(0.7, Color.rgb(50, 25, 100, 0.1)),
+                new Stop(1, Color.rgb(0, 0, 0, 0))
+            );
+            gc.setFill(nebula);
+            gc.fillOval(game.WIDTH * 0.7, game.HEIGHT * 0.2, 400, 300);
+        }
+
+        // === TITOLO "MasterCat" PERFETTAMENTE CENTRATO E SCALATO ===
+        String title = "MasterCat";
+        Font titleFont = game.scaleFont("Impact", FontWeight.BOLD, 90);
+        
+        // Calcola la larghezza esatta del testo per centrarlo perfettamente
+        gc.setFont(titleFont);
+        double titleWidth = titleFont.getSize() * title.length() * 0.6; // Stima approssimativa
+        double titleX = (game.WIDTH - titleWidth) / 2; // Centro perfetto
+        double titleY = game.HEIGHT/2 - game.scaleY(200); // SPOSTATO PIÙ IN ALTO: da -40 a -200
+        
+        // Ombra profonda per effetto 3D (più livelli) - scalate
+        double shadowOffset1 = game.scaleSize(8);
+        double shadowOffset2 = game.scaleSize(6);
+        double shadowOffset3 = game.scaleSize(4);
+        double shadowOffset4 = game.scaleSize(2);
+        
+        gc.setFill(Color.rgb(0, 0, 0, 0.8));
+        gc.fillText(title, titleX + shadowOffset1, titleY + shadowOffset1);
+        gc.setFill(Color.rgb(50, 50, 50, 0.6));
+        gc.fillText(title, titleX + shadowOffset2, titleY + shadowOffset2);
+        gc.setFill(Color.rgb(100, 100, 100, 0.4));
+        gc.fillText(title, titleX + shadowOffset3, titleY + shadowOffset3);
+        gc.setFill(Color.rgb(150, 150, 150, 0.2));
+        gc.fillText(title, titleX + shadowOffset4, titleY + shadowOffset4);
+        
+        // Gradiente principale oro-arancione
+        LinearGradient titleGradient = new LinearGradient(
+            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.rgb(255, 230, 100)),    // Oro chiaro in alto
+            new Stop(0.3, Color.rgb(255, 200, 50)),   // Oro medio
+            new Stop(0.7, Color.rgb(255, 150, 0)),    // Arancione oro
+            new Stop(1, Color.rgb(200, 100, 0))       // Arancione scuro in basso
+        );
+        gc.setFill(titleGradient);
+        gc.fillText(title, titleX, titleY);
+        
+        // Bordo luminoso per effetto 3D - scalato
+        gc.setStroke(Color.rgb(255, 255, 255, 0.8));
+        gc.setLineWidth(game.scaleSize(2));
+        gc.strokeText(title, titleX, titleY);
+        
+        // Riflessi luminosi interni - scalati
+        gc.setStroke(Color.rgb(255, 255, 200, 0.6));
+        gc.setLineWidth(game.scaleSize(1));
+        gc.strokeText(title, titleX - game.scaleSize(1), titleY - game.scaleSize(1));
+        
+        // Bagliore esterno dorato - scalato
+        gc.setStroke(Color.rgb(255, 215, 0, 0.3));
+        gc.setLineWidth(game.scaleSize(8));
+        gc.strokeText(title, titleX, titleY);
+        gc.setLineWidth(game.scaleSize(12));
+        gc.setStroke(Color.rgb(255, 215, 0, 0.15));
+        gc.strokeText(title, titleX, titleY);
+
+        // === ISTRUZIONI PERFETTAMENTE CENTRATE E SCALATE ===
+        String startText = "Premi SPAZIO per avviare";
+        Font startFont = game.scaleFont("Arial", FontWeight.BOLD, 35);
+        gc.setFont(startFont);
+        double startTextWidth = startFont.getSize() * startText.length() * 0.6; // Stima per centratura
+        double startTextX = (game.WIDTH - startTextWidth) / 2; // Centro perfetto
+        
+        gc.setFill(Color.WHITE);
+        gc.fillText(startText, startTextX, game.HEIGHT/2 + game.scaleY(50));
+        
+        // === PULSANTE IMPOSTAZIONI ===
+        // Calcola posizione in basso a destra con margine
+        game.settingsButtonX = game.WIDTH - game.settingsButtonWidth - 30; // 30 pixel di margine dal bordo destro
+        game.settingsButtonY = game.HEIGHT - game.settingsButtonHeight - 30; // 30 pixel di margine dal bordo inferiore
+        
+        // NO background for the settings button - just text
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        gc.fillText("Impostazioni", game.settingsButtonX, game.settingsButtonY + 25);
+        
+        // === MENU A TENDINA IMPOSTAZIONI ===
+        if (game.settingsMenuOpen) {
+            renderSettingsDropdown(gc);
+        }
+    }
+
+    private void renderGame(GraphicsContext gc) {
+        // === SFONDO PERSONALIZZATO PER IL GIOCO ===
+        
+        if (game.assets.gameBackgroundImage != null && !game.assets.gameBackgroundImage.isError()) {
+            // Usa l'immagine di sfondo personalizzata, scalandola per coprire tutto lo schermo
+            gc.drawImage(game.assets.gameBackgroundImage, 0, 0, game.WIDTH, game.HEIGHT);
+        } else {
+            // Fallback: sfondo spaziale/caverna generato proceduralmente
+            // Sfondo con gradiente cosmico profondo
+            LinearGradient spaceGradient = new LinearGradient(
+                0, 0, 0, game.HEIGHT,
+                false, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(5, 5, 30)),      // Blu scurissimo in alto
+                new Stop(0.4, Color.rgb(20, 10, 50)),  // Blu-viola scuro
+                new Stop(1, Color.rgb(40, 20, 60))     // Viola scuro in basso
+            );
+            gc.setFill(spaceGradient);
+            gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+            
+            // Stelle sparse nel cielo con effetto scintillante
+            double time = System.currentTimeMillis() * 0.001;
+            gc.setFill(Color.WHITE);
+            for (int i = 0; i < 150; i++) {
+                double starX = (i * 137) % game.WIDTH; // Distribuzione pseudo-casuale
+                double starY = (i * 79) % (game.HEIGHT - 200);
+                // Effetto scintillante per alcune stelle
+                double twinkle = 1.0;
+                if (i % 5 == 0) {
+                    twinkle = 0.7 + Math.sin(time + i) * 0.3;
+                }
+                double starSize = (1 + (i % 3)) * twinkle;
+                gc.fillOval(starX, starY, starSize, starSize);
+            }
+            
+            // Apertura del cielo in lontananza (al centro superiore)
+            double skyOpeningWidth = 350; // Più ampia
+            double skyOpeningHeight = 250; // Più alta
+            double skyX = game.WIDTH/2 - skyOpeningWidth/2;
+            double skyY = 0;
+            
+            // Cielo blu dietro l'apertura con colori più vivaci
+            RadialGradient skyGradient = new RadialGradient(
+                0, 0, 0.5, 0.3, 1.0, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(135, 206, 250)),    // Azzurro cielo più brillante
+                new Stop(0.4, Color.rgb(100, 149, 237)),  // Blu cornflower
+                new Stop(0.7, Color.rgb(65, 105, 225)),   // Blu reale
+                new Stop(1, Color.rgb(25, 25, 112))       // Blu notte profondo
+            );
+            gc.setFill(skyGradient);
+            gc.fillOval(skyX, skyY - 100, skyOpeningWidth, skyOpeningHeight + 100);
+            
+            // Nuvole nel cielo lontano con effetto volumetrico
+            // Prima nuvola con gradiente
+            RadialGradient cloudGradient1 = new RadialGradient(
+                0, 0, 0.5, 0.5, 1.0, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(255, 255, 255, 0.9)),
+                new Stop(0.7, Color.rgb(240, 240, 255, 0.7)),
+                new Stop(1, Color.rgb(200, 200, 255, 0))
+            );
+            gc.setFill(cloudGradient1);
+            gc.fillOval(skyX + 50, skyY + 20, 70, 30);
+            gc.fillOval(skyX + 80, skyY + 15, 60, 25);
+            
+            // Seconda nuvola con gradiente
+            RadialGradient cloudGradient2 = new RadialGradient(
+                0, 0, 0.5, 0.5, 1.0, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(255, 255, 255, 0.9)),
+                new Stop(0.7, Color.rgb(240, 240, 255, 0.7)),
+                new Stop(1, Color.rgb(200, 200, 255, 0))
+            );
+            gc.setFill(cloudGradient2);
+            gc.fillOval(skyX + 180, skyY + 25, 80, 35);
+            gc.fillOval(skyX + 210, skyY + 20, 60, 30);
+            
+            // Sole dorato più brillante e con raggi
+            RadialGradient sunGradient = new RadialGradient(
+                0, 0, 0.5, 0.5, 0.8, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(255, 255, 200)),      // Bianco-giallo al centro
+                new Stop(0.5, Color.rgb(255, 255, 0)),      // Giallo brillante
+                new Stop(0.8, Color.rgb(255, 165, 0)),      // Arancione
+                new Stop(1, Color.rgb(255, 140, 0, 0.5))    // Arancione scuro con trasparenza
+            );
+            gc.setFill(sunGradient);
+            gc.fillOval(skyX + 200, skyY + 30, 50, 50); // Sole più grande
+            
+            // Raggi del sole
+            gc.setStroke(Color.rgb(255, 255, 150, 0.4));
+            gc.setLineWidth(2);
+            double sunCenterX = skyX + 225;
+            double sunCenterY = skyY + 55;
+            for (int i = 0; i < 12; i++) {
+                double angle = i * Math.PI / 6;
+                double startX = sunCenterX + Math.cos(angle) * 30;
+                double startY = sunCenterY + Math.sin(angle) * 30;
+                double endX = sunCenterX + Math.cos(angle) * 60;
+                double endY = sunCenterY + Math.sin(angle) * 60;
+                gc.strokeLine(startX, startY, endX, endY);
+            }
+            
+            // Pareti rocciose della caverna/canyon con texture migliorata
+            // Parete sinistra con gradiente
+            LinearGradient leftWallGradient = new LinearGradient(
+                0, 0, skyX, 0,
+                false, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(30, 20, 40)),    // Viola scuro
+                new Stop(0.7, Color.rgb(50, 30, 60)),  // Viola medio
+                new Stop(1, Color.rgb(70, 40, 80))     // Viola chiaro verso l'apertura
+            );
+            gc.setFill(leftWallGradient);
+            double[] leftWallX = {0, 0, skyX - 50, skyX + 20};
+            double[] leftWallY = {0, game.HEIGHT, game.HEIGHT, 0};
+            gc.fillPolygon(leftWallX, leftWallY, 4);
+            
+            // Parete destra con gradiente
+            LinearGradient rightWallGradient = new LinearGradient(
+                game.WIDTH, 0, skyX + skyOpeningWidth, 0,
+                false, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(30, 20, 40)),    // Viola scuro
+                new Stop(0.7, Color.rgb(50, 30, 60)),  // Viola medio
+                new Stop(1, Color.rgb(70, 40, 80))     // Viola chiaro verso l'apertura
+            );
+            gc.setFill(rightWallGradient);
+            double[] rightWallX = {game.WIDTH, game.WIDTH, skyX + skyOpeningWidth + 50, skyX + skyOpeningWidth - 20};
+            double[] rightWallY = {0, game.HEIGHT, game.HEIGHT, 0};
+            gc.fillPolygon(rightWallX, rightWallY, 4);
+            
+            // Dettagli rocciosi sulle pareti con texture migliorata
+            // Formazioni rocciose sulla parete sinistra
+            for (int i = 0; i < 15; i++) {
+                double rockX = i * 30;
+                double rockY = i * 50 + 100;
+                if (rockX < skyX - 50) {
+                    // Rocce con gradiente per effetto 3D
+                    RadialGradient rockGradient = new RadialGradient(
+                        0, 0, rockX + 12, rockY + 7, 20, false, CycleMethod.NO_CYCLE,
+                        new Stop(0, Color.rgb(70, 50, 80)),   // Viola chiaro
+                        new Stop(0.7, Color.rgb(50, 30, 60)),  // Viola medio
+                        new Stop(1, Color.rgb(30, 20, 40))     // Viola scuro
+                    );
+                    gc.setFill(rockGradient);
+                    gc.fillOval(rockX, rockY, 30, 18);
+                }
+            }
+            
+            // Formazioni rocciose sulla parete destra
+            for (int i = 0; i < 15; i++) {
+                double rockX = game.WIDTH - (i * 30);
+                double rockY = i * 50 + 100;
+                if (rockX > skyX + skyOpeningWidth + 50) {
+                    // Rocce con gradiente per effetto 3D
+                    RadialGradient rockGradient = new RadialGradient(
+                        0, 0, rockX + 12, rockY + 7, 20, false, CycleMethod.NO_CYCLE,
+                        new Stop(0, Color.rgb(70, 50, 80)),   // Viola chiaro
+                        new Stop(0.7, Color.rgb(50, 30, 60)),  // Viola medio
+                        new Stop(1, Color.rgb(30, 20, 40))     // Viola scuro
+                    );
+                    gc.setFill(rockGradient);
+                    gc.fillOval(rockX, rockY, 30, 18);
+                }
+            }
+            
+            // Stalattiti dal soffitto con effetto cristallino
+            for (int i = 0; i < 10; i++) {
+                double stalX = i * 80 + 40;
+                if (stalX < skyX - 20 || stalX > skyX + skyOpeningWidth + 20) {
+                    // Stalattiti con gradiente per effetto cristallino
+                    LinearGradient stalGradient = new LinearGradient(
+                        0, 0, 0, 100,
+                        false, CycleMethod.NO_CYCLE,
+                        new Stop(0, Color.rgb(40, 30, 50)),    // Viola scuro in alto
+                        new Stop(0.5, Color.rgb(60, 40, 80)),  // Viola medio
+                        new Stop(1, Color.rgb(80, 60, 100))    // Viola chiaro in basso
+                    );
+                    gc.setFill(stalGradient);
+                    
+                    double[] stalactiteX = {stalX, stalX + 15, stalX + 30, stalX + 15};
+                    double[] stalactiteY = {0, 0, 90 + i * 10, 100 + i * 10};
+                    gc.fillPolygon(stalactiteX, stalactiteY, 4);
+                    
+                    // Riflessi luminosi sulle stalattiti
+                    gc.setFill(Color.rgb(255, 255, 255, 0.3));
+                    gc.fillOval(stalX + 10, 40, 5, 20);
+                }
+            }
+            
+            // Terreno come linea orizzontale ben visibile
+            gc.setStroke(Color.rgb(120, 80, 100));
+            gc.setLineWidth(6);
+            gc.strokeLine(0, game.GROUND_HEIGHT, game.WIDTH, game.GROUND_HEIGHT);
+
+        }
+
+        // HUD minimal
+        drawMinimalHUD(gc);
+
+        // Gatto con immagine caricata - INGRANDITO in gioco - PIÙ VISIBILE
+        if (game.assets.catImage != null) {
+            double catWidth = game.scaleSize(110);  // INGRANDITO: era 78, ora 110 (+40%)
+            double catHeight = game.scaleSize(110); // INGRANDITO: era 78, ora 110 (+40%)
+            double bounce = Math.sin(game.bodyBounce) * 2; // Rimbalzo quando corre
+            double catDrawX = game.catX - catWidth/2;
+            double catDrawY = game.catY + bounce - catHeight;
+            
+            // === RENDERING NORMALE SENZA EFFETTI ===
+            // Disegna il gatto normalmente con piena opacità - NESSUNA SFERA BIANCA
+            gc.setGlobalAlpha(1.0);
+            gc.setGlobalBlendMode(BlendMode.SRC_OVER);
+            gc.drawImage(game.assets.catImage, catDrawX, catDrawY, catWidth, catHeight);
+        } else {
+            // Fallback: disegna un cerchio blu per vedere dove dovrebbe essere il gatto - PIÙ GRANDE
+            gc.setFill(Color.BLUE);
+            double fallbackSize = game.scaleSize(110); // INGRANDITO: era 78, ora 110
+            double bounce = Math.sin(game.bodyBounce) * 2;
+            gc.fillOval(game.catX - fallbackSize/2, game.catY + bounce - fallbackSize, fallbackSize, fallbackSize);
+        }
+
+        // === SFERE ENERGETICHE DRAGON BALL ===
+        for (DragonBallSphere sphere : game.dragonBallSpheres) {
+            sphere.render(gc);
+        }
+
+        // Ostacoli migliorati
+        for (Obstacle o : game.obstacles) {
+            o.render(gc);
+        }
+    }
+
+    private void renderBossFight(GraphicsContext gc) {
+        // === SFONDO PERSONALIZZATO PER LA BOSS FIGHT ===
+        
+        if (game.assets.bossBackgroundImage != null && !game.assets.bossBackgroundImage.isError()) {
+            // Usa l'immagine di sfondo personalizzata per la boss battle
+            gc.drawImage(game.assets.bossBackgroundImage, 0, 0, game.WIDTH, game.HEIGHT);
+        } else {
+            // Fallback: sfondo drammatico per la boss fight
+            LinearGradient bossGradient = new LinearGradient(
+                0, 0, 0, game.HEIGHT,
+                false, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(60, 10, 10)),    // Rosso scuro in alto
+                new Stop(0.5, Color.rgb(30, 5, 30)),   // Viola scurissimo al centro
+                new Stop(1, Color.rgb(10, 5, 5))       // Quasi nero in basso
+            );
+            gc.setFill(bossGradient);
+            gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+            
+            // Fulmini di sfondo per atmosfera drammatica
+            gc.setStroke(Color.rgb(255, 255, 100, 0.3));
+            gc.setLineWidth(3);
+            double time = System.currentTimeMillis() * 0.01;
+            for (int i = 0; i < 10; i++) {
+                double x = (i * 200 + Math.sin(time + i) * 50) % game.WIDTH;
+                gc.strokeLine(x, 0, x + 20, game.HEIGHT * 0.3);
+            }
+        }
+        
+        // === DISEGNA IL TERRENO ===
+        gc.setFill(Color.rgb(139, 90, 43)); // Marrone terreno
+        gc.fillRect(0, game.GROUND_HEIGHT, game.WIDTH, game.HEIGHT - game.GROUND_HEIGHT);
+        
+        // Linea superiore del terreno
+        gc.setStroke(Color.rgb(100, 70, 30));
+        gc.setLineWidth(3);
+        gc.strokeLine(0, game.GROUND_HEIGHT, game.WIDTH, game.GROUND_HEIGHT);
+        
+        // === DISEGNA IL BOSS (CORRIERE AMAZON) - INGRANDITO E A TERRA ===
+        if (game.assets.bossImage != null && !game.assets.bossImage.isError()) {
+            // Usa l'immagine personalizzata del boss - INGRANDITA
+            double bossWidth = 150; // Aumentato da 120 a 150
+            double bossHeight = 200; // Aumentato da 160 a 200
+            
+            // Boss posizionato a terra come il giocatore
+            double bossGroundY = game.GROUND_HEIGHT - 10; // Stesso livello del giocatore
+            
+            // Animazione oscillante del boss (movimento più sottile)
+            double bobbing = Math.sin(game.bossAnimationTimer) * 3; // Movimento ridotto
+            gc.drawImage(game.assets.bossImage, game.bossX - bossWidth/2, bossGroundY - bossHeight + bobbing, bossWidth, bossHeight);
+        } else {
+            // Fallback: disegna il boss come un rettangolo stilizzato - INGRANDITO
+            double bossWidth = 120; // Aumentato da 80 a 120  
+            double bossHeight = 160; // Aumentato da 120 a 160
+            
+            // Boss posizionato a terra
+            double bossGroundY = game.GROUND_HEIGHT - 10;
+            
+            // Corpo del corriere (in piedi sul terreno)
+            gc.setFill(Color.rgb(70, 130, 180)); // Blu uniforme Amazon
+            double bobbing = Math.sin(game.bossAnimationTimer) * 3; // Movimento ridotto
+            gc.fillRect(game.bossX - bossWidth/2, bossGroundY - bossHeight + bobbing, bossWidth, bossHeight);
+            
+            // Bordo della divisa
+            gc.setStroke(Color.rgb(50, 100, 140));
+            gc.setLineWidth(3);
+            gc.strokeRect(game.bossX - bossWidth/2, bossGroundY - bossHeight + bobbing, bossWidth, bossHeight);
+            
+            // Logo Amazon sul petto
+            gc.setFill(Color.WHITE);
+            gc.setFont(Font.font("Arial", FontWeight.BOLD, 20)); // Aumentato font
+            gc.fillText("amazon", game.bossX - 30, bossGroundY - bossHeight + bobbing + 50);
+            
+            // Sorriso caratteristico Amazon
+            gc.setStroke(Color.ORANGE);
+            gc.setLineWidth(5); // Aumentato spessore
+            gc.strokeArc(game.bossX - 25, bossGroundY - bossHeight + bobbing + 55, 50, 25, 0, 180, javafx.scene.shape.ArcType.OPEN);
+            
+            // Braccia che lanciano (movimento di lancio verso il basso)
+            gc.setStroke(Color.rgb(220, 180, 140)); // Colore pelle
+            gc.setLineWidth(10); // Aumentato spessore
+            double armAngle = Math.sin(game.bossAnimationTimer * 3) * 15; // Movimento più contenuto
+            
+            // Braccio sinistro (quello che lancia verso il basso)
+            double armY = bossGroundY - bossHeight + bobbing + 60;
+            gc.strokeLine(game.bossX - bossWidth/2, armY, 
+                         game.bossX - bossWidth/2 - 40, armY + 40 + armAngle); // Lancia verso il basso
+            
+            // Braccio destro (bilanciamento, anche verso il basso)
+            gc.strokeLine(game.bossX + bossWidth/2, armY, 
+                         game.bossX + bossWidth/2 + 30, armY + 30 - armAngle/2); // Anche verso il basso
+        }
+        
+        // === DISEGNA IL GATTO - INGRANDITO ===
+        double catSize = 80; // Aumentato da 50 a 80
+        double catDrawX = game.catX - catSize/2;
+        double catDrawY = game.catY - catSize;
+        
+        if (game.assets.catImage != null && !game.assets.catImage.isError()) {
+            gc.drawImage(game.assets.catImage, catDrawX, catDrawY, catSize, catSize);
+        } else {
+            // Fallback: disegna il gatto come forme geometriche - INGRANDITO
+            double bounce = Math.sin(game.bodyBounce) * 3;
+            
+            // Corpo
+            gc.setFill(Color.rgb(255, 140, 0));
+            gc.fillOval(catDrawX, catDrawY + bounce, catSize * 0.8, catSize * 0.6);
+            
+            // Testa
+            gc.fillOval(catDrawX + catSize * 0.1, catDrawY - catSize * 0.2 + bounce, catSize * 0.6, catSize * 0.5);
+            
+            // Orecchie
+            gc.setFill(Color.rgb(255, 120, 0));
+            gc.fillPolygon(
+                new double[]{catDrawX + catSize * 0.2, catDrawX + catSize * 0.1, catDrawX + catSize * 0.3},
+                new double[]{catDrawY - catSize * 0.2 + bounce, catDrawY - catSize * 0.4 + bounce, catDrawY - catSize * 0.3 + bounce},
+                3
+            );
+            gc.fillPolygon(
+                new double[]{catDrawX + catSize * 0.5, catDrawX + catSize * 0.6, catDrawX + catSize * 0.4},
+                new double[]{catDrawY - catSize * 0.2 + bounce, catDrawY - catSize * 0.4 + bounce, catDrawY - catSize * 0.3 + bounce},
+                3
+            );
+            
+            // Occhi
+            gc.setFill(Color.BLACK);
+            gc.fillOval(catDrawX + catSize * 0.25, catDrawY - catSize * 0.1 + bounce, 6, 6); // Ingranditi
+            gc.fillOval(catDrawX + catSize * 0.45, catDrawY - catSize * 0.1 + bounce, 6, 6); // Ingranditi
+        }
+        
+        // === SCUDO ===
+        if (game.shieldActive) {
+            double shieldAlpha = 0.7 * Math.sin(game.shieldTimer * 8); // Effetto pulsante
+            if (shieldAlpha < 0) shieldAlpha = -shieldAlpha;
+            
+            RadialGradient shieldGradient = new RadialGradient(
+                0, 0, 0.5, 0.5, 1.0, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(100, 255, 100, shieldAlpha * 0.3)),
+                new Stop(0.7, Color.rgb(50, 200, 50, shieldAlpha * 0.6)),
+                new Stop(1, Color.rgb(0, 150, 0, shieldAlpha))
+            );
+            gc.setFill(shieldGradient);
+            gc.fillOval(game.catX - 60, game.catY - 80, 120, 120);
+            
+            // Bordo dello scudo
+            gc.setStroke(Color.rgb(0, 255, 0, shieldAlpha));
+            gc.setLineWidth(4);
+            gc.strokeOval(game.catX - 60, game.catY - 80, 120, 120);
+        }
+        
+        // === SFERE DRAGON BALL NEL BOSS FIGHT ===
+        for (DragonBallSphere sphere : game.dragonBallSpheres) {
+            sphere.render(gc);
+        }
+        
+        // === INDICATORI DANNO ===
+        for (DamageIndicator indicator : game.damageIndicators) {
+            indicator.render(gc);
+        }
+        
+        // === DISEGNA PROIETTILI DEL BOSS ===
+        for (BossProjectile projectile : game.bossProjectiles) {
+            projectile.render(gc);
+        }
+        
+        // === DISEGNA BARRIERA BOSS ===
+        for (BarrierBlock block : game.bossBarrier) {
+            block.render(gc);
+        }
+        
+        // === HUD DELLA BOSS FIGHT ===
+        renderBossFightHUD(gc);
+    }
+    
+    private void renderBossFightHUD(GraphicsContext gc) {
+        // === TIMER BOSS FIGHT ===
+        double remainingTime = game.BOSS_DURATION - game.bossTimer;
+        int minutes = (int) (remainingTime / 60);
+        int seconds = (int) (remainingTime % 60);
+        
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(36)));
+        String timeText = String.format("TEMPO: %d:%02d", minutes, seconds);
+        gc.fillText(timeText, game.scaleX(50), game.scaleY(50));
+        
+       
+        
+        // === BARRA ENERGIA (PIÙ GRANDE E SOTTO IL PUNTEGGIO) ===
+        double energyBarX = game.scaleX(50);
+        double energyBarY = game.scaleY(80);
+        double energyBarWidth = game.scaleX(300);
+        double energyBarHeight = game.scaleY(20);
+
+       
+        
+        
+        
+        // Energia attuale
+        double energyPercent = game.energy / game.MAX_ENERGY;
+        Color energyColor = energyPercent >= 1.0 ? Color.CYAN : Color.LIGHTBLUE;
+        gc.setFill(energyColor);
+        gc.fillRect(energyBarX, energyBarY, energyBarWidth * energyPercent, energyBarHeight);
+        
+        // Bordo barra energia
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(1);
+        gc.strokeRect(energyBarX, energyBarY, energyBarWidth, energyBarHeight);
+
+        
+        // Testo energia
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(16)));
+        String energyText = String.format("ENERGIA: %.0f/%.0f", game.energy, game.MAX_ENERGY);
+        if (game.energy >= game.MAX_ENERGY) {
+            energyText += " [PREMI C]";
+        }
+        gc.fillText(energyText, energyBarX, energyBarY - game.scaleY(5));
+        
+        // === BARRA VITA BOSS ===
+        double bossHealthBarX = game.WIDTH - game.scaleX(320);
+        double bossHealthBarY = game.scaleY(30);
+        double bossHealthBarWidth = game.scaleX(250);
+        double bossHealthBarHeight = game.scaleY(20);
+        
+     
+        
+        // Vita attuale del boss
+        double bossHealthPercent = game.bossHealth / game.MAX_BOSS_HEALTH;
+        gc.setFill(Color.RED);
+        gc.fillRect(bossHealthBarX, bossHealthBarY, bossHealthBarWidth * bossHealthPercent, bossHealthBarHeight);
+        
+        // Bordo barra vita boss
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(2);
+        gc.strokeRect(bossHealthBarX, bossHealthBarY, bossHealthBarWidth, bossHealthBarHeight);
+        
+        // Etichetta vita boss
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(14)));
+        gc.fillText(String.format("VITA BOSS: %.0f/%.0f", game.bossHealth, game.MAX_BOSS_HEALTH), 
+                   bossHealthBarX, bossHealthBarY - game.scaleY(5));
+        
+        // === ISTRUZIONI BOSS FIGHT ===
+        gc.setFill(Color.YELLOW);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(16)));
+        gc.fillText("← → (A/D) Movimento| X Scudo", 
+                   game.scaleX(50), game.scaleY(120));
+        
+        // === INDICATORE SCUDO ===
+        if (game.shieldActive) {
+            double shieldTimeLeft = game.SHIELD_DURATION - game.shieldTimer;
+            gc.setFill(Color.GREEN);
+            gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(14)));
+            gc.fillText("🛡️ SCUDO ATTIVO: " + String.format("%.1f", shieldTimeLeft) + "s", 
+                       game.scaleX(50), game.scaleY(260));
+        }
+          
+    }
+
+    private void renderGameOver(GraphicsContext gc) {
+        // === SFONDO PERSONALIZZATO PER IL GAME OVER ===
+        
+        if (game.assets.gameOverBackgroundImage != null && !game.assets.gameOverBackgroundImage.isError()) {
+            // Usa l'immagine di sfondo personalizzata, scalandola per coprire tutto lo schermo
+            gc.drawImage(game.assets.gameOverBackgroundImage, 0, 0, game.WIDTH, game.HEIGHT);
+        } else {
+            // Fallback: sfondo nero semplice
+            gc.setFill(Color.BLACK);
+            gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+        }
+        
+        // Istruzioni centrate e posizionate nella parte centrale in basso
+        gc.setFill(Color.WHITE);
+        gc.setFont(game.scaleFont("Arial", FontWeight.BOLD, 25));
+        String instructionText = "Premi qualsiasi tasto per tornare al menu";
+        
+        // Calcolo per centrare il testo orizzontalmente
+        double instructionTextWidth = gc.getFont().getSize() * instructionText.length() * 0.6; // Stima approssimativa
+        double instructionX = game.WIDTH/2 - instructionTextWidth/2;
+        
+        // Posizione verticale: circa 3/4 dell'altezza dello schermo (parte centrale in basso)
+        double instructionY = game.HEIGHT * 0.75;
+        
+        gc.fillText(instructionText, instructionX, instructionY);
+    }
+
+    private void renderVictory(GraphicsContext gc) {
+        try {
+            // === SFONDO PERSONALIZZATO PER LA VITTORIA ===
+            
+            if (game.assets.victoryBackgroundImage != null && !game.assets.victoryBackgroundImage.isError()) {
+                // Usa l'immagine di sfondo personalizzata, scalandola per coprire tutto lo schermo
+                gc.drawImage(game.assets.victoryBackgroundImage, 0, 0, game.WIDTH, game.HEIGHT);
+            } else {
+                // Fallback: sfondo nero semplice
+                gc.setFill(Color.BLACK);
+                gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+            }
+
+            // Punteggio finale centrato e spostato più in basso
+            gc.setFill(Color.WHITE);
+            gc.setFont(game.scaleFont("Arial", FontWeight.BOLD, 36));
+            String finalScoreText = "Punteggio Finale: " + game.score;
+            // Calcolo per centrare il testo orizzontalmente
+            double textWidth = gc.getFont().getSize() * finalScoreText.length() * 0.6; // Stima approssimativa
+            gc.fillText(finalScoreText, game.WIDTH/2 - textWidth/2, game.HEIGHT/2 + game.scaleSize(100));
+            
+            // Istruzioni centrate sotto il punteggio
+            gc.setFill(Color.WHITE);
+            gc.setFont(game.scaleFont("Arial", FontWeight.NORMAL, 20));
+            String instructionText = "Premi qualsiasi tasto per tornare al menu";
+            double instructionWidth = gc.getFont().getSize() * instructionText.length() * 0.6; // Stima approssimativa
+            gc.fillText(instructionText, game.WIDTH/2 - instructionWidth/2, game.HEIGHT/2 + game.scaleSize(170));
+            
+        } catch (Exception e) {
+            System.out.println("❌ Errore nel rendering della vittoria: " + e.getMessage());
+            // Fallback: schermata nera con testo semplice
+            gc.setFill(Color.BLACK);
+            gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+            gc.setFill(Color.WHITE);
+            gc.setFont(Font.font("Arial", 24));
+            gc.fillText("VITTORIA! Punteggio: " + game.score, game.WIDTH/2 - 100, game.HEIGHT/2);
+            gc.fillText("Premi qualsiasi tasto per continuare", game.WIDTH/2 - 150, game.HEIGHT/2 + 50);
+        }
+    }
+
+    private void drawMinimalHUD(GraphicsContext gc) {
+        // === PUNTEGGIO INGRANDITO IN ALTO A SINISTRA ===
+
+        
+        // === BARRA ENERGIA DINAMICA E GRAFICA COME NEL BOSS FIGHT ===
+        double energyBarX = 20;
+        double energyBarY = 55;
+        double energyBarWidth = 300; // Aumentata per essere più prominente
+        double energyBarHeight = 20; // Più alta come nel boss fight
+        
+        // Testo energia sopra la barra
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Impact", FontWeight.BOLD, 18));
+        String energyText = String.format("ENERGIA: %.0f/%.0f", game.energy, game.MAX_ENERGY);
+        if (game.energy >= game.MAX_ENERGY) {
+            energyText += " [PREMI C]";
+        }
+        gc.fillText(energyText, energyBarX, energyBarY - 5);
+        
+      
+        
+        // Energia attuale con gradiente dinamico
+        if (game.energy > 0) {
+            double energyPercent = game.energy / game.MAX_ENERGY;
+            Color energyColor = energyPercent >= 1.0 ? Color.CYAN : Color.LIGHTBLUE;
+            
+            // Effetto pulsante quando energia è al massimo
+            if (energyPercent >= 1.0) {
+                double pulse = Math.sin(System.currentTimeMillis() * 0.01) * 0.3 + 0.7;
+                energyColor = Color.rgb((int)(255 * pulse), (int)(255 * pulse), 255);
+            }
+            
+            gc.setFill(energyColor);
+            gc.fillRect(energyBarX, energyBarY, energyBarWidth * energyPercent, energyBarHeight);
+            
+            // Effetto brillante quando energia è al massimo
+            if (energyPercent >= 1.0) {
+                gc.setFill(Color.rgb(255, 255, 255, 0.4));
+                gc.fillRect(energyBarX, energyBarY, energyBarWidth * energyPercent, energyBarHeight / 2);
+            }
+        }
+        
+        // Bordo barra energia
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(1);
+        gc.strokeRect(energyBarX, energyBarY, energyBarWidth, energyBarHeight);
+        
+        // === BARRA PROGRESSO VITTORIA SPOSTATA PIU' IN BASSO ===
+        double progressBarWidth = 300;
+        double progressBarHeight = 15;
+        double progressX = 20;
+        double progressY = 100; // SPOSTATA: più in basso per fare spazio all'energia più grande
+        
+        // Testo progresso sopra la barra
+        gc.setFill(Color.GOLD);
+        gc.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, 16));
+        gc.fillText("Obiettivo: " + game.score + "/" + game.WINNING_SCORE, progressX, progressY - 8);
+        
+        // Sfondo barra progresso
+        gc.setFill(Color.rgb(40, 40, 40, 0.8));
+        gc.fillRoundRect(progressX, progressY, progressBarWidth, progressBarHeight, 8, 8);
+        
+        // Progresso con gradiente
+        double progress = Math.min(1.0, (double)game.score / game.WINNING_SCORE);
+        if (progress > 0) {
+            Color progressColor = progress >= 1.0 ? Color.GOLD : Color.LIME;
+            LinearGradient progressGradient = new LinearGradient(
+                0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, progressColor.brighter()),
+                new Stop(1, progressColor.darker())
+            );
+            gc.setFill(progressGradient);
+            gc.fillRoundRect(progressX + 2, progressY + 2, (progressBarWidth - 4) * progress, progressBarHeight - 4, 6, 6);
+        }
+        
+        // Bordo della barra progresso
+        gc.setStroke(Color.GOLD);
+        gc.setLineWidth(1);
+        gc.strokeRoundRect(progressX, progressY, progressBarWidth, progressBarHeight, 8, 8);
+    }
+
+    // Classe Obstacle migliorata con supporto per immagini
+    // === CLASSE BLOCCO BARRIERA BOSS ===
+    private void renderSettingsDropdown(GraphicsContext gc) {
+        double menuWidth = 350;
+        double menuHeight = 350;
+        
+        // Calcola posizione del menu: se il pulsante è in basso, aprilo verso l'alto
+        double menuX = game.settingsButtonX - menuWidth + game.settingsButtonWidth; // Allinea a destra del pulsante
+        double menuY = game.settingsButtonY - menuHeight; // Apri sopra il pulsante
+        
+        // Assicurati che il menu non esca dai bordi dello schermo
+        if (menuX < 0) menuX = 10; // Non uscire a sinistra
+        if (menuX + menuWidth > game.WIDTH) menuX = game.WIDTH - menuWidth - 10; // Non uscire a destra
+        if (menuY < 0) menuY = 10; // Non uscire in alto
+        
+        // Sfondo del menu a tendina
+        gc.setFill(Color.rgb(0, 0, 0, 0.95));
+        gc.fillRoundRect(menuX, menuY, menuWidth, menuHeight, 10, 10);
+        
+        // Bordo del menu
+        gc.setStroke(Color.CYAN);
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(menuX, menuY, menuWidth, menuHeight, 10, 10);
+        
+        // Titolo del menu
+        gc.setFill(Color.CYAN);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        gc.fillText("🎮COMANDI DI GIOCO", menuX + 15, menuY + 30);
+        
+        // Linea di separazione
+        gc.setStroke(Color.CYAN);
+        gc.setLineWidth(1);
+        gc.strokeLine(menuX + 15, menuY + 40, menuX + menuWidth - 15, menuY + 40);
+        
+        double currentY = menuY + 60;
+        double lineHeight = 25;
+        
+        // === COMANDI ESSENZIALI ===
+        
+        // Comando SPAZIO per saltare
+        gc.setFill(Color.YELLOW);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("SPAZIO", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        gc.fillText("→ Salto singolo", menuX + 75, currentY);
+        currentY += lineHeight;
+        
+        // Comando doppio SPAZIO
+        gc.setFill(Color.ORANGE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("SPAZIO x2", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        gc.fillText("→ Doppio salto", menuX + 95, currentY);
+        currentY += lineHeight;
+        
+        // Comando C per sfera energetica
+        gc.setFill(Color.CYAN);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("C", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        gc.fillText("→ Lancia Onda Energetica", menuX + 35, currentY);
+        currentY += lineHeight;
+        // Comando X per scudo
+        gc.setFill(Color.GREEN);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("X", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        gc.fillText("→ Scudo (Boss Fight)", menuX + 35, currentY);
+        currentY += lineHeight;
+        
+        // Comando frecce per movimento nel boss fight
+        gc.setFill(Color.LIGHTCORAL);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("← → (A/D)", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        gc.fillText("→ Movimento Boss Fight", menuX + 90, currentY);
+        currentY += lineHeight;
+        
+        // Comando M per toggle game.audio
+        gc.setFill(Color.CYAN);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("🎵 M", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        String musicStatus = game.audio.isMusicEnabled() ? "Audio ON" : "Audio OFF";
+        gc.fillText("→ " + musicStatus, menuX + 55, currentY);
+        currentY += lineHeight;
+        
+        // Comando U/ESC per toggle fullscreen
+        gc.setFill(Color.MAGENTA);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        gc.fillText("ESC / U", menuX + 20, currentY);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
+        String fullscreenStatus = game.gameStage != null && game.gameStage.isFullScreen() ? "Fullscreen ON" : "Fullscreen OFF";
+        gc.fillText("→ " + fullscreenStatus, menuX + 75, currentY);
+        currentY += lineHeight;
+
+        // Istruzioni per chiudere
+        gc.setFill(Color.GRAY);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
+        gc.fillText("Clicca fuori dal menu per chiudere", menuX + 20, menuY + menuHeight - 15);
+    }
+}

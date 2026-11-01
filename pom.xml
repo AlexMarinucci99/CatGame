@@ -10,8 +10,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
     <java.version>21</java.version>
     <javafx.version>21.0.2</javafx.version>
   </properties>
@@ -23,16 +22,17 @@
       <artifactId>javafx-controls</artifactId>
       <version>${javafx.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <version>${javafx.version}</version>
-    </dependency>
     <!-- JavaFX Media per l'audio -->
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-media</artifactId>
       <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -44,8 +44,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
         <configuration>
-          <source>21</source>
-          <target>21</target>
+          <release>21</release>
         </configuration>
       </plugin>
       
@@ -55,35 +54,17 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <runtimePathOption>MODULEPATH</runtimePathOption>
-          <mainClass>com.master.bro.catdinogame.MasterCat</mainClass>
+          <mainClass>com.master.bro.catdinogame.GameLauncher</mainClass>
         </configuration>
       </plugin>
 
-      <!-- Plugin per creare JAR eseguibile -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.6.0</version>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
         <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <archive>
-            <manifest>
-              <mainClass>com.master.bro.catdinogame.MasterCat</mainClass>
-            </manifest>
-          </archive>
+          <useModulePath>false</useModulePath>
         </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
