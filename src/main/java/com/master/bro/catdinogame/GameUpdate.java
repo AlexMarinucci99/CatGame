@@ -5,7 +5,7 @@ import com.master.bro.catdinogame.MasterCat.BossProjectile;
 import com.master.bro.catdinogame.MasterCat.DamageIndicator;
 import com.master.bro.catdinogame.MasterCat.DragonBallSphere;
 
-/** Original frame update, physics, spawning, and collision sequence. */
+/** Advances gameplay physics, spawning, attacks, and collisions. */
 final class GameUpdate {
     private final MasterCat game;
     private final ProgressionClock progressionClock = new ProgressionClock();
@@ -16,6 +16,9 @@ final class GameUpdate {
     }
 
     void update(double dt) {
+        if (game.currentState == MasterCat.GameState.PLAYING || game.currentState == MasterCat.GameState.BOSS_FIGHT) {
+            game.landingTimer = Math.max(0, game.landingTimer - dt);
+        }
         if (game.currentState == MasterCat.GameState.PLAYING) {
             updatePlaying(dt);
         } else if (game.currentState == MasterCat.GameState.BOSS_FIGHT) {
@@ -50,6 +53,9 @@ final class GameUpdate {
         
         // Fisica del gatto
         updateCatPhysics(dt);
+        double beltSpeed = ObstaclePacing.speedPixelsPerSecond(game.score);
+        game.conveyorTravel = (game.conveyorTravel + beltSpeed * Math.max(0, Math.min(dt, 0.1))) % 100000;
+        if (game.onGround) game.runFramePhase = PlayerAnimation.advance(game.runFramePhase, dt, beltSpeed);
 
         // Genera ostacoli con difficoltà incrementale e migliore spaziatura - RALLENTATO
         generateObstacles();
@@ -85,9 +91,11 @@ final class GameUpdate {
         // === MOVIMENTO ORIZZONTALE DEL GATTO ===
         if (game.leftPressed && game.catX > 50) { // Limite sinistro
             game.catX -= game.catMoveSpeed * dt;
+            game.facingLeft = true;
         }
         if (game.rightPressed && game.catX < game.WIDTH - 150) { // Limite destro (non troppo vicino al boss)
             game.catX += game.catMoveSpeed * dt;
+            game.facingLeft = false;
         }
         
         // Ricarica energia più veloce durante il boss fight
@@ -121,6 +129,7 @@ final class GameUpdate {
         
         // === AGGIORNA SFERE DRAGON BALL NEL BOSS FIGHT ===
         updateDragonBallSpheres(dt);
+        if (game.currentState != MasterCat.GameState.BOSS_FIGHT) return;
         
         // Animazioni del gatto e del boss
         game.bodyBounce += dt * 8;
@@ -128,6 +137,9 @@ final class GameUpdate {
         
         // Fisica del gatto
         updateCatPhysics(dt);
+        if (game.onGround && (game.leftPressed || game.rightPressed)) {
+            game.runFramePhase = PlayerAnimation.advance(game.runFramePhase, dt, game.catMoveSpeed);
+        }
 
         // Genera attacchi del boss
         generateBossAttacks();
@@ -137,6 +149,7 @@ final class GameUpdate {
     }
     
     private void updateCatPhysics(double dt) {
+        boolean wasOnGround = game.onGround;
         // Exact extension of the original discrete 60 Hz rule to fractional frames:
         // n*v0 + gravity*n*(n+1)/2 is the sum of n original frame steps.
         double frames = Math.max(0.0, Math.min(dt, 0.05)) * 60.0;
@@ -144,6 +157,7 @@ final class GameUpdate {
             + game.GRAVITY * frames * (frames + 1.0) / 2.0;
         game.velocityY += game.GRAVITY * frames;
         if (game.catY >= game.GROUND_HEIGHT) {
+            if (!wasOnGround) game.landingTimer = 0.16;
             game.catY = game.GROUND_HEIGHT;
             game.velocityY = 0;
             game.onGround = true;
@@ -152,7 +166,7 @@ final class GameUpdate {
     }
     
     private void generateObstacles() {
-        long now = System.currentTimeMillis();
+        long now = game.nowMillis();
         if (ObstaclePacing.ready(now, game.lastObstacleTime, game.score)) {
             double obstacleSize = 50; // Dimensione fissa appropriata
             double obstacleSpeed = ObstaclePacing.speedPixelsPerSecond(game.score);
@@ -205,7 +219,8 @@ final class GameUpdate {
                 continue;
             }
             
-            if (o.intersects(game.catX, game.catY - 50, 50, 50)) {
+            PlayerHitbox.Bounds cat = PlayerHitbox.normal(game);
+            if (o.intersects(cat.x(), cat.y(), cat.width(), cat.height())) {
                 game.gameOver(); // Game over
             }
             if (o.isOffScreen()) {
@@ -214,80 +229,83 @@ final class GameUpdate {
         }
     }
     
-    private void generateBossAttacks() {
-        long currentTime = System.currentTimeMillis();
-        
-        // Attacchi del boss ogni 1-3 secondi con difficoltà crescente
-        double attackInterval = Math.max(1000, 3000 - (game.bossTimer * 15)); // Attacchi più frequenti col tempo
-        
-        if (currentTime - game.lastBossAttackTime > attackInterval) {
-            // Tipo di attacco basato sul tempo trascorso
-            int attackType;
-            if (game.bossTimer < 30) {
-                attackType = 0; // Solo pacchi singoli nei primi 30 secondi
-            } else if (game.bossTimer < 60) {
-                attackType = (Math.random() < 0.7) ? 0 : 1; // 70% singoli, 30% doppi
-            } else if (game.bossTimer < 90) {
-                double rand = Math.random();
-                if (rand < 0.4) attackType = 0;      // 40% singoli
-                else if (rand < 0.8) attackType = 1; // 40% doppi  
-                else attackType = 2;                  // 20% tripli
-            } else {
-                // Ultimi 30 secondi: tutti i tipi possibili
-                double rand = Math.random();
-                if (rand < 0.25) attackType = 0;
-                else if (rand < 0.5) attackType = 1;
-                else if (rand < 0.75) attackType = 2;
-                else attackType = 3; // Pacchi impilati
+    private static final double BOSS_WARNING_SECONDS = 0.8;
+
+    void generateBossAttacks() {
+        double attackInterval = Math.max(1.0, 3.0 - game.bossTimer * 0.015);
+        if (game.pendingBossAttackType < 0) {
+            if (game.bossTimer - game.lastBossAttackAt >= attackInterval - BOSS_WARNING_SECONDS) {
+                game.pendingBossAttackType = chooseBossAttackType();
+                game.bossWarningEndsAt = game.bossTimer + BOSS_WARNING_SECONDS;
             }
-            
-            // Posizione di lancio del boss ingrandito
-            double launchX = game.bossX - 75; // Punto di lancio davanti al boss ingrandito
-            double launchY = game.bossY - 80; // Altezza delle mani del boss
-            
-            // Target PRECISO sul centro del gatto (ora con tracking dinamico)
-            double targetX = game.catX + 25; // Centro esatto del gatto (larghezza 50/2 = 25)
-            double targetY = game.catY - 25; // Centro verticale del gatto (altezza 50/2 = 25)
-            
-            // Crea proiettili in base al tipo di attacco (TUTTI CON TRACKING DINAMICO)
-            switch (attackType) {
-                case 0: // Singolo - mira diretta al centro del gatto
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX, targetY, 0));
-                    System.out.println("🎯 Boss attacco singolo -> Player pos: (" + (int)game.catX + ", " + (int)game.catY + ")");
-                    break;
-                    
-                case 1: // Doppio - due proiettili con offset ridotto per maggiore precisione
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX - 15, targetY, 1));
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX + 15, targetY, 1));
-                    System.out.println("🎯🎯 Boss attacco doppio -> Player pos: (" + (int)game.catX + ", " + (int)game.catY + ")");
-                    break;
-                    
-                case 2: // Triplo - spread ridotto per coprire area più precisa
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX - 20, targetY, 2));
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX, targetY, 2));
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX + 20, targetY, 2));
-                    System.out.println("🎯🎯🎯 Boss attacco triplo -> Player pos: (" + (int)game.catX + ", " + (int)game.catY + ")");
-                    break;
-                    
-                case 3: // Impilato - targeting più preciso per bloccare fuga
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX - 12, targetY, 3));
-                    game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX + 12, targetY, 3));
-                    System.out.println("🎯⬆ Boss attacco impilato -> Player pos: (" + (int)game.catX + ", " + (int)game.catY + ")");
-                    break;
+            return;
+        }
+        if (game.bossTimer < game.bossWarningEndsAt) return;
+
+        spawnBossAttack(game.pendingBossAttackType);
+        game.pendingBossAttackType = -1;
+        game.lastBossAttackAt = game.bossTimer;
+    }
+
+    private int chooseBossAttackType() {
+        if (game.bossTimer < 30) return 0;
+        double roll = Math.random();
+        if (game.bossTimer < 60) return roll < 0.7 ? 0 : 1;
+        if (game.bossTimer < 90) return roll < 0.4 ? 0 : roll < 0.8 ? 1 : 2;
+        return roll < 0.25 ? 0 : roll < 0.5 ? 1 : roll < 0.75 ? 2 : 3;
+    }
+
+    private void spawnBossAttack(int type) {
+        double launchX = game.bossX - 75;
+        double launchY = game.bossY - 80;
+        PlayerHitbox.Bounds cat = PlayerHitbox.boss(game);
+        double targetX = cat.centerX();
+        double targetY = cat.centerY();
+        switch (type) {
+            case 0 -> game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX, targetY, 0));
+            case 1 -> {
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX - 15, targetY, 1));
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX + 15, targetY, 1));
             }
-            
-            game.lastBossAttackTime = currentTime;
+            case 2 -> {
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX - 20, targetY, 2));
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX, targetY, 2));
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX + 20, targetY, 2));
+            }
+            case 3 -> {
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX - 12, targetY, 3));
+                game.bossProjectiles.add(game.new BossProjectile(launchX, launchY, targetX + 12, targetY, 3));
+            }
+            default -> throw new IllegalArgumentException("Unknown boss attack: " + type);
         }
     }
-    
+
     private void updateBossProjectiles(double dt) {
         Iterator<BossProjectile> it = game.bossProjectiles.iterator();
         while (it.hasNext()) {
             BossProjectile projectile = it.next();
             projectile.update(dt);
+
+            // A charged sphere can clear every incoming attack, including all
+            // boss projectile variants. Consume the sphere on the first hit.
+            boolean hitBySphere = false;
+            for (DragonBallSphere sphere : game.dragonBallSpheres) {
+                if (projectile.intersects(sphere)) {
+                    sphere.destroy();
+                    hitBySphere = true;
+                    break;
+                }
+            }
+            if (hitBySphere) {
+                projectile.destroy();
+                game.score += 25;
+                it.remove();
+                continue;
+            }
             
             // Controlla collisione con il gatto (solo se lo scudo non è attivo)
-            if (!game.shieldActive && projectile.intersects(game.catX, game.catY - 50, 50, 50)) {
+            PlayerHitbox.Bounds cat = PlayerHitbox.boss(game);
+            if (!game.shieldActive && projectile.intersects(cat.x(), cat.y(), cat.width(), cat.height())) {
                 game.gameOver();
                 return;
             }

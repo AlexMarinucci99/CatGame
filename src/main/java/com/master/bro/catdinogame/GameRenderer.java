@@ -10,7 +10,7 @@ import com.master.bro.catdinogame.MasterCat.BossProjectile;
 import com.master.bro.catdinogame.MasterCat.DamageIndicator;
 import com.master.bro.catdinogame.MasterCat.DragonBallSphere;
 
-/** Draws the original game screens from the live game state. */
+/** Draws the game screens and their state-dependent overlays. */
 final class GameRenderer {
     private final MasterCat game;
     GameRenderer(MasterCat game) { this.game = game; }
@@ -25,6 +25,9 @@ final class GameRenderer {
                 break;
             case BOSS_FIGHT:
                 renderBossFight(gc);
+                break;
+            case PAUSED:
+                renderPaused(gc);
                 break;
             case GAME_OVER:
                 renderGameOver(gc);
@@ -102,79 +105,63 @@ final class GameRenderer {
             gc.fillOval(game.WIDTH * 0.7, game.HEIGHT * 0.2, 400, 300);
         }
 
-        // === TITOLO "MasterCat" PERFETTAMENTE CENTRATO E SCALATO ===
-        String title = "MasterCat";
-        Font titleFont = game.scaleFont("Impact", FontWeight.BOLD, 90);
-        
-        // Calcola la larghezza esatta del testo per centrarlo perfettamente
-        gc.setFont(titleFont);
-        double titleWidth = titleFont.getSize() * title.length() * 0.6; // Stima approssimativa
-        double titleX = (game.WIDTH - titleWidth) / 2; // Centro perfetto
-        double titleY = game.HEIGHT/2 - game.scaleY(200); // SPOSTATO PIÙ IN ALTO: da -40 a -200
-        
-        // Ombra profonda per effetto 3D (più livelli) - scalate
-        double shadowOffset1 = game.scaleSize(8);
-        double shadowOffset2 = game.scaleSize(6);
-        double shadowOffset3 = game.scaleSize(4);
-        double shadowOffset4 = game.scaleSize(2);
-        
-        gc.setFill(Color.rgb(0, 0, 0, 0.8));
-        gc.fillText(title, titleX + shadowOffset1, titleY + shadowOffset1);
-        gc.setFill(Color.rgb(50, 50, 50, 0.6));
-        gc.fillText(title, titleX + shadowOffset2, titleY + shadowOffset2);
-        gc.setFill(Color.rgb(100, 100, 100, 0.4));
-        gc.fillText(title, titleX + shadowOffset3, titleY + shadowOffset3);
-        gc.setFill(Color.rgb(150, 150, 150, 0.2));
-        gc.fillText(title, titleX + shadowOffset4, titleY + shadowOffset4);
-        
-        // Gradiente principale oro-arancione
-        LinearGradient titleGradient = new LinearGradient(
-            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-            new Stop(0, Color.rgb(255, 230, 100)),    // Oro chiaro in alto
-            new Stop(0.3, Color.rgb(255, 200, 50)),   // Oro medio
-            new Stop(0.7, Color.rgb(255, 150, 0)),    // Arancione oro
-            new Stop(1, Color.rgb(200, 100, 0))       // Arancione scuro in basso
-        );
-        gc.setFill(titleGradient);
-        gc.fillText(title, titleX, titleY);
-        
-        // Bordo luminoso per effetto 3D - scalato
-        gc.setStroke(Color.rgb(255, 255, 255, 0.8));
-        gc.setLineWidth(game.scaleSize(2));
-        gc.strokeText(title, titleX, titleY);
-        
-        // Riflessi luminosi interni - scalati
-        gc.setStroke(Color.rgb(255, 255, 200, 0.6));
-        gc.setLineWidth(game.scaleSize(1));
-        gc.strokeText(title, titleX - game.scaleSize(1), titleY - game.scaleSize(1));
-        
-        // Bagliore esterno dorato - scalato
-        gc.setStroke(Color.rgb(255, 215, 0, 0.3));
-        gc.setLineWidth(game.scaleSize(8));
-        gc.strokeText(title, titleX, titleY);
-        gc.setLineWidth(game.scaleSize(12));
-        gc.setStroke(Color.rgb(255, 215, 0, 0.15));
-        gc.strokeText(title, titleX, titleY);
+        if (!game.settingsMenuOpen) {
+            // === TITOLO "MasterCat" PERFETTAMENTE CENTRATO E SCALATO ===
+            String title = "MasterCat";
+            Font titleFont = game.scaleFont("Impact", FontWeight.BOLD, 90);
 
-        // === ISTRUZIONI PERFETTAMENTE CENTRATE E SCALATE ===
-        String startText = "Premi SPAZIO per avviare";
-        Font startFont = game.scaleFont("Arial", FontWeight.BOLD, 35);
-        gc.setFont(startFont);
-        double startTextWidth = startFont.getSize() * startText.length() * 0.6; // Stima per centratura
-        double startTextX = (game.WIDTH - startTextWidth) / 2; // Centro perfetto
-        
-        gc.setFill(Color.WHITE);
-        gc.fillText(startText, startTextX, game.HEIGHT/2 + game.scaleY(50));
-        
+            // Calcola la larghezza esatta del testo per centrarlo perfettamente
+            gc.setFont(titleFont);
+            double titleWidth = titleFont.getSize() * title.length() * 0.6; // Stima approssimativa
+            double titleX = (game.WIDTH - titleWidth) / 2; // Centro perfetto
+            double titleY = game.HEIGHT/2 - game.scaleY(200); // SPOSTATO PIÙ IN ALTO: da -40 a -200
+
+            // Una sola ombra mantiene il titolo leggibile sullo sfondo illustrato.
+            double shadowOffset = game.scaleSize(3);
+            gc.setFill(Color.rgb(0, 0, 0, 0.65));
+            gc.fillText(title, titleX + shadowOffset, titleY + shadowOffset);
+
+            // Gradiente principale oro-arancione
+            LinearGradient titleGradient = new LinearGradient(
+                0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.rgb(255, 230, 100)),    // Oro chiaro in alto
+                new Stop(0.3, Color.rgb(255, 200, 50)),   // Oro medio
+                new Stop(0.7, Color.rgb(255, 150, 0)),    // Arancione oro
+                new Stop(1, Color.rgb(200, 100, 0))       // Arancione scuro in basso
+            );
+            gc.setFill(titleGradient);
+            gc.fillText(title, titleX, titleY);
+
+            gc.setStroke(Color.rgb(57, 36, 22, 0.8));
+            gc.setLineWidth(game.scaleSize(1.5));
+            gc.strokeText(title, titleX, titleY);
+
+            // === ISTRUZIONI PERFETTAMENTE CENTRATE E SCALATE ===
+            String startText = "Premi SPAZIO per avviare";
+            Font startFont = game.scaleFont("Arial", FontWeight.BOLD, 35);
+            gc.setFont(startFont);
+            double startTextWidth = startFont.getSize() * startText.length() * 0.6; // Stima per centratura
+            double startTextX = (game.WIDTH - startTextWidth) / 2; // Centro perfetto
+
+            gc.setFill(Color.WHITE);
+            gc.fillText(startText, startTextX, game.HEIGHT/2 + game.scaleY(50));
+        }
+
         // === PULSANTE IMPOSTAZIONI ===
         // Calcola posizione in basso a destra con margine
         game.settingsButtonX = game.WIDTH - game.settingsButtonWidth - 30; // 30 pixel di margine dal bordo destro
         game.settingsButtonY = game.HEIGHT - game.settingsButtonHeight - 30; // 30 pixel di margine dal bordo inferiore
         
-        // NO background for the settings button - just text
+        gc.setFill(Color.rgb(20, 26, 35, 0.93));
+        gc.fillRoundRect(game.settingsButtonX, game.settingsButtonY,
+                game.settingsButtonWidth, game.settingsButtonHeight, 12, 12);
+        gc.setStroke(game.settingsMenuOpen ? Color.rgb(184, 197, 208) : Color.rgb(107, 121, 135));
+        gc.setLineWidth(1);
+        gc.strokeRoundRect(game.settingsButtonX, game.settingsButtonY,
+                game.settingsButtonWidth, game.settingsButtonHeight, 12, 12);
         gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        gc.fillText("Impostazioni", game.settingsButtonX, game.settingsButtonY + 25);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 15));
+        gc.fillText("IMPOSTAZIONI", game.settingsButtonX + 18, game.settingsButtonY + 26);
         
         // === MENU A TENDINA IMPOSTAZIONI ===
         if (game.settingsMenuOpen) {
@@ -202,14 +189,14 @@ final class GameRenderer {
             gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
             
             // Stelle sparse nel cielo con effetto scintillante
-            double time = System.currentTimeMillis() * 0.001;
+            double time = game.bodyBounce * 0.125;
             gc.setFill(Color.WHITE);
             for (int i = 0; i < 150; i++) {
                 double starX = (i * 137) % game.WIDTH; // Distribuzione pseudo-casuale
                 double starY = (i * 79) % (game.HEIGHT - 200);
                 // Effetto scintillante per alcune stelle
                 double twinkle = 1.0;
-                if (i % 5 == 0) {
+                if (!game.reducedEffects && i % 5 == 0) {
                     twinkle = 0.7 + Math.sin(time + i) * 0.3;
                 }
                 double starSize = (1 + (i % 3)) * twinkle;
@@ -374,27 +361,23 @@ final class GameRenderer {
 
         }
 
+        ConveyorRenderer.render(gc, game);
+
         // HUD minimal
         drawMinimalHUD(gc);
 
         // Gatto con immagine caricata - INGRANDITO in gioco - PIÙ VISIBILE
-        if (game.assets.catImage != null) {
-            double catWidth = game.scaleSize(110);  // INGRANDITO: era 78, ora 110 (+40%)
-            double catHeight = game.scaleSize(110); // INGRANDITO: era 78, ora 110 (+40%)
-            double bounce = Math.sin(game.bodyBounce) * 2; // Rimbalzo quando corre
-            double catDrawX = game.catX - catWidth/2;
-            double catDrawY = game.catY + bounce - catHeight;
-            
-            // === RENDERING NORMALE SENZA EFFETTI ===
-            // Disegna il gatto normalmente con piena opacità - NESSUNA SFERA BIANCA
-            gc.setGlobalAlpha(1.0);
-            gc.setGlobalBlendMode(BlendMode.SRC_OVER);
-            gc.drawImage(game.assets.catImage, catDrawX, catDrawY, catWidth, catHeight);
+        if (game.assets.catImage != null || game.assets.catRunImage != null) {
+            double catWidth = game.scaleSize(PlayerHitbox.NORMAL_SPRITE_SIZE);
+            gc.setFill(Color.rgb(0, 0, 0, 0.25));
+            gc.fillOval(game.catX - catWidth * 0.28, game.GROUND_HEIGHT - 3,
+                    catWidth * 0.56, 7);
+            PlayerAnimation.render(gc, game, catWidth, true);
         } else {
             // Fallback: disegna un cerchio blu per vedere dove dovrebbe essere il gatto - PIÙ GRANDE
             gc.setFill(Color.BLUE);
-            double fallbackSize = game.scaleSize(110); // INGRANDITO: era 78, ora 110
-            double bounce = Math.sin(game.bodyBounce) * 2;
+            double fallbackSize = game.scaleSize(PlayerHitbox.NORMAL_SPRITE_SIZE);
+            double bounce = game.reducedEffects ? 0 : Math.sin(game.bodyBounce) * 2;
             gc.fillOval(game.catX - fallbackSize/2, game.catY + bounce - fallbackSize, fallbackSize, fallbackSize);
         }
 
@@ -405,6 +388,8 @@ final class GameRenderer {
 
         // Ostacoli migliorati
         for (Obstacle o : game.obstacles) {
+            gc.setFill(Color.rgb(0, 0, 0, 0.24));
+            gc.fillOval(o.x - 3, game.GROUND_HEIGHT - 3, o.width + 6, 6);
             o.render(gc);
         }
     }
@@ -430,8 +415,8 @@ final class GameRenderer {
             // Fulmini di sfondo per atmosfera drammatica
             gc.setStroke(Color.rgb(255, 255, 100, 0.3));
             gc.setLineWidth(3);
-            double time = System.currentTimeMillis() * 0.01;
-            for (int i = 0; i < 10; i++) {
+            double time = game.bossAnimationTimer;
+            for (int i = 0; !game.reducedEffects && i < 10; i++) {
                 double x = (i * 200 + Math.sin(time + i) * 50) % game.WIDTH;
                 gc.strokeLine(x, 0, x + 20, game.HEIGHT * 0.3);
             }
@@ -456,7 +441,7 @@ final class GameRenderer {
             double bossGroundY = game.GROUND_HEIGHT - 10; // Stesso livello del giocatore
             
             // Animazione oscillante del boss (movimento più sottile)
-            double bobbing = Math.sin(game.bossAnimationTimer) * 3; // Movimento ridotto
+            double bobbing = game.reducedEffects ? 0 : Math.sin(game.bossAnimationTimer) * 3;
             gc.drawImage(game.assets.bossImage, game.bossX - bossWidth/2, bossGroundY - bossHeight + bobbing, bossWidth, bossHeight);
         } else {
             // Fallback: disegna il boss come un rettangolo stilizzato - INGRANDITO
@@ -502,12 +487,12 @@ final class GameRenderer {
         }
         
         // === DISEGNA IL GATTO - INGRANDITO ===
-        double catSize = 80; // Aumentato da 50 a 80
+        double catSize = PlayerHitbox.BOSS_SPRITE_SIZE;
         double catDrawX = game.catX - catSize/2;
         double catDrawY = game.catY - catSize;
         
-        if (game.assets.catImage != null && !game.assets.catImage.isError()) {
-            gc.drawImage(game.assets.catImage, catDrawX, catDrawY, catSize, catSize);
+        if (game.assets.catImage != null || game.assets.catRunImage != null) {
+            PlayerAnimation.render(gc, game, catSize, game.leftPressed || game.rightPressed);
         } else {
             // Fallback: disegna il gatto come forme geometriche - INGRANDITO
             double bounce = Math.sin(game.bodyBounce) * 3;
@@ -539,7 +524,13 @@ final class GameRenderer {
         }
         
         // === SCUDO ===
-        if (game.shieldActive) {
+        if (game.shieldActive && game.reducedEffects) {
+            gc.setFill(Color.rgb(80, 155, 100, 0.24));
+            gc.fillOval(game.catX - 60, game.catY - 80, 120, 120);
+            gc.setStroke(Color.rgb(120, 190, 135, 0.75));
+            gc.setLineWidth(2);
+            gc.strokeOval(game.catX - 60, game.catY - 80, 120, 120);
+        } else if (game.shieldActive) {
             double shieldAlpha = 0.7 * Math.sin(game.shieldTimer * 8); // Effetto pulsante
             if (shieldAlpha < 0) shieldAlpha = -shieldAlpha;
             
@@ -580,91 +571,127 @@ final class GameRenderer {
         
         // === HUD DELLA BOSS FIGHT ===
         renderBossFightHUD(gc);
+        renderBossAttackWarning(gc);
     }
     
     private void renderBossFightHUD(GraphicsContext gc) {
-        // === TIMER BOSS FIGHT ===
-        double remainingTime = game.BOSS_DURATION - game.bossTimer;
+        double scale = Math.max(0.78, Math.min(1.25, game.uniformScale));
+        double margin = 22 * scale;
+        double panelWidth = Math.min(340 * scale, (game.WIDTH - 3 * margin) / 2);
+        double panelHeight = 130 * scale;
+        double leftX = margin;
+        double rightX = game.WIDTH - margin - panelWidth;
+        double topY = margin;
+
+        hudPanel(gc, leftX, topY, panelWidth, panelHeight);
+        hudPanel(gc, rightX, topY, panelWidth, panelHeight);
+
+        double remainingTime = Math.max(0, game.BOSS_DURATION - game.bossTimer);
         int minutes = (int) (remainingTime / 60);
         int seconds = (int) (remainingTime % 60);
-        
+        gc.setFill(Color.rgb(174, 187, 199));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText("TEMPO RIMASTO", leftX + 18 * scale, topY + 24 * scale);
         gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(36)));
-        String timeText = String.format("TEMPO: %d:%02d", minutes, seconds);
-        gc.fillText(timeText, game.scaleX(50), game.scaleY(50));
-        
-       
-        
-        // === BARRA ENERGIA (PIÙ GRANDE E SOTTO IL PUNTEGGIO) ===
-        double energyBarX = game.scaleX(50);
-        double energyBarY = game.scaleY(80);
-        double energyBarWidth = game.scaleX(300);
-        double energyBarHeight = game.scaleY(20);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 30 * scale));
+        gc.fillText(String.format("%d:%02d", minutes, seconds), leftX + 18 * scale, topY + 58 * scale);
 
-       
-        
-        
-        
-        // Energia attuale
-        double energyPercent = game.energy / game.MAX_ENERGY;
-        Color energyColor = energyPercent >= 1.0 ? Color.CYAN : Color.LIGHTBLUE;
-        gc.setFill(energyColor);
-        gc.fillRect(energyBarX, energyBarY, energyBarWidth * energyPercent, energyBarHeight);
-        
-        // Bordo barra energia
-        gc.setStroke(Color.WHITE);
+        gc.setFill(Color.rgb(174, 187, 199));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText("ENERGIA", leftX + 18 * scale, topY + 84 * scale);
+        gc.setFill(game.energy >= game.MAX_ENERGY ? Color.rgb(137, 190, 194) : Color.WHITE);
+        gc.fillText(game.energy >= game.MAX_ENERGY ? "C  PRONTA" :
+                String.format("%.0f / %.0f", game.energy, game.MAX_ENERGY),
+                leftX + panelWidth - 105 * scale, topY + 84 * scale);
+        hudBar(gc, leftX + 18 * scale, topY + 96 * scale,
+                panelWidth - 36 * scale, 12 * scale,
+                game.energy / game.MAX_ENERGY, Color.rgb(93, 157, 163));
+
+        gc.setFill(Color.rgb(174, 187, 199));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText("SCONTRO FINALE", rightX + 18 * scale, topY + 24 * scale);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 24 * scale));
+        gc.fillText("IL BOSS", rightX + 18 * scale, topY + 57 * scale);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText(String.format("VITA  %.0f / %.0f", Math.max(0, game.bossHealth), game.MAX_BOSS_HEALTH),
+                rightX + 18 * scale, topY + 84 * scale);
+        hudBar(gc, rightX + 18 * scale, topY + 96 * scale,
+                panelWidth - 36 * scale, 12 * scale,
+                game.bossHealth / game.MAX_BOSS_HEALTH, Color.rgb(174, 88, 98));
+
+        double stripWidth = Math.min(650 * scale, game.WIDTH - 2 * margin);
+        double stripX = (game.WIDTH - stripWidth) / 2;
+        double stripY = game.HEIGHT - 58 * scale;
+        hudPanel(gc, stripX, stripY, stripWidth, 42 * scale);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText("A / D   MUOVI", stripX + 18 * scale, stripY + 26 * scale);
+        gc.fillText("SPAZIO   SALTA", stripX + 160 * scale, stripY + 26 * scale);
+        gc.fillText("C   SFERA", stripX + 336 * scale, stripY + 26 * scale);
+        gc.setFill(game.shieldActive ? Color.rgb(156, 193, 159) : Color.rgb(183, 194, 205));
+        gc.fillText(game.shieldActive
+                ? String.format("SCUDO  %.1fs", Math.max(0, game.SHIELD_DURATION - game.shieldTimer))
+                : "X   SCUDO", stripX + 462 * scale, stripY + 26 * scale);
+    }
+
+    private void hudPanel(GraphicsContext gc, double x, double y, double width, double height) {
+        gc.setFill(Color.rgb(17, 23, 32, 0.9));
+        gc.fillRoundRect(x, y, width, height, 18, 18);
+        gc.setStroke(Color.rgb(112, 126, 140, 0.72));
         gc.setLineWidth(1);
-        gc.strokeRect(energyBarX, energyBarY, energyBarWidth, energyBarHeight);
+        gc.strokeRoundRect(x, y, width, height, 18, 18);
+    }
 
-        
-        // Testo energia
+    private void hudBar(GraphicsContext gc, double x, double y, double width,
+                        double height, double fraction, Color color) {
+        gc.setFill(Color.rgb(55, 65, 76));
+        gc.fillRoundRect(x, y, width, height, height, height);
+        gc.setFill(color);
+        gc.fillRoundRect(x, y, width * Math.max(0, Math.min(1, fraction)), height, height, height);
+    }
+
+    private void renderBossAttackWarning(GraphicsContext gc) {
+        if (game.pendingBossAttackType < 0) return;
+        String[] attackNames = {"SINGOLO", "DOPPIO", "TRIPLO", "IMPILATO"};
+        int type = game.pendingBossAttackType;
+        if (type >= attackNames.length) return;
+        double scale = Math.max(0.78, Math.min(1.25, game.uniformScale));
+        double width = 280 * scale;
+        double x = (game.WIDTH - width) / 2;
+        double topPanelEdge = 22 * scale + Math.min(340 * scale, (game.WIDTH - 66 * scale) / 2);
+        double y = x > topPanelEdge + 10 * scale ? 34 * scale : 175 * scale;
+        gc.setFill(Color.rgb(27, 28, 31, 0.94));
+        gc.fillRoundRect(x, y, width, 45 * scale, 12, 12);
+        gc.setStroke(Color.rgb(171, 137, 90));
+        gc.setLineWidth(1);
+        gc.strokeRoundRect(x, y, width, 45 * scale, 12, 12);
+        gc.setFill(Color.rgb(238, 218, 184));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 13 * scale));
+        gc.fillText("ATTACCO IN ARRIVO", x + 16 * scale, y + 18 * scale);
         gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(16)));
-        String energyText = String.format("ENERGIA: %.0f/%.0f", game.energy, game.MAX_ENERGY);
-        if (game.energy >= game.MAX_ENERGY) {
-            energyText += " [PREMI C]";
-        }
-        gc.fillText(energyText, energyBarX, energyBarY - game.scaleY(5));
-        
-        // === BARRA VITA BOSS ===
-        double bossHealthBarX = game.WIDTH - game.scaleX(320);
-        double bossHealthBarY = game.scaleY(30);
-        double bossHealthBarWidth = game.scaleX(250);
-        double bossHealthBarHeight = game.scaleY(20);
-        
-     
-        
-        // Vita attuale del boss
-        double bossHealthPercent = game.bossHealth / game.MAX_BOSS_HEALTH;
-        gc.setFill(Color.RED);
-        gc.fillRect(bossHealthBarX, bossHealthBarY, bossHealthBarWidth * bossHealthPercent, bossHealthBarHeight);
-        
-        // Bordo barra vita boss
-        gc.setStroke(Color.WHITE);
-        gc.setLineWidth(2);
-        gc.strokeRect(bossHealthBarX, bossHealthBarY, bossHealthBarWidth, bossHealthBarHeight);
-        
-        // Etichetta vita boss
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 12 * scale));
+        gc.fillText(attackNames[type], x + 16 * scale, y + 34 * scale);
+    }
+
+    private void renderPaused(GraphicsContext gc) {
+        if (game.pausedFrom == MasterCat.GameState.BOSS_FIGHT) renderBossFight(gc);
+        else renderGame(gc);
+        gc.setFill(Color.rgb(4, 8, 14, 0.62));
+        gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
+        double width = Math.min(440, game.WIDTH - 36);
+        double height = 208;
+        double x = (game.WIDTH - width) / 2;
+        double y = (game.HEIGHT - height) / 2;
+        hudPanel(gc, x, y, width, height);
         gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(14)));
-        gc.fillText(String.format("VITA BOSS: %.0f/%.0f", game.bossHealth, game.MAX_BOSS_HEALTH), 
-                   bossHealthBarX, bossHealthBarY - game.scaleY(5));
-        
-        // === ISTRUZIONI BOSS FIGHT ===
-        gc.setFill(Color.YELLOW);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(16)));
-        gc.fillText("← → (A/D) Movimento| X Scudo", 
-                   game.scaleX(50), game.scaleY(120));
-        
-        // === INDICATORE SCUDO ===
-        if (game.shieldActive) {
-            double shieldTimeLeft = game.SHIELD_DURATION - game.shieldTimer;
-            gc.setFill(Color.GREEN);
-            gc.setFont(Font.font("Arial", FontWeight.BOLD, game.scaleY(14)));
-            gc.fillText("🛡️ SCUDO ATTIVO: " + String.format("%.1f", shieldTimeLeft) + "s", 
-                       game.scaleX(50), game.scaleY(260));
-        }
-          
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        gc.fillText("IN PAUSA", x + 30, y + 52);
+        gc.setFill(Color.rgb(178, 190, 202));
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 16));
+        gc.fillText("P   Riprendi", x + 32, y + 100);
+        gc.fillText("R   Ricomincia", x + 32, y + 136);
+        gc.fillText("Q   Torna al menu", x + 32, y + 172);
     }
 
     private void renderGameOver(GraphicsContext gc) {
@@ -761,7 +788,7 @@ final class GameRenderer {
             Color energyColor = energyPercent >= 1.0 ? Color.CYAN : Color.LIGHTBLUE;
             
             // Effetto pulsante quando energia è al massimo
-            if (energyPercent >= 1.0) {
+            if (energyPercent >= 1.0 && !game.reducedEffects) {
                 double pulse = Math.sin(System.currentTimeMillis() * 0.01) * 0.3 + 0.7;
                 energyColor = Color.rgb((int)(255 * pulse), (int)(255 * pulse), 255);
             }
@@ -818,109 +845,80 @@ final class GameRenderer {
     // Classe Obstacle migliorata con supporto per immagini
     // === CLASSE BLOCCO BARRIERA BOSS ===
     private void renderSettingsDropdown(GraphicsContext gc) {
-        double menuWidth = 350;
-        double menuHeight = 350;
-        
-        // Calcola posizione del menu: se il pulsante è in basso, aprilo verso l'alto
-        double menuX = game.settingsButtonX - menuWidth + game.settingsButtonWidth; // Allinea a destra del pulsante
-        double menuY = game.settingsButtonY - menuHeight; // Apri sopra il pulsante
-        
-        // Assicurati che il menu non esca dai bordi dello schermo
-        if (menuX < 0) menuX = 10; // Non uscire a sinistra
-        if (menuX + menuWidth > game.WIDTH) menuX = game.WIDTH - menuWidth - 10; // Non uscire a destra
-        if (menuY < 0) menuY = 10; // Non uscire in alto
-        
-        // Sfondo del menu a tendina
-        gc.setFill(Color.rgb(0, 0, 0, 0.95));
-        gc.fillRoundRect(menuX, menuY, menuWidth, menuHeight, 10, 10);
-        
-        // Bordo del menu
-        gc.setStroke(Color.CYAN);
-        gc.setLineWidth(2);
-        gc.strokeRoundRect(menuX, menuY, menuWidth, menuHeight, 10, 10);
-        
-        // Titolo del menu
-        gc.setFill(Color.CYAN);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        gc.fillText("🎮COMANDI DI GIOCO", menuX + 15, menuY + 30);
-        
-        // Linea di separazione
-        gc.setStroke(Color.CYAN);
-        gc.setLineWidth(1);
-        gc.strokeLine(menuX + 15, menuY + 40, menuX + menuWidth - 15, menuY + 40);
-        
-        double currentY = menuY + 60;
-        double lineHeight = 25;
-        
-        // === COMANDI ESSENZIALI ===
-        
-        // Comando SPAZIO per saltare
-        gc.setFill(Color.YELLOW);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("SPAZIO", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("→ Salto singolo", menuX + 75, currentY);
-        currentY += lineHeight;
-        
-        // Comando doppio SPAZIO
-        gc.setFill(Color.ORANGE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("SPAZIO x2", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("→ Doppio salto", menuX + 95, currentY);
-        currentY += lineHeight;
-        
-        // Comando C per sfera energetica
-        gc.setFill(Color.CYAN);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("C", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("→ Lancia Onda Energetica", menuX + 35, currentY);
-        currentY += lineHeight;
-        // Comando X per scudo
-        gc.setFill(Color.GREEN);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("X", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("→ Scudo (Boss Fight)", menuX + 35, currentY);
-        currentY += lineHeight;
-        
-        // Comando frecce per movimento nel boss fight
-        gc.setFill(Color.LIGHTCORAL);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("← → (A/D)", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("→ Movimento Boss Fight", menuX + 90, currentY);
-        currentY += lineHeight;
-        
-        // Comando M per toggle game.audio
-        gc.setFill(Color.CYAN);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("🎵 M", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        String musicStatus = game.audio.isMusicEnabled() ? "Audio ON" : "Audio OFF";
-        gc.fillText("→ " + musicStatus, menuX + 55, currentY);
-        currentY += lineHeight;
-        
-        // Comando U/ESC per toggle fullscreen
-        gc.setFill(Color.MAGENTA);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        gc.fillText("ESC / U", menuX + 20, currentY);
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        String fullscreenStatus = game.gameStage != null && game.gameStage.isFullScreen() ? "Fullscreen ON" : "Fullscreen OFF";
-        gc.fillText("→ " + fullscreenStatus, menuX + 75, currentY);
-        currentY += lineHeight;
+        SettingsLayout.Bounds bounds = SettingsLayout.panel(game);
+        double x = bounds.x();
+        double y = bounds.y();
+        double width = bounds.width();
+        double height = bounds.height();
+        double scale = height / 500.0;
 
-        // Istruzioni per chiudere
-        gc.setFill(Color.GRAY);
-        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
-        gc.fillText("Clicca fuori dal menu per chiudere", menuX + 20, menuY + menuHeight - 15);
+        gc.setFill(Color.rgb(18, 24, 33, 0.97));
+        gc.fillRoundRect(x, y, width, height, 20, 20);
+        gc.setStroke(Color.rgb(111, 125, 139, 0.82));
+        gc.setLineWidth(1);
+        gc.strokeRoundRect(x, y, width, height, 20, 20);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 21 * scale));
+        gc.fillText("IMPOSTAZIONI", x + 23, y + 38 * scale);
+        gc.setFill(Color.rgb(163, 177, 190));
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 12 * scale));
+        gc.fillText("COMANDI E PREFERENZE", x + 23, y + 57 * scale);
+
+        settingsSection(gc, x, y, scale, 84, "COMANDI");
+        settingsRow(gc, x, y, scale, 109, "SPAZIO", "Salto");
+        settingsRow(gc, x, y, scale, 139, "SPAZIO x2", "Doppio salto");
+        settingsRow(gc, x, y, scale, 169, "C", "Sfera di energia");
+        settingsRow(gc, x, y, scale, 199, "A / D", "Movimento boss");
+        settingsRow(gc, x, y, scale, 229, "X", "Scudo boss");
+        settingsRow(gc, x, y, scale, 259, "P", "Pausa / riprendi");
+
+        settingsSection(gc, x, y, scale, 286, "OPZIONI");
+        settingsRow(gc, x, y, scale, 309, "M", game.audio.isMusicEnabled() ?
+                "Musica: attiva" : "Musica: disattivata");
+        gc.setFill(Color.rgb(227, 234, 240));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText("VOLUME", x + 23, y + 350 * scale);
+        SettingsLayout.Bounds track = SettingsLayout.volumeTrack(game);
+        gc.setFill(Color.rgb(55, 65, 76));
+        gc.fillRoundRect(track.x(), track.y(), track.width(), track.height(), 10, 10);
+        gc.setFill(Color.rgb(116, 159, 166));
+        gc.fillRoundRect(track.x(), track.y(), track.width() * game.audio.getVolume(), track.height(), 10, 10);
+        double thumbX = track.x() + track.width() * game.audio.getVolume();
+        gc.setFill(Color.rgb(231, 237, 241));
+        gc.fillOval(thumbX - 8 * scale, track.y() - 2 * scale, 16 * scale, 16 * scale);
+        gc.setFill(Color.rgb(184, 196, 207));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText(String.format("%.0f%%", game.audio.getVolume() * 100), x + width - 59, y + 350 * scale);
+        settingsRow(gc, x, y, scale, 393, "FX", game.reducedEffects ?
+                "Effetti: ridotti" : "Effetti: normali");
+        settingsRow(gc, x, y, scale, 435, "U / ESC", game.gameStage != null && game.gameStage.isFullScreen() ?
+                "Schermo intero: attivo" : "Schermo intero: inattivo");
+
+        gc.setFill(Color.rgb(152, 165, 178));
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 11 * scale));
+        gc.fillText("Clicca un'opzione o premi I per chiudere", x + 23, y + 475 * scale);
+    }
+
+    private void settingsSection(GraphicsContext gc, double x, double y, double scale,
+                                 double baseline, String title) {
+        gc.setFill(Color.rgb(176, 190, 202));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 11 * scale));
+        gc.fillText(title, x + 23, y + baseline * scale);
+    }
+
+    private void settingsRow(GraphicsContext gc, double x, double y, double scale,
+                             double baseline, String key, String label) {
+        double rowY = y + (baseline - 21) * scale;
+        gc.setFill(Color.rgb(39, 49, 60));
+        gc.fillRoundRect(x + 22, rowY, 103, 27 * scale, 7, 7);
+        gc.setStroke(Color.rgb(101, 116, 130));
+        gc.setLineWidth(1);
+        gc.strokeRoundRect(x + 22, rowY, 103, 27 * scale, 7, 7);
+        gc.setFill(Color.rgb(227, 234, 240));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
+        gc.fillText(key, x + 31, y + baseline * scale);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13 * scale));
+        gc.fillText(label, x + 144, y + baseline * scale);
     }
 }

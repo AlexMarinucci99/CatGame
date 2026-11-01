@@ -21,6 +21,7 @@ import javafx.scene.image.Image;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.function.LongSupplier;
 
 public class MasterCat extends Application {
     // Dimensioni base del gioco (design di riferimento)
@@ -43,8 +44,13 @@ public class MasterCat extends Application {
     double GROUND_HEIGHT; // Ora variabile
 
     // Game States
-    enum GameState { MENU, PLAYING, BOSS_FIGHT, GAME_OVER, VICTORY }
+    enum GameState { MENU, PLAYING, BOSS_FIGHT, PAUSED, GAME_OVER, VICTORY }
     GameState currentState = GameState.MENU;
+    GameState pausedFrom = GameState.MENU;
+    long pausedAtMillis;
+    LongSupplier clock = System::currentTimeMillis;
+    boolean reducedEffects = false;
+    boolean resetFrameClock;
     
     // Punteggio finale per vincere
     static final int WINNING_SCORE = 10000;
@@ -64,6 +70,10 @@ public class MasterCat extends Application {
     
     // Variabili per animazione gatto (solo bodyBounce utilizzato)
     double bodyBounce = 0;
+    double conveyorTravel;
+    double runFramePhase;
+    double landingTimer;
+    boolean facingLeft;
     
     // Sistema energia e onda
     double energy = 0;
@@ -92,7 +102,9 @@ public class MasterCat extends Application {
     double bossX;
     double bossY;
     double bossAnimationTimer = 0;
-    long lastBossAttackTime = 0;
+    double lastBossAttackAt = 0;
+    double bossWarningEndsAt = 0;
+    int pendingBossAttackType = -1;
     final ArrayList<BossProjectile> bossProjectiles = new ArrayList<>();
     
     // === NUOVE VARIABILI PER BOSS FIGHT MIGLIORATO ===
@@ -122,6 +134,8 @@ public class MasterCat extends Application {
     final GameAudio audio = new GameAudio();
     private final GameRenderer renderer = new GameRenderer(this);
     final GameUpdate updater = new GameUpdate(this);
+
+    long nowMillis() { return clock.getAsLong(); }
 
     @Override
     public void start(Stage primaryStage) {
@@ -173,13 +187,20 @@ public class MasterCat extends Application {
         });
 
         // Controlli basati sullo stato del gioco
-        new GameInput(this).install(scene);
+        GameInput input = new GameInput(this);
+        input.install(scene);
+        primaryStage.focusedProperty().addListener((observation, wasFocused, isFocused) -> {
+            if (!isFocused) input.onFocusLost();
+        });
 
         new AnimationTimer() {
             private long lastTime = 0;
             @Override
             public void handle(long now) {
-                if (lastTime == 0) lastTime = now;
+                if (lastTime == 0 || resetFrameClock) {
+                    lastTime = now;
+                    resetFrameClock = false;
+                }
                 double dt = (now - lastTime) / 1e9;
                 lastTime = now;
 
@@ -195,10 +216,16 @@ public class MasterCat extends Application {
     // Metodi per gestire gli stati del gioco
     void startGame() {
         currentState = GameState.PLAYING;
+        resetFrameClock = true;
+        pausedFrom = GameState.MENU;
         // Reset delle variabili del gioco
         score = 0;
         gameSpeed = 1.0;
         updater.resetProgression();
+        conveyorTravel = 0;
+        runFramePhase = 0;
+        landingTimer = 0;
+        facingLeft = false;
         energy = 0;
         waveActive = false;
         waveTimer = 0;
@@ -209,15 +236,18 @@ public class MasterCat extends Application {
         canDoubleJump = false; // Reset doppio salto
         obstacles.clear();
         dragonBallSpheres.clear(); // Reset sfere Dragon Ball
-        lastObstacleTime = System.currentTimeMillis();
+        lastObstacleTime = nowMillis();
         
         // Cambia alla musica del gioco
         audio.switchToGameMusic();
+        audio.setGameplayPaused(false);
         System.out.println("🚀 Gioco avviato! Buona fortuna!");
     }
     
     void startBossFight() {
         currentState = GameState.BOSS_FIGHT;
+        resetFrameClock = true;
+        pausedFrom = GameState.MENU;
         System.out.println("⚔️ BOSS FIGHT INIZIATO! Sopravvivi per 2 minuti!");
         
         // Inizializza variabili del boss
@@ -226,7 +256,12 @@ public class MasterCat extends Application {
         bossX = WIDTH - 200; // Posizione del boss sul lato destro
         bossY = GROUND_HEIGHT; // STESSO LIVELLO DEL GIOCATORE
         bossAnimationTimer = 0;
-        lastBossAttackTime = System.currentTimeMillis();
+        runFramePhase = 0;
+        landingTimer = 0;
+        facingLeft = false;
+        lastBossAttackAt = 0;
+        bossWarningEndsAt = 0;
+        pendingBossAttackType = -1;
         
         // Reset movimento orizzontale
         leftPressed = false;
@@ -260,12 +295,14 @@ public class MasterCat extends Application {
         
         // Cambia alla musica del boss finale
         audio.switchToBossMusic();
+        audio.setGameplayPaused(false);
     }
     
     void gameOver() {
         currentState = GameState.GAME_OVER;
         // Torna alla musica del menu
         audio.switchToMenuMusic();
+        audio.setGameplayPaused(false);
     }
     
     void victory() {
@@ -275,6 +312,7 @@ public class MasterCat extends Application {
             
             // Attiva la musica della vittoria
             audio.switchToVictoryMusic();
+            audio.setGameplayPaused(false);
             
             System.out.println("✅ Transizione alla vittoria completata");
         } catch (Exception e) {
@@ -287,10 +325,37 @@ public class MasterCat extends Application {
     
     void resetToMenu() {
         currentState = GameState.MENU;
+        pausedFrom = GameState.MENU;
+        settingsMenuOpen = false;
+        leftPressed = false;
+        rightPressed = false;
         // Reset animazioni
         bodyBounce = 0;
         // Torna alla musica del menu
         audio.switchToMenuMusic();
+        audio.setGameplayPaused(false);
+    }
+
+    void pauseGame() {
+        if (currentState != GameState.PLAYING && currentState != GameState.BOSS_FIGHT) return;
+        pausedFrom = currentState;
+        currentState = GameState.PAUSED;
+        resetFrameClock = true;
+        pausedAtMillis = nowMillis();
+        leftPressed = false;
+        rightPressed = false;
+        audio.setGameplayPaused(true);
+    }
+
+    void resumeGame() {
+        if (currentState != GameState.PAUSED) return;
+        if (pausedFrom == GameState.PLAYING) {
+            lastObstacleTime += Math.max(0, nowMillis() - pausedAtMillis);
+        }
+        currentState = pausedFrom;
+        resetFrameClock = true;
+        pausedFrom = GameState.MENU;
+        audio.setGameplayPaused(false);
     }
     
     // === SISTEMA CARICAMENTO RISORSE ===
@@ -362,11 +427,11 @@ public class MasterCat extends Application {
                 if (trackingTimer < TRACKING_DURATION) {
                     // Predizione del movimento del giocatore per un targeting più preciso
                     double predictedCatX = catX + (leftPressed ? -catMoveSpeed * 0.3 : rightPressed ? catMoveSpeed * 0.3 : 0);
-                    double predictedCatY = catY + (velocityY * 0.2); // Predizione basata sulla velocità verticale
+                    double predictedCatY = PlayerHitbox.boss(MasterCat.this).centerY() + (velocityY * 0.2);
                     
                     // Calcola direzione verso la posizione predetta del giocatore
-                    double deltaX = (predictedCatX + 25) - x; // Centro del gatto predetto
-                    double deltaY = (predictedCatY - 25) - y; // Centro verticale predetto
+                    double deltaX = predictedCatX - x;
+                    double deltaY = predictedCatY - y;
                     double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                     
                     if (distance > 0) {
@@ -482,6 +547,10 @@ public class MasterCat extends Application {
                    x + size/2 > catX && 
                    y - size/2 < catY + catHeight && 
                    y + size/2 > catY;
+        }
+
+        public boolean intersects(DragonBallSphere sphere) {
+            return !isDestroyed && sphere.intersects(x - size/2, y - size/2, size, size);
         }
         
         public boolean isOffScreen() {
@@ -606,12 +675,12 @@ public class MasterCat extends Application {
         
         public void update(double dt) {
             timer += dt;
-            y -= 50 * dt; // Sale verso l'alto
+            if (!reducedEffects) y -= 50 * dt;
         }
         
         public void render(GraphicsContext gc) {
             if (timer < DURATION) {
-                double alpha = 1.0 - (timer / DURATION);
+                double alpha = reducedEffects ? 1.0 : 1.0 - (timer / DURATION);
                 gc.setFill(Color.rgb(255, 100, 100, alpha));
                 gc.setFont(Font.font("Arial", FontWeight.BOLD, 30));
                 gc.fillText(text, x, y);
@@ -657,6 +726,18 @@ public class MasterCat extends Application {
         
         public void render(GraphicsContext gc) {
             if (isDestroyed) return;
+
+            if (reducedEffects) {
+                if (exploding) {
+                    gc.setStroke(Color.rgb(236, 190, 95));
+                    gc.setLineWidth(2);
+                    gc.strokeOval(x - size/2, y - size/2, size, size);
+                } else {
+                    gc.setFill(Color.rgb(236, 190, 95));
+                    gc.fillOval(x - size/2, y - size/2, size, size);
+                }
+                return;
+            }
             
             if (exploding) {
                 // === EFFETTO ESPLOSIONE ===

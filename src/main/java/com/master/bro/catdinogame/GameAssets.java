@@ -4,6 +4,7 @@ import javafx.scene.image.Image;
 
 final class GameAssets {
     Image catImage;
+    Image catRunImage;
     Image menuBackgroundImage;
     Image gameBackgroundImage;
     Image victoryBackgroundImage;
@@ -17,6 +18,11 @@ final class GameAssets {
 
     void loadResources() {
         System.out.println("🔍 Caricamento risorse grafiche...");
+        try (var stream = getClass().getResourceAsStream("/images/player/cat-run-v1.png")) {
+            if (stream != null) catRunImage = new Image(stream);
+        } catch (Exception e) {
+            catRunImage = null;
+        }
         
         // === CARICA IMMAGINE DEL GATTO ===
         try {

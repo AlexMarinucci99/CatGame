@@ -37,6 +37,10 @@ class ProgressionPacingTest {
         assertTrue(ObstaclePacing.ready(4501, 0, 0));
         assertTrue(ObstaclePacing.speedPixelsPerSecond(2000) > ObstaclePacing.speedPixelsPerSecond(0));
         assertTrue(ObstaclePacing.intervalMillis(2000) < ObstaclePacing.intervalMillis(0));
+        assertEquals(3900.0, ObstaclePacing.intervalMillis(2000));
+        assertEquals(3000.0, ObstaclePacing.intervalMillis(5000));
+        assertEquals(1500.0, ObstaclePacing.intervalMillis(10000));
+        assertEquals(1500.0, ObstaclePacing.intervalMillis(15000));
         assertEquals(280.0, ObstaclePacing.speedPixelsPerSecond(2000));
     }
 }

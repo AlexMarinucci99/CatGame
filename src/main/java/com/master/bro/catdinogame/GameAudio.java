@@ -5,6 +5,8 @@ import javafx.scene.media.MediaPlayer;
 
 final class GameAudio {
     private boolean isMusicEnabled = true;
+    private boolean gameplayPaused;
+    private double masterVolume = 1.0;
     private MediaPlayer menuMusicPlayer;
     private MediaPlayer gameMusicPlayer;
     private MediaPlayer bossMusicPlayer;
@@ -18,21 +20,18 @@ final class GameAudio {
             Media menuMedia = new Media(menuMusicPath);
             menuMusicPlayer = new MediaPlayer(menuMedia);
             menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop infinito
-            menuMusicPlayer.setVolume(0.5); // Volume al 50%
             
             // Carica la musica del gioco
             String gameMusicPath = getClass().getResource("/audio/game_music.mp3").toExternalForm();
             Media gameMedia = new Media(gameMusicPath);
             gameMusicPlayer = new MediaPlayer(gameMedia);
             gameMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop infinito
-            gameMusicPlayer.setVolume(0.5); // Volume al 50%
             
             // Carica la musica del boss finale
             String bossMusicPath = getClass().getResource("/audio/boss_music.mp3").toExternalForm();
             Media bossMedia = new Media(bossMusicPath);
             bossMusicPlayer = new MediaPlayer(bossMedia);
             bossMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop infinito
-            bossMusicPlayer.setVolume(0.6); // Volume leggermente più alto per l'epicità
             
             // Carica la musica della vittoria
             try {
@@ -40,13 +39,13 @@ final class GameAudio {
                 Media victoryMedia = new Media(victoryMusicPath);
                 victoryMusicPlayer = new MediaPlayer(victoryMedia);
                 victoryMusicPlayer.setCycleCount(1); // Suona una sola volta (non loop infinito)
-                victoryMusicPlayer.setVolume(0.7); // Volume alto per celebrare la vittoria
                 System.out.println("✅ Musica della vittoria caricata!");
             } catch (Exception victoryException) {
                 System.out.println("⚠️ Musica della vittoria non trovata (opzionale) - il gioco continuerà normalmente");
                 victoryMusicPlayer = null;
             }
             
+            applyVolumes();
             // Inizia con la musica del menu
             currentMusicPlayer = menuMusicPlayer;
             if (isMusicEnabled) {
@@ -67,7 +66,7 @@ final class GameAudio {
         isMusicEnabled = !isMusicEnabled;
         
         if (isMusicEnabled) {
-            if (currentMusicPlayer != null) {
+            if (!gameplayPaused && currentMusicPlayer != null) {
                 currentMusicPlayer.play();
             }
             System.out.println("🎵 Musica attivata");
@@ -84,7 +83,7 @@ final class GameAudio {
             currentMusicPlayer.stop();
         }
         currentMusicPlayer = menuMusicPlayer;
-        if (isMusicEnabled && currentMusicPlayer != null) {
+        if (isMusicEnabled && !gameplayPaused && currentMusicPlayer != null) {
             currentMusicPlayer.play();
         }
     }
@@ -94,7 +93,7 @@ final class GameAudio {
             currentMusicPlayer.stop();
         }
         currentMusicPlayer = gameMusicPlayer;
-        if (isMusicEnabled && currentMusicPlayer != null) {
+        if (isMusicEnabled && !gameplayPaused && currentMusicPlayer != null) {
             currentMusicPlayer.play();
         }
     }
@@ -104,7 +103,7 @@ final class GameAudio {
             currentMusicPlayer.stop();
         }
         currentMusicPlayer = bossMusicPlayer;
-        if (isMusicEnabled && currentMusicPlayer != null) {
+        if (isMusicEnabled && !gameplayPaused && currentMusicPlayer != null) {
             currentMusicPlayer.play();
         }
         System.out.println("🎼 Musica del boss finale attivata!");
@@ -131,7 +130,7 @@ final class GameAudio {
                 currentMusicPlayer.stop();
             }
             currentMusicPlayer = victoryMusicPlayer;
-            if (isMusicEnabled && currentMusicPlayer != null) {
+            if (isMusicEnabled && !gameplayPaused && currentMusicPlayer != null) {
                 currentMusicPlayer.play();
                 System.out.println("🏆 Musica della vittoria attivata!");
             } else if (victoryMusicPlayer == null) {
@@ -143,6 +142,28 @@ final class GameAudio {
     }
     
     boolean isMusicEnabled() { return isMusicEnabled; }
+
+    double getVolume() { return masterVolume; }
+
+    void setVolume(double volume) {
+        masterVolume = Math.max(0, Math.min(1, volume));
+        applyVolumes();
+    }
+
+    void setGameplayPaused(boolean paused) {
+        if (gameplayPaused == paused) return;
+        gameplayPaused = paused;
+        if (currentMusicPlayer == null) return;
+        if (paused) currentMusicPlayer.pause();
+        else if (isMusicEnabled) currentMusicPlayer.play();
+    }
+
+    private void applyVolumes() {
+        if (menuMusicPlayer != null) menuMusicPlayer.setVolume(0.5 * masterVolume);
+        if (gameMusicPlayer != null) gameMusicPlayer.setVolume(0.5 * masterVolume);
+        if (bossMusicPlayer != null) bossMusicPlayer.setVolume(0.6 * masterVolume);
+        if (victoryMusicPlayer != null) victoryMusicPlayer.setVolume(0.7 * masterVolume);
+    }
 
     void dispose() {
         stopAllMusic();

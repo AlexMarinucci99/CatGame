@@ -37,7 +37,16 @@ class Obstacle {
         
         if (imageToUse != null && !imageToUse.isError()) {
             // Usa l'immagine personalizzata caricata dall'utente
-            gc.drawImage(imageToUse, x, y, width, height);
+            if (!isPartOfDouble) {
+                // Trim the known transparent artwork margins at render time so
+                // the visible parcel base meets the conveyor collision plane.
+                double sourceWidth = imageToUse.getWidth();
+                double sourceHeight = imageToUse.getHeight();
+                gc.drawImage(imageToUse, sourceWidth * 104 / 1024, sourceHeight * 6 / 1024,
+                        sourceWidth * 812 / 1024, sourceHeight * 929 / 1024, x, y, width, height);
+            } else {
+                gc.drawImage(imageToUse, x, y, width, height);
+            }
             return; // Esce qui se l'immagine è disponibile
         }
         // === PACCO AMAZON FEDELE ALL'ORIGINALE ===

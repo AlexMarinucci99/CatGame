@@ -6,11 +6,11 @@ Acceptance: original/refactored comparison recorded; opening obstacle curve is g
 
 ## Milestone 2 — State and simulation boundaries
 
-Introduce an owned game model, a validated state transition controller, and injectable wall clock/randomness. Prevent stuck movement on focus loss. Replace reflection in old tests with supported test seams. Acceptance: deterministic obstacle and boss traces, input press/release tests, and restart/reset tests.
+Introduce an owned game model, a validated state transition controller, and injectable randomness. Pause and focus-loss movement release are now implemented, and obstacle timing has an injectable millisecond clock while boss attacks use simulation time. Replace reflection in old tests with supported test seams. Acceptance: deterministic obstacle and boss traces, input press/release tests, and restart/reset tests.
 
 ## Milestone 3 — Animation foundation
 
-Add visual-only animation states, easing and bounded transient effects without changing hitboxes. Add reduced-effects setting. Acceptance: normal/double jump, shield and impacts show clear feedback; effects never alter collision results; frame-time measurements stay within an agreed budget on reference hardware.
+The first animation pass now includes a six-frame running atlas, airborne poses, a small landing response, an animated normal-level conveyor, and reduced-effects controls. Further work should refine shield and impact feedback without changing hitboxes and measure frame times on reference hardware.
 
 ## Milestone 4 — Presentation and audio
 
