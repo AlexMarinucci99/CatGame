@@ -438,7 +438,7 @@ public class MasterCat extends Application {
                     }
                     
                     // Gravità minima durante il tracking attivo
-                    velocityY += GRAVITY * 0.05 * dt * 60; 
+                    velocityY += GRAVITY * 0.05 * dt * 60;
                 } else {
                     // Dopo il tracking, movimento balistico naturale
                     velocityY += GRAVITY * 0.7 * dt * 60; // Gravità normale dopo il tracking

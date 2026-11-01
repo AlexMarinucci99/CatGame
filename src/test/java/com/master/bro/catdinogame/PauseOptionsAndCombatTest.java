@@ -1,7 +1,6 @@
 package com.master.bro.catdinogame;
 
 import static org.junit.jupiter.api.Assertions.*;
-import java.util.concurrent.atomic.AtomicLong;
 import javafx.scene.input.KeyCode;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +19,7 @@ class PauseOptionsAndCombatTest {
     @Test
     void pauseFreezesProgressAndPreservesObstacleDelay() {
         MasterCat game = game();
-        AtomicLong time = new AtomicLong(10_000);
-        
+
         game.startGame();
         GameInput input = new GameInput(game);
         game.updater.update(1.0 / 60);
@@ -29,7 +27,6 @@ class PauseOptionsAndCombatTest {
         input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         assertEquals(MasterCat.GameState.PAUSED, game.state());
-        time.addAndGet(20_000);
         game.updater.update(20);
         assertEquals(scoreBeforePause, game.score);
         input.onKeyReleased(KeyCode.P);
