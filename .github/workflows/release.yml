@@ -21,7 +21,7 @@ jobs:
         include:
           - platform: linux
             arch: x64
-            runs-on: ubuntu-latest
+            runs-on: ubuntu-22.04
           - platform: windows
             arch: x64
             runs-on: windows-latest

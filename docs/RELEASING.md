@@ -3,10 +3,10 @@
 Il workflow `.github/workflows/release.yml` è separato dal workflow CI. Usa JDK 21, Maven, jpackage e i runner nativi GitHub Actions:
 
 - Windows x64: installer EXE con voci nel menu Start e scorciatoia, più ZIP dell'app-image.
-- Ubuntu x64: pacchetto DEB con launcher desktop, più ZIP dell'app-image.
+- Ubuntu 22.04 x64: pacchetto DEB compatibile con Debian 12/Ubuntu 22.04+, con launcher desktop, più ZIP dell'app-image.
 - macOS Intel x64 e Apple Silicon arm64: DMG e ZIP dell'app-image distinti.
 
-Il runner Windows installa WiX Toolset 3.14.1, necessario a jpackage 21 per creare l'installer EXE.
+Il runner Windows installa WiX Toolset 3.14.1, necessario a jpackage 21 per creare l'installer EXE. Il runner Ubuntu è fissato a 22.04 così i nomi delle dipendenze native del `.deb` restano compatibili con Debian 12; non usare `ubuntu-latest` per questa build senza prima verificare i metadati delle dipendenze.
 
 Il packaging usa classpath Java, senza `module-info.java`. Maven copia nel bundle il JAR e tutte le dipendenze runtime risolte sul runner, compresi i classifier JavaFX nativi per quel sistema. jpackage include un runtime Java 21. Il controllo di packaging confronta ogni file di `src/main/resources` con le voci del JAR e verifica app-image, launcher, runtime e installer.
 
@@ -39,4 +39,4 @@ Controllare i file, i checksum, le note generate e la compatibilità sui sistemi
 
 Il repository non contiene certificati o chiavi. Gli installer Windows non sono firmati e possono mostrare SmartScreen. Le app macOS non sono firmate Developer ID né notarizzate e possono ricevere avvisi Gatekeeper; una distribuzione pubblica macOS senza questi avvisi richiede un account Apple Developer e la gestione esterna delle credenziali di firma/notarizzazione. Linux usa un `.deb` x64 che dichiara GTK 3, ALSA e OpenGL come dipendenze; un ambiente grafico e un server audio funzionante restano necessari.
 
-Le build macOS sono native separate per Intel e Apple Silicon, non universal binary. Al momento Windows e Linux sono distribuiti solo per x64; Linux supportato dal pacchetto installabile è Debian/Ubuntu compatibile con le dipendenze dichiarate.
+Le build macOS sono native separate per Intel e Apple Silicon, non universal binary. Al momento Windows e Linux sono distribuiti solo per x64; Linux supportato dal pacchetto installabile è Debian 12/Ubuntu 22.04 o successivi con le dipendenze dichiarate.

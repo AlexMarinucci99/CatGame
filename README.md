@@ -75,7 +75,7 @@ Le versioni installabili sono pubblicate nella pagina [GitHub Releases](https://
 | Sistema | Pacchetto | Architetture |
 |---|---|---|
 | Windows | Installer `.exe` oppure ZIP portatile | x64 |
-| Linux Debian/Ubuntu | Pacchetto `.deb` oppure ZIP portatile | x64 |
+| Linux Debian 12 o Ubuntu 22.04+ | Pacchetto `.deb` oppure ZIP portatile | x64 |
 | macOS | Immagine `.dmg` oppure ZIP dell'app | Intel x64 e Apple Silicon arm64, build separate |
 
 Il runtime Java 21 e le dipendenze JavaFX con le librerie native della piattaforma sono inclusi. Serve comunque un ambiente desktop grafico compatibile; su Linux il pacchetto richiede GTK 3, ALSA e OpenGL, installati dal gestore dei pacchetti quando necessario. Per l'audio serve un server ALSA/PulseAudio/PipeWire funzionante.
@@ -94,7 +94,7 @@ Scaricare `CatGame-linux-x86_64-<versione>.deb` e installarlo con il gestore gra
 sudo apt install ./CatGame-linux-x86_64-<versione>.deb
 ```
 
-Avviare CatGame dal menu applicazioni. Il pacchetto `.deb` dichiara le dipendenze di sistema GTK 3, ALSA e OpenGL. Lo ZIP portatile non installa dipendenze di sistema: estrarlo e avviare `CatGame/bin/CatGame`.
+Avviare CatGame dal menu applicazioni. Il pacchetto `.deb` dichiara le dipendenze di sistema GTK 3, ALSA e OpenGL. È generato su Ubuntu 22.04 per mantenere compatibilità con Debian 12 e Ubuntu 22.04 o versioni successive. Lo ZIP portatile non installa dipendenze di sistema: estrarlo e avviare `CatGame/bin/CatGame`.
 
 ### macOS
 
