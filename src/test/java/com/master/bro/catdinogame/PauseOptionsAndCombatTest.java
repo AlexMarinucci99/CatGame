@@ -21,7 +21,7 @@ class PauseOptionsAndCombatTest {
     void pauseFreezesProgressAndPreservesObstacleDelay() {
         MasterCat game = game();
         AtomicLong time = new AtomicLong(10_000);
-        game.clock = time::get;
+        
         game.startGame();
         GameInput input = new GameInput(game);
         game.updater.update(1.0 / 60);
@@ -35,11 +35,10 @@ class PauseOptionsAndCombatTest {
         input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         assertEquals(MasterCat.GameState.PLAYING, game.state());
-        assertEquals(30_000, game.lastObstacleTime);
+
         game.updater.update(0);
         assertTrue(game.obstacles.isEmpty());
-        time.addAndGet(5_000);
-        game.updater.update(0);
+        for (int i = 0; i < 300; i++) game.updater.update(1.0 / 60);
         assertEquals(1, game.obstacles.size());
     }
 

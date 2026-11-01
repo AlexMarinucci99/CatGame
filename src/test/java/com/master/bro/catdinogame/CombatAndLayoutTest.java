@@ -19,7 +19,7 @@ class CombatAndLayoutTest {
         for (boolean partOfDouble : new boolean[] {false, true}) {
             MasterCat game = game();
             game.startGame();
-            game.lastObstacleTime = System.currentTimeMillis();
+            
             game.obstacles.add(new Obstacle(390, 430, 50, 50, 190, partOfDouble));
             MasterCat.DragonBallSphere sphere = game.new DragonBallSphere(410, 450);
             game.dragonBallSpheres.add(sphere);

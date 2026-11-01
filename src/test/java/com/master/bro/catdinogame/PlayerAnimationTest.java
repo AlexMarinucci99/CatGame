@@ -66,7 +66,7 @@ class PlayerAnimationTest {
         game.HEIGHT = 600;
         game.GROUND_HEIGHT = 498;
         game.scaleX = game.scaleY = game.uniformScale = 1;
-        game.clock = () -> 10_000;
+        
         return game;
     }
 }

@@ -8,11 +8,13 @@ import com.master.bro.catdinogame.MasterCat.DragonBallSphere;
 /** Advances gameplay physics, spawning, attacks, and collisions. */
 final class GameUpdate {
     private final MasterCat game;
+    private double obstacleElapsedMillis;
     private final ProgressionClock progressionClock = new ProgressionClock();
     GameUpdate(MasterCat game) { this.game = game; }
 
     void resetProgression() {
         progressionClock.reset();
+        obstacleElapsedMillis = 0;
     }
 
     // Drop excess stall time uniformly, then bound collision/motion steps.
@@ -71,7 +73,7 @@ final class GameUpdate {
         if (game.onGround) game.runFramePhase = PlayerAnimation.advance(game.runFramePhase, dt, beltSpeed);
 
         // Genera ostacoli con difficoltà incrementale e migliore spaziatura - RALLENTATO
-        generateObstacles();
+        generateObstacles(dt);
         
         // Aggiorna ostacoli
         updateObstacles(dt);
@@ -178,9 +180,9 @@ final class GameUpdate {
         }
     }
     
-    private void generateObstacles() {
-        long now = game.nowMillis();
-        if (ObstaclePacing.ready(now, game.lastObstacleTime, game.score)) {
+    private void generateObstacles(double dt) {
+        obstacleElapsedMillis += dt * 1000;
+        if (obstacleElapsedMillis > ObstaclePacing.intervalMillis(game.score)) {
             double obstacleSize = 50; // Dimensione fissa appropriata
             double obstacleSpeed = ObstaclePacing.speedPixelsPerSecond(game.score);
             
@@ -201,7 +203,7 @@ final class GameUpdate {
                 obstacle.setBlockImages(game.assets.blockNormalImage, game.assets.blockDoubleImage);
                 game.obstacles.add(obstacle);
             }
-            game.lastObstacleTime = now;
+            obstacleElapsedMillis = 0;
         }
     }
     

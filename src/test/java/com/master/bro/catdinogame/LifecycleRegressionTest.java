@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 class LifecycleRegressionTest {
  static MasterCat game() {
   MasterCat g=new MasterCat(); g.WIDTH=1200;g.HEIGHT=600;g.GROUND_HEIGHT=498;
-  g.scaleX=g.scaleY=g.uniformScale=1;g.clock=()->10000; return g;
+  g.scaleX=g.scaleY=g.uniformScale=1; return g;
  }
  @Test void explosionStaysUntilItsHalfSecondLifetimeEnds() {
   MasterCat g=game();g.startGame();var s=g.new DragonBallSphere(500,450);
@@ -66,5 +66,16 @@ class LifecycleRegressionTest {
   MasterCat g=game();g.startBossFight();g.victory();g.gameOver();
   assertEquals(MasterCat.GameState.VICTORY,g.state());
   g.resetToMenu();g.gameOver();g.victory();assertEquals(MasterCat.GameState.MENU,g.state());
+ }
+ @Test void heldMenuKeyDoesNotLeakIntoGameplayAndMusicRepeatIsIgnored() {
+  MasterCat g=game();GameInput in=new GameInput(g);
+  in.onKeyPressed(javafx.scene.input.KeyCode.SPACE);
+  in.onKeyPressed(javafx.scene.input.KeyCode.SPACE);assertTrue(g.onGround);
+  in.onKeyPressed(javafx.scene.input.KeyCode.M);in.onKeyPressed(javafx.scene.input.KeyCode.M);
+  assertFalse(g.audio.isMusicEnabled());
+ }
+ @Test void stallCapAlsoAppliesToBossAndShieldTimers() {
+  MasterCat g=game();g.startBossFight();g.shieldActive=true;
+  g.updater.update(20);assertEquals(.05,g.bossTimer,1e-9);assertEquals(.05,g.shieldTimer,1e-9);
  }
 }

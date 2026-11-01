@@ -21,7 +21,6 @@ import javafx.scene.image.Image;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.function.LongSupplier;
 
 public class MasterCat extends Application {
     // Dimensioni base del gioco (design di riferimento)
@@ -47,8 +46,6 @@ public class MasterCat extends Application {
     enum GameState { MENU, PLAYING, BOSS_FIGHT, PAUSED, GAME_OVER, VICTORY }
     private GameState currentState = GameState.MENU;
     GameState pausedFrom = GameState.MENU;
-    long pausedAtMillis;
-    LongSupplier clock = System::currentTimeMillis;
     boolean reducedEffects = false;
     boolean resetFrameClock;
     
@@ -128,7 +125,6 @@ public class MasterCat extends Application {
     boolean barrierCreated = false;
 
     final ArrayList<Obstacle> obstacles = new ArrayList<>();
-    long lastObstacleTime = 0;
 
     final GameAssets assets = new GameAssets();
     final GameAudio audio = new GameAudio();
@@ -137,7 +133,6 @@ public class MasterCat extends Application {
 
     GameState state() { return currentState; }
 
-    long nowMillis() { return clock.getAsLong(); }
 
     @Override
     public void start(Stage primaryStage) {
@@ -238,7 +233,6 @@ public class MasterCat extends Application {
         canDoubleJump = false; // Reset doppio salto
         obstacles.clear();
         dragonBallSpheres.clear(); // Reset sfere Dragon Ball
-        lastObstacleTime = nowMillis();
         
         // Cambia alla musica del gioco
         audio.switchToGameMusic();
@@ -345,7 +339,6 @@ public class MasterCat extends Application {
         pausedFrom = currentState;
         currentState = GameState.PAUSED;
         resetFrameClock = true;
-        pausedAtMillis = nowMillis();
         leftPressed = false;
         rightPressed = false;
         audio.setGameplayPaused(true);
@@ -353,9 +346,6 @@ public class MasterCat extends Application {
 
     void resumeGame() {
         if (currentState != GameState.PAUSED) return;
-        if (pausedFrom == GameState.PLAYING) {
-            lastObstacleTime += Math.max(0, nowMillis() - pausedAtMillis);
-        }
         currentState = pausedFrom;
         resetFrameClock = true;
         pausedFrom = GameState.MENU;
