@@ -8,37 +8,36 @@ final class GameInput {
     private final MasterCat game;
     GameInput(MasterCat game) { this.game = game; }
 
-    void install(Scene scene) {
-        scene.setOnKeyPressed(e -> {
+    void onKeyPressed(KeyCode code) {
             // Controllo fullscreen globale (funziona in tutti gli stati)
-            if (e.getCode() == KeyCode.U || e.getCode() == KeyCode.ESCAPE) {
+            if (code == KeyCode.U || code == KeyCode.ESCAPE) {
                 game.toggleFullscreen();
                 return;
             }
             
             // Controllo musica globale (funziona in tutti gli stati)
-            if (e.getCode() == KeyCode.M) {
+            if (code == KeyCode.M) {
                 game.audio.toggleMusic();
                 return;
             }
             
             switch (game.currentState) {
                 case MENU:
-                    if (e.getCode() == KeyCode.SPACE) {
+                    if (code == KeyCode.SPACE) {
                         game.startGame();
                     }
                     // Toggle menu impostazioni solo con tasto I
-                    else if (e.getCode() == KeyCode.I) {
+                    else if (code == KeyCode.I) {
                         game.settingsMenuOpen = !game.settingsMenuOpen;
                     }
                     // Tasto segreto T per saltare direttamente al boss fight (per test)
-                    else if (e.getCode() == KeyCode.T) {
+                    else if (code == KeyCode.T) {
                         game.score = game.WINNING_SCORE; // Imposta il punteggio necessario
                         game.startBossFight(); // Vai direttamente al boss fight
                     }
                     break;
                 case PLAYING:
-                    if (e.getCode() == KeyCode.SPACE) {
+                    if (code == KeyCode.SPACE) {
                         // Salto normale se a terra
                         if (game.onGround) {
                             game.velocityY = game.JUMP_VELOCITY;
@@ -52,7 +51,7 @@ final class GameInput {
                         }
                     }
                     // === LANCIO SFERA DRAGON BALL NEL LIVELLO NORMALE ===
-                    if (e.getCode() == KeyCode.C && game.energy >= game.MAX_ENERGY) {
+                    if (code == KeyCode.C && game.energy >= game.MAX_ENERGY) {
                         // Lancia una nuova sfera energetica Dragon Ball
                         double sphereStartX = game.catX + 60; // Parte dalla mano del gatto
                         double sphereStartY = game.catY - 40; // Centro verticale del gatto
@@ -62,7 +61,7 @@ final class GameInput {
                     }
                     break;
                 case BOSS_FIGHT:
-                    if (e.getCode() == KeyCode.SPACE) {
+                    if (code == KeyCode.SPACE) {
                         // Salto normale se a terra
                         if (game.onGround) {
                             game.velocityY = game.JUMP_VELOCITY;
@@ -76,7 +75,7 @@ final class GameInput {
                         }
                     }
                     // === LANCIO SFERA DRAGON BALL NEL BOSS FIGHT ===
-                    if (e.getCode() == KeyCode.C && game.energy >= game.MAX_ENERGY) {
+                    if (code == KeyCode.C && game.energy >= game.MAX_ENERGY) {
                         // Lancia una nuova sfera energetica Dragon Ball
                         double sphereStartX = game.catX + 60; // Parte dalla mano del gatto
                         double sphereStartY = game.catY - 40; // Centro verticale del gatto
@@ -85,17 +84,17 @@ final class GameInput {
                         System.out.println("🌊 SFERA DRAGON BALL LANCIATA!");
                     }
                     // Scudo con X
-                    if (e.getCode() == KeyCode.X && game.energy >= game.SHIELD_ENERGY_COST && !game.shieldActive) {
+                    if (code == KeyCode.X && game.energy >= game.SHIELD_ENERGY_COST && !game.shieldActive) {
                         game.shieldActive = true;
                         game.shieldTimer = 0;
                         game.energy -= game.SHIELD_ENERGY_COST;
                         System.out.println("🛡️ SCUDO ATTIVATO!");
                     }
                     // === MOVIMENTO ORIZZONTALE ===
-                    if (e.getCode() == KeyCode.LEFT || e.getCode() == KeyCode.A) {
+                    if (code == KeyCode.LEFT || code == KeyCode.A) {
                         game.leftPressed = true;
                     }
-                    if (e.getCode() == KeyCode.RIGHT || e.getCode() == KeyCode.D) {
+                    if (code == KeyCode.RIGHT || code == KeyCode.D) {
                         game.rightPressed = true;
                     }
                     break;
@@ -108,16 +107,17 @@ final class GameInput {
                     game.resetToMenu();
                     break;
             }
-        });
+    }
+
 
         // Gestione rilascio tasti per movimento fluido
-        scene.setOnKeyReleased(e -> {
+    void onKeyReleased(KeyCode code) {
             switch (game.currentState) {
                 case BOSS_FIGHT:
-                    if (e.getCode() == KeyCode.LEFT || e.getCode() == KeyCode.A) {
+                    if (code == KeyCode.LEFT || code == KeyCode.A) {
                         game.leftPressed = false;
                     }
-                    if (e.getCode() == KeyCode.RIGHT || e.getCode() == KeyCode.D) {
+                    if (code == KeyCode.RIGHT || code == KeyCode.D) {
                         game.rightPressed = false;
                     }
                     break;
@@ -128,8 +128,14 @@ final class GameInput {
                     // Nessuna azione speciale per questi stati
                     break;
             }
-        });
+    }
 
+
+    void install(Scene scene) {
+        scene.setOnKeyPressed(e -> onKeyPressed(e.getCode()));
+        scene.setOnKeyReleased(e -> onKeyReleased(e.getCode()));
+
+        // === GESTIONE CLICK MOUSE PER MENU A TENDINA ===
         // === GESTIONE CLICK MOUSE PER MENU A TENDINA ===
         scene.setOnMouseClicked(e -> {
             if (game.currentState == MasterCat.GameState.MENU) {
