@@ -40,9 +40,9 @@ class GameBehaviorTest {
     void scoringAndEnergyUseOriginalFrameAndTimeRules() throws Exception {
         MasterCat game = game();
         call(game, "startGame", null, null);
-        call(game.updater, "updatePlaying", double.class, 0.5);
+        call(game.updater, "updatePlaying", double.class, 1.0 / 60.0);
         assertEquals(3, field(game, "score"));
-        assertEquals(4.25, (double) field(game, "energy"), 1e-9);
+        assertEquals(8.5 / 60.0, (double) field(game, "energy"), 1e-9);
         assertEquals(1.0002, (double) field(game, "gameSpeed"), 1e-9);
     }
 
@@ -51,7 +51,7 @@ class GameBehaviorTest {
         MasterCat game = game();
         call(game, "startGame", null, null);
         field(game, "score", 9998);
-        call(game.updater, "updatePlaying", double.class, 0.016);
+        call(game.updater, "updatePlaying", double.class, 1.0 / 60.0);
         assertEquals("BOSS_FIGHT", field(game, "currentState").toString());
         assertEquals(2000.0, (double) field(game, "bossHealth"));
         assertEquals(50.0, (double) field(game, "energy"));
