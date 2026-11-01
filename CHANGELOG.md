@@ -11,3 +11,4 @@
 - Increased obstacle arrival frequency continuously from a 4.5-second opening interval to 1.5 seconds at 10,000 points.
 - Let energy spheres destroy every boss projectile variant; parcels and barrier blocks remain destructible.
 - Redesigned the settings panel and boss HUD with consistent hit bounds, grouped controls, and clearer status bars.
+- Reduced menu title glow and removed decorative color stripes and dividers from the settings and boss layouts.

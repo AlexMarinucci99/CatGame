@@ -112,20 +112,10 @@ final class GameRenderer {
         double titleX = (game.WIDTH - titleWidth) / 2; // Centro perfetto
         double titleY = game.HEIGHT/2 - game.scaleY(200); // SPOSTATO PIÙ IN ALTO: da -40 a -200
         
-        // Ombra profonda per effetto 3D (più livelli) - scalate
-        double shadowOffset1 = game.scaleSize(8);
-        double shadowOffset2 = game.scaleSize(6);
-        double shadowOffset3 = game.scaleSize(4);
-        double shadowOffset4 = game.scaleSize(2);
-        
-        gc.setFill(Color.rgb(0, 0, 0, 0.8));
-        gc.fillText(title, titleX + shadowOffset1, titleY + shadowOffset1);
-        gc.setFill(Color.rgb(50, 50, 50, 0.6));
-        gc.fillText(title, titleX + shadowOffset2, titleY + shadowOffset2);
-        gc.setFill(Color.rgb(100, 100, 100, 0.4));
-        gc.fillText(title, titleX + shadowOffset3, titleY + shadowOffset3);
-        gc.setFill(Color.rgb(150, 150, 150, 0.2));
-        gc.fillText(title, titleX + shadowOffset4, titleY + shadowOffset4);
+        // Una sola ombra mantiene il titolo leggibile sullo sfondo illustrato.
+        double shadowOffset = game.scaleSize(3);
+        gc.setFill(Color.rgb(0, 0, 0, 0.65));
+        gc.fillText(title, titleX + shadowOffset, titleY + shadowOffset);
         
         // Gradiente principale oro-arancione
         LinearGradient titleGradient = new LinearGradient(
@@ -138,22 +128,8 @@ final class GameRenderer {
         gc.setFill(titleGradient);
         gc.fillText(title, titleX, titleY);
         
-        // Bordo luminoso per effetto 3D - scalato
-        gc.setStroke(Color.rgb(255, 255, 255, 0.8));
-        gc.setLineWidth(game.scaleSize(2));
-        gc.strokeText(title, titleX, titleY);
-        
-        // Riflessi luminosi interni - scalati
-        gc.setStroke(Color.rgb(255, 255, 200, 0.6));
-        gc.setLineWidth(game.scaleSize(1));
-        gc.strokeText(title, titleX - game.scaleSize(1), titleY - game.scaleSize(1));
-        
-        // Bagliore esterno dorato - scalato
-        gc.setStroke(Color.rgb(255, 215, 0, 0.3));
-        gc.setLineWidth(game.scaleSize(8));
-        gc.strokeText(title, titleX, titleY);
-        gc.setLineWidth(game.scaleSize(12));
-        gc.setStroke(Color.rgb(255, 215, 0, 0.15));
+        gc.setStroke(Color.rgb(57, 36, 22, 0.8));
+        gc.setLineWidth(game.scaleSize(1.5));
         gc.strokeText(title, titleX, titleY);
 
         // === ISTRUZIONI PERFETTAMENTE CENTRATE E SCALATE ===
@@ -171,11 +147,11 @@ final class GameRenderer {
         game.settingsButtonX = game.WIDTH - game.settingsButtonWidth - 30; // 30 pixel di margine dal bordo destro
         game.settingsButtonY = game.HEIGHT - game.settingsButtonHeight - 30; // 30 pixel di margine dal bordo inferiore
         
-        gc.setFill(Color.rgb(12, 20, 38, 0.9));
+        gc.setFill(Color.rgb(20, 26, 35, 0.93));
         gc.fillRoundRect(game.settingsButtonX, game.settingsButtonY,
                 game.settingsButtonWidth, game.settingsButtonHeight, 12, 12);
-        gc.setStroke(game.settingsMenuOpen ? Color.CYAN : Color.rgb(132, 170, 205));
-        gc.setLineWidth(1.5);
+        gc.setStroke(game.settingsMenuOpen ? Color.rgb(184, 197, 208) : Color.rgb(107, 121, 135));
+        gc.setLineWidth(1);
         gc.strokeRoundRect(game.settingsButtonX, game.settingsButtonY,
                 game.settingsButtonWidth, game.settingsButtonHeight, 12, 12);
         gc.setFill(Color.WHITE);
@@ -597,31 +573,31 @@ final class GameRenderer {
         double rightX = game.WIDTH - margin - panelWidth;
         double topY = margin;
 
-        hudPanel(gc, leftX, topY, panelWidth, panelHeight, Color.CYAN);
-        hudPanel(gc, rightX, topY, panelWidth, panelHeight, Color.rgb(255, 95, 104));
+        hudPanel(gc, leftX, topY, panelWidth, panelHeight);
+        hudPanel(gc, rightX, topY, panelWidth, panelHeight);
 
         double remainingTime = Math.max(0, game.BOSS_DURATION - game.bossTimer);
         int minutes = (int) (remainingTime / 60);
         int seconds = (int) (remainingTime % 60);
-        gc.setFill(Color.rgb(142, 214, 234));
+        gc.setFill(Color.rgb(174, 187, 199));
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText("TEMPO RIMASTO", leftX + 18 * scale, topY + 24 * scale);
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 30 * scale));
         gc.fillText(String.format("%d:%02d", minutes, seconds), leftX + 18 * scale, topY + 58 * scale);
 
-        gc.setFill(Color.rgb(179, 205, 226));
+        gc.setFill(Color.rgb(174, 187, 199));
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText("ENERGIA", leftX + 18 * scale, topY + 84 * scale);
-        gc.setFill(game.energy >= game.MAX_ENERGY ? Color.CYAN : Color.WHITE);
+        gc.setFill(game.energy >= game.MAX_ENERGY ? Color.rgb(137, 190, 194) : Color.WHITE);
         gc.fillText(game.energy >= game.MAX_ENERGY ? "C  PRONTA" :
                 String.format("%.0f / %.0f", game.energy, game.MAX_ENERGY),
                 leftX + panelWidth - 105 * scale, topY + 84 * scale);
         hudBar(gc, leftX + 18 * scale, topY + 96 * scale,
                 panelWidth - 36 * scale, 12 * scale,
-                game.energy / game.MAX_ENERGY, Color.CYAN);
+                game.energy / game.MAX_ENERGY, Color.rgb(93, 157, 163));
 
-        gc.setFill(Color.rgb(255, 166, 169));
+        gc.setFill(Color.rgb(174, 187, 199));
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText("SCONTRO FINALE", rightX + 18 * scale, topY + 24 * scale);
         gc.setFill(Color.WHITE);
@@ -632,36 +608,34 @@ final class GameRenderer {
                 rightX + 18 * scale, topY + 84 * scale);
         hudBar(gc, rightX + 18 * scale, topY + 96 * scale,
                 panelWidth - 36 * scale, 12 * scale,
-                game.bossHealth / game.MAX_BOSS_HEALTH, Color.rgb(255, 77, 91));
+                game.bossHealth / game.MAX_BOSS_HEALTH, Color.rgb(174, 88, 98));
 
         double stripWidth = Math.min(650 * scale, game.WIDTH - 2 * margin);
         double stripX = (game.WIDTH - stripWidth) / 2;
         double stripY = game.HEIGHT - 58 * scale;
-        hudPanel(gc, stripX, stripY, stripWidth, 42 * scale, Color.rgb(125, 170, 210));
+        hudPanel(gc, stripX, stripY, stripWidth, 42 * scale);
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText("A / D   MUOVI", stripX + 18 * scale, stripY + 26 * scale);
         gc.fillText("SPAZIO   SALTA", stripX + 160 * scale, stripY + 26 * scale);
         gc.fillText("C   SFERA", stripX + 336 * scale, stripY + 26 * scale);
-        gc.setFill(game.shieldActive ? Color.LIGHTGREEN : Color.rgb(185, 208, 223));
+        gc.setFill(game.shieldActive ? Color.rgb(156, 193, 159) : Color.rgb(183, 194, 205));
         gc.fillText(game.shieldActive
                 ? String.format("SCUDO  %.1fs", Math.max(0, game.SHIELD_DURATION - game.shieldTimer))
                 : "X   SCUDO", stripX + 462 * scale, stripY + 26 * scale);
     }
 
-    private void hudPanel(GraphicsContext gc, double x, double y, double width, double height, Color accent) {
-        gc.setFill(Color.rgb(8, 15, 31, 0.88));
+    private void hudPanel(GraphicsContext gc, double x, double y, double width, double height) {
+        gc.setFill(Color.rgb(17, 23, 32, 0.9));
         gc.fillRoundRect(x, y, width, height, 18, 18);
-        gc.setStroke(accent.deriveColor(0, 1, 1, 0.75));
-        gc.setLineWidth(1.5);
+        gc.setStroke(Color.rgb(112, 126, 140, 0.72));
+        gc.setLineWidth(1);
         gc.strokeRoundRect(x, y, width, height, 18, 18);
-        gc.setFill(accent);
-        gc.fillRoundRect(x + 14, y + 13, 3, height - 26, 3, 3);
     }
 
     private void hudBar(GraphicsContext gc, double x, double y, double width,
                         double height, double fraction, Color color) {
-        gc.setFill(Color.rgb(42, 54, 75));
+        gc.setFill(Color.rgb(55, 65, 76));
         gc.fillRoundRect(x, y, width, height, height, height);
         gc.setFill(color);
         gc.fillRoundRect(x, y, width * Math.max(0, Math.min(1, fraction)), height, height, height);
@@ -825,62 +799,55 @@ final class GameRenderer {
         double height = bounds.height();
         double contentScale = height / 410.0;
 
-        gc.setFill(Color.rgb(5, 10, 23, 0.96));
+        gc.setFill(Color.rgb(18, 24, 33, 0.97));
         gc.fillRoundRect(x, y, width, height, 20, 20);
-        gc.setStroke(Color.rgb(96, 205, 233));
-        gc.setLineWidth(2);
+        gc.setStroke(Color.rgb(111, 125, 139, 0.82));
+        gc.setLineWidth(1);
         gc.strokeRoundRect(x, y, width, height, 20, 20);
-        gc.setFill(Color.CYAN);
-        gc.fillRoundRect(x + 20, y + 18, 4, 42 * contentScale, 3, 3);
 
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 21 * contentScale));
-        gc.fillText("IMPOSTAZIONI", x + 34, y + 38 * contentScale);
-        gc.setFill(Color.rgb(157, 185, 209));
+        gc.fillText("IMPOSTAZIONI", x + 23, y + 38 * contentScale);
+        gc.setFill(Color.rgb(163, 177, 190));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 12 * contentScale));
-        gc.fillText("COMANDI E PREFERENZE", x + 35, y + 57 * contentScale);
-        gc.setStroke(Color.rgb(71, 102, 130));
-        gc.setLineWidth(1);
-        gc.strokeLine(x + 20, y + 70 * contentScale, x + width - 20, y + 70 * contentScale);
+        gc.fillText("COMANDI E PREFERENZE", x + 23, y + 57 * contentScale);
 
         settingsSection(gc, x, y, contentScale, 89, "LIVELLO");
-        settingsRow(gc, x, y, contentScale, 114, "SPAZIO", "Salto", Color.CYAN);
-        settingsRow(gc, x, y, contentScale, 146, "SPAZIO x2", "Doppio salto", Color.CYAN);
-        settingsRow(gc, x, y, contentScale, 178, "C", "Sfera di energia", Color.CYAN);
+        settingsRow(gc, x, y, contentScale, 114, "SPAZIO", "Salto");
+        settingsRow(gc, x, y, contentScale, 146, "SPAZIO x2", "Doppio salto");
+        settingsRow(gc, x, y, contentScale, 178, "C", "Sfera di energia");
 
         settingsSection(gc, x, y, contentScale, 206, "BOSS FINALE");
-        settingsRow(gc, x, y, contentScale, 231, "A / D", "Movimento", Color.rgb(255, 155, 160));
-        settingsRow(gc, x, y, contentScale, 263, "X", "Scudo", Color.rgb(255, 155, 160));
+        settingsRow(gc, x, y, contentScale, 231, "A / D", "Movimento");
+        settingsRow(gc, x, y, contentScale, 263, "X", "Scudo");
 
         settingsSection(gc, x, y, contentScale, 291, "SISTEMA");
         settingsRow(gc, x, y, contentScale, 316, "M", game.audio.isMusicEnabled() ?
-                "Musica: attiva" : "Musica: disattivata", Color.rgb(177, 207, 239));
+                "Musica: attiva" : "Musica: disattivata");
         settingsRow(gc, x, y, contentScale, 348, "U / ESC", game.gameStage != null && game.gameStage.isFullScreen() ?
-                "Schermo intero: attivo" : "Schermo intero: inattivo", Color.rgb(177, 207, 239));
+                "Schermo intero: attivo" : "Schermo intero: inattivo");
 
-        gc.setStroke(Color.rgb(71, 102, 130));
-        gc.strokeLine(x + 20, y + 367 * contentScale, x + width - 20, y + 367 * contentScale);
-        gc.setFill(Color.rgb(147, 171, 193));
+        gc.setFill(Color.rgb(152, 165, 178));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 11 * contentScale));
         gc.fillText("Premi I o clicca fuori per chiudere", x + 23, y + 390 * contentScale);
     }
 
     private void settingsSection(GraphicsContext gc, double x, double y, double scale,
                                  double baseline, String title) {
-        gc.setFill(Color.rgb(109, 198, 225));
+        gc.setFill(Color.rgb(176, 190, 202));
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 11 * scale));
         gc.fillText(title, x + 23, y + baseline * scale);
     }
 
     private void settingsRow(GraphicsContext gc, double x, double y, double scale,
-                             double baseline, String key, String label, Color accent) {
+                             double baseline, String key, String label) {
         double rowY = y + (baseline - 21) * scale;
-        gc.setFill(Color.rgb(25, 41, 63));
+        gc.setFill(Color.rgb(39, 49, 60));
         gc.fillRoundRect(x + 22, rowY, 103, 27 * scale, 7, 7);
-        gc.setStroke(accent);
+        gc.setStroke(Color.rgb(101, 116, 130));
         gc.setLineWidth(1);
         gc.strokeRoundRect(x + 22, rowY, 103, 27 * scale, 7, 7);
-        gc.setFill(accent);
+        gc.setFill(Color.rgb(227, 234, 240));
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12 * scale));
         gc.fillText(key, x + 31, y + baseline * scale);
         gc.setFill(Color.WHITE);
