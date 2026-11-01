@@ -26,11 +26,13 @@ class PauseOptionsAndCombatTest {
         GameInput input = new GameInput(game);
         game.updater.update(1.0 / 60);
         int scoreBeforePause = game.score;
+        input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         assertEquals(MasterCat.GameState.PAUSED, game.currentState);
         time.addAndGet(20_000);
         game.updater.update(20);
         assertEquals(scoreBeforePause, game.score);
+        input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         assertEquals(MasterCat.GameState.PLAYING, game.currentState);
         assertEquals(30_000, game.lastObstacleTime);
@@ -46,6 +48,7 @@ class PauseOptionsAndCombatTest {
         MasterCat game = game();
         game.startBossFight();
         GameInput input = new GameInput(game);
+        input.onKeyReleased(KeyCode.A);
         input.onKeyPressed(KeyCode.A);
         assertTrue(game.leftPressed);
         game.updater.update(1.0);
@@ -56,6 +59,7 @@ class PauseOptionsAndCombatTest {
         assertFalse(game.rightPressed);
         game.updater.update(30);
         assertEquals(timeBeforePause, game.bossTimer);
+        input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
         game.updater.update(0.1);
         assertEquals(timeBeforePause + 0.1, game.bossTimer, 1e-9);
@@ -67,11 +71,15 @@ class PauseOptionsAndCombatTest {
         GameInput input = new GameInput(game);
         game.startGame();
         game.score = 250;
+        input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
+        input.onKeyReleased(KeyCode.R);
         input.onKeyPressed(KeyCode.R);
         assertEquals(MasterCat.GameState.PLAYING, game.currentState);
         assertEquals(0, game.score);
+        input.onKeyReleased(KeyCode.P);
         input.onKeyPressed(KeyCode.P);
+        input.onKeyReleased(KeyCode.Q);
         input.onKeyPressed(KeyCode.Q);
         assertEquals(MasterCat.GameState.MENU, game.currentState);
     }

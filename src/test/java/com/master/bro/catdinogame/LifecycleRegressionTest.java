@@ -19,4 +19,24 @@ class LifecycleRegressionTest {
   g.bossBarrier.add(new BarrierBlock(590,440,30,30));
   g.updater.update(0);g.updater.update(0);assertEquals(1,g.bossBarrier.size());
  }
+ @Test void autoRepeatCannotDoubleJumpOrTogglePauseAgain() {
+  MasterCat g=game();g.startGame();GameInput in=new GameInput(g);
+  in.onKeyPressed(javafx.scene.input.KeyCode.SPACE);
+  in.onKeyPressed(javafx.scene.input.KeyCode.SPACE);assertEquals(-15,g.velocityY);
+  in.onKeyReleased(javafx.scene.input.KeyCode.SPACE);
+  in.onKeyPressed(javafx.scene.input.KeyCode.SPACE);assertEquals(-12,g.velocityY);
+  in.onKeyPressed(javafx.scene.input.KeyCode.P);
+  in.onKeyPressed(javafx.scene.input.KeyCode.P);assertEquals(MasterCat.GameState.PAUSED,g.currentState);
+  in.onKeyReleased(javafx.scene.input.KeyCode.P);
+  in.onKeyPressed(javafx.scene.input.KeyCode.P);assertEquals(MasterCat.GameState.PLAYING,g.currentState);
+ }
+ @Test void movementAliasesAndFocusLossTrackPhysicalKeys() {
+  MasterCat g=game();g.startBossFight();GameInput in=new GameInput(g);
+  in.onKeyPressed(javafx.scene.input.KeyCode.A);in.onKeyPressed(javafx.scene.input.KeyCode.LEFT);
+  in.onKeyReleased(javafx.scene.input.KeyCode.A);assertTrue(g.leftPressed);
+  in.onFocusLost();assertFalse(g.leftPressed);
+  in.onKeyPressed(javafx.scene.input.KeyCode.P); // deliberate new press resumes
+  in.onKeyReleased(javafx.scene.input.KeyCode.P);
+  in.onKeyPressed(javafx.scene.input.KeyCode.A);assertTrue(g.leftPressed);
+ }
 }
