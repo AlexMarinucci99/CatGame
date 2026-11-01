@@ -42,7 +42,7 @@ Global `M`, `U`, and `Esc` controls take precedence over the “any other key”
 
 ## Progression
 
-The normal level advances score and speed at a 60 Hz reference rate, starts obstacles after about 4.5 seconds, and increases their speed gradually. Normal and double jumps use time-consistent motion. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. Collision with a parcel can end a run. Energy spheres can destroy parcels, boss projectiles, and barrier blocks. The boss fight also provides a five-second shield for 25 energy.
+The normal level advances score and speed at a 60 Hz reference rate, starts obstacles after about 4.5 seconds, then reduces their arrival interval steadily to 1.5 seconds by 10,000 points while their travel speed also increases. Normal and double jumps use time-consistent motion. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. Collision with a parcel can end a run. Energy spheres can destroy normal and double parcels, every boss projectile type, and barrier blocks. The boss fight also provides a five-second shield for 25 energy.
 
 The game has menu, normal play, boss fight, game over, and victory screens. Music changes with those states.
 
@@ -53,7 +53,7 @@ mvn clean verify
 mvn javafx:run
 ```
 
-The Maven project is at the repository root. Production sources and resources are under `src/main`; focused tests are under `src/test`. `MasterCat` owns the game state and animation loop. `GameInput` installs controls; `GameUpdate` handles frame updates, physics, spawning, and collisions; `GameRenderer` draws the screens. `GameAssets` loads images, `GameAudio` owns music players, and `Obstacle` and `BarrierBlock` are independent entities. `GameLauncher` is the entry point. The project intentionally retains the original frame-based physics and scoring formulas.
+The Maven project is at the repository root. Production sources and resources are under `src/main`; focused tests are under `src/test`. `MasterCat` owns the game state and animation loop. `GameInput` installs controls; `GameUpdate` handles frame updates, physics, spawning, and collisions; `GameRenderer` draws the screens; `SettingsLayout` shares menu geometry between rendering and mouse input. `GameAssets` loads images, `GameAudio` owns music players, and `Obstacle` and `BarrierBlock` are independent entities. `GameLauncher` is the entry point. Scoring and jump physics use a 60 Hz reference rate so play is consistent across display refresh rates.
 
 The GitHub Actions workflow compiles and tests on Ubuntu, Windows, and macOS with Java 21. Its first matrix run passed on all three systems. It does not exercise a live graphical session or audio device.
 

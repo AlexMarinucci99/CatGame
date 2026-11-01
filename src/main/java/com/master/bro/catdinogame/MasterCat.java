@@ -483,6 +483,10 @@ public class MasterCat extends Application {
                    y - size/2 < catY + catHeight && 
                    y + size/2 > catY;
         }
+
+        public boolean intersects(DragonBallSphere sphere) {
+            return !isDestroyed && sphere.intersects(x - size/2, y - size/2, size, size);
+        }
         
         public boolean isOffScreen() {
             return x < -size || x > WIDTH + size || y > HEIGHT + size;

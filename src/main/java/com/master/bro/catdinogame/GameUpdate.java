@@ -285,6 +285,23 @@ final class GameUpdate {
         while (it.hasNext()) {
             BossProjectile projectile = it.next();
             projectile.update(dt);
+
+            // A charged sphere can clear every incoming attack, including all
+            // boss projectile variants. Consume the sphere on the first hit.
+            boolean hitBySphere = false;
+            for (DragonBallSphere sphere : game.dragonBallSpheres) {
+                if (projectile.intersects(sphere)) {
+                    sphere.destroy();
+                    hitBySphere = true;
+                    break;
+                }
+            }
+            if (hitBySphere) {
+                projectile.destroy();
+                game.score += 25;
+                it.remove();
+                continue;
+            }
             
             // Controlla collisione con il gatto (solo se lo scudo non è attivo)
             if (!game.shieldActive && projectile.intersects(game.catX, game.catY - 50, 50, 50)) {

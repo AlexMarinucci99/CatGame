@@ -149,20 +149,7 @@ final class GameInput {
                 }
                 // Check se click è fuori dal menu per chiuderlo
                 else if (game.settingsMenuOpen) {
-                    double menuWidth = 450;
-                    double menuHeight = 350;
-                    
-                    // Calcola posizione del menu usando la stessa logica di renderSettingsDropdown
-                    double menuX = game.settingsButtonX - menuWidth + game.settingsButtonWidth; // Allinea a destra del pulsante
-                    double menuY = game.settingsButtonY - menuHeight; // Apri sopra il pulsante
-                    
-                    // Assicurati che il menu non esca dai bordi dello schermo
-                    if (menuX < 0) menuX = 10; // Non uscire a sinistra
-                    if (menuX + menuWidth > game.WIDTH) menuX = game.WIDTH - menuWidth - 10; // Non uscire a destra
-                    if (menuY < 0) menuY = 10; // Non uscire in alto
-                    
-                    if (mouseX < menuX || mouseX > menuX + menuWidth ||
-                        mouseY < menuY || mouseY > menuY + menuHeight) {
+                    if (!SettingsLayout.panel(game).contains(mouseX, mouseY)) {
                         game.settingsMenuOpen = false; // Chiudi menu se click fuori
                     }
                 }
