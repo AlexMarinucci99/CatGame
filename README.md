@@ -1,5 +1,5 @@
 
-# CatGame — MasterCat
+# MasterCat
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![JavaFX](https://img.shields.io/badge/JavaFX-21.0.2-blue)
