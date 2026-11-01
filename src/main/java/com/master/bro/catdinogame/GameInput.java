@@ -3,6 +3,7 @@ package com.master.bro.catdinogame;
 import java.util.EnumSet;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 
 /** Handles gameplay keys, pause, focus loss, and interactive menu settings. */
 final class GameInput {
@@ -60,14 +61,7 @@ final class GameInput {
                         }
                     }
                     // === LANCIO SFERA DRAGON BALL NEL LIVELLO NORMALE ===
-                    if (code == KeyCode.C && game.energy >= game.MAX_ENERGY) {
-                        // Lancia una nuova sfera energetica Dragon Ball
-                        double sphereStartX = game.catX + 60; // Parte dalla mano del gatto
-                        double sphereStartY = game.catY - 40; // Centro verticale del gatto
-                        game.dragonBallSpheres.add(game.new DragonBallSphere(sphereStartX, sphereStartY));
-                        game.energy = 0; // Reset energia
-                        game.waveActive = false; // Non usiamo più game.waveActive nel normale
-                    }
+
                     break;
                 case BOSS_FIGHT:
                     if (code == KeyCode.SPACE) {
@@ -84,14 +78,7 @@ final class GameInput {
                         }
                     }
                     // === LANCIO SFERA DRAGON BALL NEL BOSS FIGHT ===
-                    if (code == KeyCode.C && game.energy >= game.MAX_ENERGY) {
-                        // Lancia una nuova sfera energetica Dragon Ball
-                        double sphereStartX = game.catX + 60; // Parte dalla mano del gatto
-                        double sphereStartY = game.catY - 40; // Centro verticale del gatto
-                        game.dragonBallSpheres.add(game.new DragonBallSphere(sphereStartX, sphereStartY));
-                        game.energy = 0; // Reset energia
-                        System.out.println("🌊 SFERA DRAGON BALL LANCIATA!");
-                    }
+
                     // Scudo con X
                     if (code == KeyCode.X && game.energy >= game.SHIELD_ENERGY_COST && !game.shieldActive) {
                         game.shieldActive = true;
@@ -188,11 +175,28 @@ final class GameInput {
     }
 
 
+    void onMouseAttack(MouseButton button) {
+        boolean boss=game.state()==MasterCat.GameState.BOSS_FIGHT;
+        if(!boss && game.state()!=MasterCat.GameState.PLAYING)return;
+        if(button==MouseButton.PRIMARY && game.energy>=game.MAX_ENERGY) {
+            game.dragonBallSpheres.add(game.new DragonBallSphere(game.catX+60,game.catY-40));
+            game.energy=0;game.waveActive=false;
+        } else if(button==MouseButton.SECONDARY && boss && game.specialCharge>=game.SPECIAL_CHARGE_SECONDS
+                && game.specialParcel==null) {
+            game.specialParcel=new ExplosiveParcel(game.catX,game.catY-50,game.bossX,game.bossY-100);
+            game.specialCharge=0;
+        }
+    }
+
     void install(Scene scene) {
         scene.setOnKeyPressed(e -> onKeyPressed(e.getCode()));
         scene.setOnKeyReleased(e -> onKeyReleased(e.getCode()));
 
-        scene.setOnMouseClicked(e -> onMenuClick(e.getX(), e.getY()));
+        scene.setOnMouseClicked(e -> {
+            if(e.getButton()==MouseButton.PRIMARY) onMenuClick(e.getX(),e.getY());
+        });
+        scene.setOnMousePressed(e -> onMouseAttack(e.getButton()));
+        scene.setOnContextMenuRequested(e -> e.consume());
         scene.setOnMouseDragged(e -> onMenuDrag(e.getX(), e.getY()));
 
     }

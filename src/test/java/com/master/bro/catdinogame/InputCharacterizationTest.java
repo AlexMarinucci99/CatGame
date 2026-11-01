@@ -62,11 +62,11 @@ class InputCharacterizationTest {
         GameInput input = new GameInput(game);
         game.energy = 49;
         input.onKeyReleased(KeyCode.C);
-        input.onKeyPressed(KeyCode.C);
+        input.onMouseAttack(javafx.scene.input.MouseButton.PRIMARY);
         assertEquals(0, game.dragonBallSpheres.size());
         game.energy = 50;
         input.onKeyReleased(KeyCode.C);
-        input.onKeyPressed(KeyCode.C);
+        input.onMouseAttack(javafx.scene.input.MouseButton.PRIMARY);
         assertEquals(1, game.dragonBallSpheres.size());
         assertEquals(0.0, game.energy);
         game.startBossFight();

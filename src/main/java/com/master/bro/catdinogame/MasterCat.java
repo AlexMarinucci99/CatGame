@@ -75,6 +75,9 @@ public class MasterCat extends Application {
     // Sistema energia e onda
     double energy = 0;
     final double MAX_ENERGY = 50;
+    final double SPECIAL_CHARGE_SECONDS = 30;
+    double specialCharge;
+    ExplosiveParcel specialParcel;
     boolean waveActive = false;
     double waveTimer = 0;
     final double WAVE_DURATION = 3.0;
@@ -213,6 +216,8 @@ public class MasterCat extends Application {
     // Metodi per gestire gli stati del gioco
     void startGame() {
         currentState = GameState.PLAYING;
+        specialCharge = 0;
+        specialParcel = null;
         resetFrameClock = true;
         pausedFrom = GameState.MENU;
         // Reset delle variabili del gioco
@@ -242,6 +247,8 @@ public class MasterCat extends Application {
     
     void startBossFight() {
         currentState = GameState.BOSS_FIGHT;
+        specialCharge = 0;
+        specialParcel = null;
         resetFrameClock = true;
         pausedFrom = GameState.MENU;
         System.out.println("⚔️ BOSS FIGHT INIZIATO! Sopravvivi per 2 minuti!");
@@ -454,6 +461,10 @@ public class MasterCat extends Application {
         public void render(GraphicsContext gc) {
             if (isDestroyed) return;
             
+            if (assets.parcelSprites != null) {
+                assets.parcelSprites.grounded(gc, type == 0 ? 0 : 1, x-size/2, y-size/2, size, size);
+                return;
+            }
             // === PRIORITÀ 1: IMMAGINI DEDICATE DEI PROIETTILI BOSS ===
             Image dedicatedProjectileImage = (type >= 1) ? assets.bossProjectileDoubleImage : assets.bossProjectileNormalImage;
             
@@ -734,6 +745,17 @@ public class MasterCat extends Application {
                 return;
             }
             
+            if (assets.energySprites != null) {
+                int frame = exploding ? 4 + Math.min(3, (int)(explosionTimer / EXPLOSION_DURATION * 4))
+                        : (int)(animationTimer * 1.2) % 4;
+                double drawSize = exploding ? 100 : 70;
+                gc.save();
+                if (exploding) gc.setGlobalAlpha(1 - explosionTimer / EXPLOSION_DURATION * 0.65);
+                assets.energySprites.cell(gc, frame, x - drawSize * (exploding ? 0.5 : 0.68), y - drawSize / 2, drawSize, drawSize);
+                gc.restore();
+                return;
+            }
+
             if (exploding) {
                 // === EFFETTO ESPLOSIONE ===
                 double explosionProgress = explosionTimer / EXPLOSION_DURATION;

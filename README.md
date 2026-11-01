@@ -363,7 +363,8 @@ Il gioco verrà compilato e avviato tramite Maven.
 |---|---|
 | `SPAZIO` | Avvia la partita dal menu |
 | `SPAZIO` | Salto e doppio salto durante il gioco |
-| `C` | Lancia una sfera energetica con energia piena |
+| Tasto sinistro del mouse | Lancia una sfera energetica con energia piena |
+| Tasto destro del mouse | Lancia il pacco esplosivo durante il boss fight, quando la speciale è carica |
 | `X` | Attiva lo scudo durante il boss fight |
 | `←` / `A` | Movimento verso sinistra nel boss fight |
 | `→` / `D` | Movimento verso destra nel boss fight |
@@ -403,7 +404,8 @@ Durante questa fase:
 - La frequenza degli ostacoli cresce nel tempo.
 - Il giocatore può utilizzare il doppio salto.
 - L'energia si ricarica durante la partita.
-- Una barra di energia piena consente di lanciare una sfera energetica.
+- Una barra di energia piena consente di lanciare una sfera energetica con il tasto sinistro del mouse.
+- L’HUD mostra separatamente avanzamento verso il boss e ricarica dell’onda.
 
 Il personaggio dispone di animazioni di corsa, salto e atterraggio.
 
@@ -419,6 +421,8 @@ Raggiunti **10.000 punti**, inizia il combattimento finale.
 | Costo dello scudo | 25 energia |
 | Durata dello scudo | 5 secondi |
 | Comparsa della barriera | Dopo 60 secondi |
+| Ricarica della speciale | 30 secondi di gioco attivo |
+| Danno del pacco esplosivo | 1.000 punti, metà della vita massima del boss |
 
 Durante il combattimento:
 
@@ -427,6 +431,8 @@ Durante il combattimento:
 - Gli attacchi vengono anticipati da avvisi visivi.
 - Le sfere energetiche possono distruggere proiettili nemici e parti della barriera.
 - Lo scudo fornisce protezione temporanea.
+- Il tasto destro lancia il pacco speciale dopo la carica dedicata; non consuma l’energia della sfera.
+- Un lancio bloccato dalla barriera o mancato consuma la carica senza danneggiare il boss.
 - Il giocatore deve sconfiggere il boss prima della scadenza del timer.
 
 ### Vittoria e sconfitta
