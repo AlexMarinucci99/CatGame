@@ -1,0 +1,23 @@
+{
+    "folders": [
+        {
+            "path": "./MasterCat"
+        }
+    ],
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "interactive",
+        "java.compile.nullAnalysis.mode": "automatic",
+        "java.debug.settings.enableRunDebugCodeLens": true,
+        "java.configuration.runtimes": [],
+        "java.project.sourcePaths": [
+            "src/main/java"
+        ],
+        "java.project.outputPath": "target/classes",
+        "files.exclude": {
+            "**/target": false,
+            "**/.settings": true,
+            "**/.project": true,
+            "**/.classpath": true
+        }
+    }
+}

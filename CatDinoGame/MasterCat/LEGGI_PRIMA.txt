@@ -1,0 +1,25 @@
+=====================================
+  🎮 CAT DINO GAME - GUIDA RAPIDA 🎮
+=====================================
+
+🎯 COME CREARE L'ESEGUIBILE:
+
+1. Fai doppio click su "crea_gioco.bat"
+2. Aspetta 30 secondi
+3. Il gioco sarà nella cartella "gioco"
+
+🚀 COME GIOCARE:
+
+1. Apri la cartella "gioco"
+2. Fai doppio click su "GIOCA.bat"
+3. Divertiti!
+
+📦 COME CONDIVIDERE:
+
+1. Copia la cartella "gioco" su qualsiasi PC
+2. Il PC deve avere Java 21+ installato
+3. Fai doppio click su "GIOCA.bat"
+
+✅ TUTTO FATTO! È COSÌ SEMPLICE!
+
+=====================================

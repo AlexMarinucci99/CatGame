@@ -1,0 +1,20 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "java.configuration.runtimes": [],
+        "java.configuration.updateBuildConfiguration": "interactive",
+        "java.compile.nullAnalysis.mode": "automatic",
+        "java.debug.settings.enableRunDebugCodeLens": true
+    },
+    "extensions": {
+        "recommendations": [
+            "vscjava.vscode-java-pack",
+            "redhat.java",
+            "vscjava.vscode-maven"
+        ]
+    }
+}
