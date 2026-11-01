@@ -20,3 +20,11 @@
 - Added an animated parcel conveyor beneath the normal level, anchored to the existing ground plane.
 - Added a six-frame running atlas, airborne poses, facing direction, and a visual landing response for the cat.
 - Paused and reduced-effects modes freeze or simplify the new visual motion without changing collisions.
+
+## Engineering milestone 2
+
+- Corrected sphere explosion lifetime and repeat collision consumption.
+- Debounced action keys and tracked physical movement aliases.
+- Made boss gravity time-based at the existing 60 Hz reference.
+- Applied a shared bounded simulation delta and simulation-time obstacle scheduling.
+- Restricted state writes and guarded terminal transitions; added regression evidence in docs/MILESTONE_2.md.
