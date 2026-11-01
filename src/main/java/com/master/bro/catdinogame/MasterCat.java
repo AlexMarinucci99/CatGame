@@ -813,6 +813,7 @@ public class MasterCat extends Application {
         }
         
         public void destroy() {
+            if (exploding || isDestroyed) return;
             exploding = true;
             explosionTimer = 0;
         }
@@ -822,9 +823,11 @@ public class MasterCat extends Application {
         }
         
         public boolean isOffScreen() {
-            return x > WIDTH + size || exploding; // Considera off-screen anche se sta esplodendo
+            return !exploding && x > WIDTH + size;
         }
         
+        boolean isExploding() { return exploding; }
+
         public boolean intersects(double objX, double objY, double objWidth, double objHeight) {
             if (exploding || isDestroyed) return false;
             

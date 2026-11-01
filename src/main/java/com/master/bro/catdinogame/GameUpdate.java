@@ -350,6 +350,7 @@ final class GameUpdate {
         Iterator<DragonBallSphere> sphereIt = game.dragonBallSpheres.iterator();
         while (sphereIt.hasNext()) {
             DragonBallSphere sphere = sphereIt.next();
+            if (sphere.isExploding() || sphere.isDestroyed()) continue;
             boolean sphereHitBarrier = false;
             
             // Controlla collisione con ogni blocco della barriera
