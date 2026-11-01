@@ -8,7 +8,12 @@ import com.master.bro.catdinogame.MasterCat.DragonBallSphere;
 /** Original frame update, physics, spawning, and collision sequence. */
 final class GameUpdate {
     private final MasterCat game;
+    private final ProgressionClock progressionClock = new ProgressionClock();
     GameUpdate(MasterCat game) { this.game = game; }
+
+    void resetProgression() {
+        progressionClock.reset();
+    }
 
     void update(double dt) {
         if (game.currentState == MasterCat.GameState.PLAYING) {
@@ -20,8 +25,10 @@ final class GameUpdate {
     
     private void updatePlaying(double dt) {
         // Aggiorna effetti visivi - accumulo punti più lento
-        game.score += (int)(game.gameSpeed * 3); // RIDOTTO: era 10, ora 3 (70% più lento)
-        game.gameSpeed += 0.0002; // RIDOTTO: era 0.0005, ora 0.0002 (accelerazione più graduale)
+        for (int step = progressionClock.steps(dt); step > 0; step--) {
+            game.score += (int)(game.gameSpeed * 3);
+            game.gameSpeed += 0.0002;
+        }
         
         // Controlla se il giocatore ha raggiunto i 10k punti per iniziare il boss fight
         if (game.score >= game.WINNING_SCORE) {
@@ -130,8 +137,12 @@ final class GameUpdate {
     }
     
     private void updateCatPhysics(double dt) {
-        game.velocityY += game.GRAVITY;
-        game.catY += game.velocityY;
+        // Exact extension of the original discrete 60 Hz rule to fractional frames:
+        // n*v0 + gravity*n*(n+1)/2 is the sum of n original frame steps.
+        double frames = Math.max(0.0, Math.min(dt, 0.05)) * 60.0;
+        game.catY += game.velocityY * frames
+            + game.GRAVITY * frames * (frames + 1.0) / 2.0;
+        game.velocityY += game.GRAVITY * frames;
         if (game.catY >= game.GROUND_HEIGHT) {
             game.catY = game.GROUND_HEIGHT;
             game.velocityY = 0;
@@ -141,10 +152,10 @@ final class GameUpdate {
     }
     
     private void generateObstacles() {
-        double obstacleInterval = Math.max(1000, 3000 - (game.score / 300.0) * 30); // PIÙ DIFFICILE: Min 1s, inizio 3s, progressione più veloce
-        if (System.currentTimeMillis() - game.lastObstacleTime > obstacleInterval) {
+        long now = System.currentTimeMillis();
+        if (ObstaclePacing.ready(now, game.lastObstacleTime, game.score)) {
             double obstacleSize = 50; // Dimensione fissa appropriata
-            double obstacleSpeed = 250 + (game.score / 300.0) * 150; // PIÙ VELOCE: Velocità base aumentata e incremento più aggressivo
+            double obstacleSpeed = ObstaclePacing.speedPixelsPerSecond(game.score);
             
             // Probabilità di ostacolo doppio aumenta con il punteggio - RITARDATA
             boolean isDoubleObstacle = (game.score > 2000) && (Math.random() < 0.2); // RIDOTTO: parte dopo 2000 punti e solo 20% di probabilità
@@ -163,7 +174,7 @@ final class GameUpdate {
                 obstacle.setBlockImages(game.assets.blockNormalImage, game.assets.blockDoubleImage);
                 game.obstacles.add(obstacle);
             }
-            game.lastObstacleTime = System.currentTimeMillis();
+            game.lastObstacleTime = now;
         }
     }
     

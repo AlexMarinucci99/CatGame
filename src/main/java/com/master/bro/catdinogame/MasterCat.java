@@ -128,7 +128,7 @@ public class MasterCat extends Application {
         this.gameStage = primaryStage; // Memorizza il riferimento al Stage
         
         // === CALCOLO DIMENSIONI SCHERMO E SCALING ===
-        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
         screenWidth = screenBounds.getWidth();
         screenHeight = screenBounds.getHeight();
         
@@ -153,6 +153,7 @@ public class MasterCat extends Application {
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         
         Pane root = new Pane();
+        root.setStyle("-fx-background-color: black;");
         Canvas canvas = new Canvas(WIDTH, HEIGHT); // Usa le dimensioni dello schermo
         root.getChildren().add(canvas);
         Scene scene = new Scene(root);
@@ -197,6 +198,7 @@ public class MasterCat extends Application {
         // Reset delle variabili del gioco
         score = 0;
         gameSpeed = 1.0;
+        updater.resetProgression();
         energy = 0;
         waveActive = false;
         waveTimer = 0;

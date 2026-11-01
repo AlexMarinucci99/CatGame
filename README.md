@@ -42,7 +42,7 @@ Global `M`, `U`, and `Esc` controls take precedence over the “any other key”
 
 ## Progression
 
-The normal level awards points each frame and increases speed gradually. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. Collision with a parcel can end a run. Energy spheres can destroy parcels, boss projectiles, and barrier blocks. The boss fight also provides a five-second shield for 25 energy.
+The normal level advances score and speed at a 60 Hz reference rate, starts obstacles after about 4.5 seconds, and increases their speed gradually. Normal and double jumps use time-consistent motion. At 10,000 points, the game enters the boss fight. The cat begins that fight with 50 energy. The boss has 2,000 health and a 120-second limit; at 60 seconds a barrier appears. Defeat the boss before the timer expires to win. Collision with a parcel can end a run. Energy spheres can destroy parcels, boss projectiles, and barrier blocks. The boss fight also provides a five-second shield for 25 energy.
 
 The game has menu, normal play, boss fight, game over, and victory screens. Music changes with those states.
 
