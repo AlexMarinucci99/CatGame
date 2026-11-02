@@ -5,6 +5,7 @@ import javafx.scene.image.Image;
 final class GameAssets {
     SpriteAtlas parcelSprites;
     SpriteAtlas energySprites;
+    SpriteAtlas shieldSprites;
     Image catImage;
     Image catRunImage;
     Image menuBackgroundImage;
@@ -21,6 +22,7 @@ final class GameAssets {
     void loadResources() {
         System.out.println("🔍 Caricamento risorse grafiche...");
         parcelSprites = loadAtlas("/images/blocks/parcels-v2.png",2,1);
+        shieldSprites = loadAtlas("/images/equipment/cardboard-shield-v1.png",2,2);
         energySprites = loadAtlas("/images/effects/energy-impact-v1.png",4,2);
         try (var stream = getClass().getResourceAsStream("/images/player/cat-run-v1.png")) {
             if (stream != null) catRunImage = new Image(stream);

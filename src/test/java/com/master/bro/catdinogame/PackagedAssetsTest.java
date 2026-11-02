@@ -7,6 +7,7 @@ class PackagedAssetsTest {
     @Test
     void requiredAssetsAreOnClasspath() {
         String[] resources = {
+            "/images/equipment/cardboard-shield-v1.png",
             "/images/player/cat.png",
             "/images/effects/energy-impact-v1.png",
             "/images/blocks/parcels-v2.png",
