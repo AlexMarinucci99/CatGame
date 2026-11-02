@@ -1,0 +1,10 @@
+# Scudo medievale di cartone
+
+Asset: `src/main/resources/images/equipment/cardboard-shield-v1.png`.
+Generazione: tool imagegen integrato, PNG con trasparenza, atlas 2 × 2.
+
+Prompt utilizzato:
+
+> Use case: stylized-concept. Asset type: production sprite sheet for a 2D JavaFX arcade game. Create one transparent PNG sprite atlas, square, EXACTLY 2 columns by 2 rows of equal square cells, four isolated sprites, no grid lines, no background. Subject: a believable medieval heater shield, broad shoulders and tapered pointed bottom, crafted entirely out of layered recycled Amazon corrugated cardboard. Thick folded cardboard rim, exposed corrugation along edges, brown packing tape holding cardboard strips together, hand-made embossed cardboard boss at center. Front face prominently printed with the exact lowercase word 'amazon' and recognizable black Amazon smile arrow beneath, like authentic Amazon packaging. No metal, no wood, no green force field, no glow, no character or hands. Warm kraft brown material, convincing cardboard texture, clean readable silhouette and strong dark edges suitable for small on-screen game sprite, semi-realistic illustrated rendering consistent with realistic brown parcel sprites in a colorful 2D game. All four cells show the SAME shield and design at same size and aligned center, fully contained within each cell with generous 12% transparent margins. Frame order top-left front three-quarter view showing a little right edge, top-right subtly lifted defensive pose (about 4 degrees tilt), bottom-left front neutral bracing pose, bottom-right subtle opposite tilt (about -4 degrees). These are four smooth restrained animation frames of the same intact shield; no breakage, no debris, no floating shadows, no labels, no watermarks. Actual alpha transparency around each sprite.
+
+La visualizzazione usa il timer di simulazione dello scudo: si ferma durante la pausa. La modalità effetti ridotti mantiene la posa iniziale. Il logo non viene specchiato quando il boss si trova a sinistra. Il cambiamento è solo grafico: costo, durata e logica di protezione non cambiano.

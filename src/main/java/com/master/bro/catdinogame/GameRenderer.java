@@ -523,32 +523,8 @@ final class GameRenderer {
             gc.fillOval(catDrawX + catSize * 0.45, catDrawY - catSize * 0.1 + bounce, 6, 6); // Ingranditi
         }
         
-        // === SCUDO ===
-        if (game.shieldActive && game.reducedEffects) {
-            gc.setFill(Color.rgb(80, 155, 100, 0.24));
-            gc.fillOval(game.catX - 60, game.catY - 80, 120, 120);
-            gc.setStroke(Color.rgb(120, 190, 135, 0.75));
-            gc.setLineWidth(2);
-            gc.strokeOval(game.catX - 60, game.catY - 80, 120, 120);
-        } else if (game.shieldActive) {
-            double shieldAlpha = 0.7 * Math.sin(game.shieldTimer * 8); // Effetto pulsante
-            if (shieldAlpha < 0) shieldAlpha = -shieldAlpha;
-            
-            RadialGradient shieldGradient = new RadialGradient(
-                0, 0, 0.5, 0.5, 1.0, true, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.rgb(100, 255, 100, shieldAlpha * 0.3)),
-                new Stop(0.7, Color.rgb(50, 200, 50, shieldAlpha * 0.6)),
-                new Stop(1, Color.rgb(0, 150, 0, shieldAlpha))
-            );
-            gc.setFill(shieldGradient);
-            gc.fillOval(game.catX - 60, game.catY - 80, 120, 120);
-            
-            // Bordo dello scudo
-            gc.setStroke(Color.rgb(0, 255, 0, shieldAlpha));
-            gc.setLineWidth(4);
-            gc.strokeOval(game.catX - 60, game.catY - 80, 120, 120);
-        }
-        
+        ShieldRenderer.render(gc, game);
+
         // === SFERE DRAGON BALL NEL BOSS FIGHT ===
         for (DragonBallSphere sphere : game.dragonBallSpheres) {
             sphere.render(gc);
@@ -643,7 +619,7 @@ final class GameRenderer {
         gc.fillText("A / D   MUOVI", stripX + 18 * scale, stripY + 26 * scale);
         gc.fillText("SPAZIO   SALTA", stripX + 160 * scale, stripY + 26 * scale);
         gc.fillText("SX   ONDA", stripX + 336 * scale, stripY + 26 * scale);
-        gc.setFill(game.shieldActive ? Color.rgb(156, 193, 159) : Color.rgb(183, 194, 205));
+        gc.setFill(game.shieldActive ? Color.rgb(210, 177, 125) : Color.rgb(183, 194, 205));
         gc.fillText(game.shieldActive
                 ? String.format("SCUDO  %.1fs", Math.max(0, game.SHIELD_DURATION - game.shieldTimer))
                 : "X   SCUDO", stripX + 462 * scale, stripY + 26 * scale);
