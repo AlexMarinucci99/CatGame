@@ -43,7 +43,7 @@ public class MasterCat extends Application {
     double GROUND_HEIGHT; // Ora variabile
 
     // Game States
-    enum GameState { MENU, PLAYING, BOSS_FIGHT, PAUSED, GAME_OVER, VICTORY }
+    enum GameState { MENU, PLAYING, LEVEL_TRANSITION, PLATFORMER, BOSS_TRANSITION, BOSS_FIGHT, PAUSED, GAME_OVER, VICTORY }
     private GameState currentState = GameState.MENU;
     GameState pausedFrom = GameState.MENU;
     boolean reducedEffects = false;
@@ -134,6 +134,41 @@ public class MasterCat extends Application {
     private final GameRenderer renderer = new GameRenderer(this);
     final GameUpdate updater = new GameUpdate(this);
 
+    PlatformerLevel platformer;
+    final PlatformerCamera platformCamera = new PlatformerCamera();
+    double levelTransitionTimer;
+    boolean platformerCompleted;
+
+    void startPlatformerTransition() {
+        if (currentState != GameState.PLAYING) return;
+        platformer = new PlatformerLevel();
+        platformerCompleted = false;
+        platformCamera.follow(platformer, 0, true);
+        currentState = GameState.LEVEL_TRANSITION;
+        levelTransitionTimer = 1.3;
+        obstacles.clear(); dragonBallSpheres.clear();
+        leftPressed = rightPressed = false;
+        resetFrameClock = true;
+    }
+
+    void updatePlatformer(double dt) {
+        if (currentState == GameState.LEVEL_TRANSITION || currentState == GameState.BOSS_TRANSITION) {
+            levelTransitionTimer -= Math.min(dt, .05);
+            if (levelTransitionTimer <= 0) {
+                if (currentState == GameState.BOSS_TRANSITION) startBossFight();
+                else { currentState = GameState.PLATFORMER; platformer.clearInput(); resetFrameClock = true; }
+            }
+        } else if (currentState == GameState.PLATFORMER) {
+            platformer.advance(dt);
+            platformCamera.follow(platformer, Math.min(dt,.05), platformer.deathTimer > 0);
+            if (platformer.finished) {
+                platformerCompleted = true;
+                currentState = GameState.BOSS_TRANSITION;
+                levelTransitionTimer = 1.1;
+            }
+        }
+    }
+
     GameState state() { return currentState; }
 
 
@@ -170,7 +205,9 @@ public class MasterCat extends Application {
         root.setStyle("-fx-background-color: black;");
         Canvas canvas = new Canvas(WIDTH, HEIGHT); // Usa le dimensioni dello schermo
         root.getChildren().add(canvas);
-        Scene scene = new Scene(root);
+        canvas.widthProperty().bind(root.widthProperty());
+        canvas.heightProperty().bind(root.heightProperty());
+        Scene scene = new Scene(root, WIDTH, HEIGHT);
         primaryStage.setScene(scene);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -216,6 +253,7 @@ public class MasterCat extends Application {
     // Metodi per gestire gli stati del gioco
     void startGame() {
         currentState = GameState.PLAYING;
+        platformer = null; platformerCompleted = false;
         specialCharge = 0;
         specialParcel = null;
         resetFrameClock = true;
@@ -329,6 +367,7 @@ public class MasterCat extends Application {
     }
     
     void resetToMenu() {
+        platformer = null; platformerCompleted = false;
         currentState = GameState.MENU;
         pausedFrom = GameState.MENU;
         settingsMenuOpen = false;
@@ -342,7 +381,10 @@ public class MasterCat extends Application {
     }
 
     void pauseGame() {
-        if (currentState != GameState.PLAYING && currentState != GameState.BOSS_FIGHT) return;
+        if (currentState != GameState.PLAYING && currentState != GameState.BOSS_FIGHT
+                && currentState != GameState.PLATFORMER && currentState != GameState.LEVEL_TRANSITION
+                && currentState != GameState.BOSS_TRANSITION) return;
+        if (platformer != null) platformer.clearInput();
         pausedFrom = currentState;
         currentState = GameState.PAUSED;
         resetFrameClock = true;

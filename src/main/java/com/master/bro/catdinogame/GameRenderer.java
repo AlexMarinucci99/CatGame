@@ -23,6 +23,11 @@ final class GameRenderer {
             case PLAYING:
                 renderGame(gc);
                 break;
+            case PLATFORMER:
+            case LEVEL_TRANSITION:
+            case BOSS_TRANSITION:
+                PlatformerRenderer.render(gc, game);
+                break;
             case BOSS_FIGHT:
                 renderBossFight(gc);
                 break;
@@ -665,7 +670,9 @@ final class GameRenderer {
     }
 
     private void renderPaused(GraphicsContext gc) {
-        if (game.pausedFrom == MasterCat.GameState.BOSS_FIGHT) renderBossFight(gc);
+        if (game.pausedFrom == MasterCat.GameState.PLATFORMER || game.pausedFrom == MasterCat.GameState.LEVEL_TRANSITION
+                || game.pausedFrom == MasterCat.GameState.BOSS_TRANSITION) PlatformerRenderer.render(gc, game);
+        else if (game.pausedFrom == MasterCat.GameState.BOSS_FIGHT) renderBossFight(gc);
         else renderGame(gc);
         gc.setFill(Color.rgb(4, 8, 14, 0.62));
         gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);

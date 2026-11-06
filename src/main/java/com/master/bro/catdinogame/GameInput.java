@@ -46,6 +46,15 @@ final class GameInput {
                         game.startBossFight(); // Vai direttamente al boss fight
                     }
                     break;
+                case PLATFORMER:
+                    if (code == KeyCode.SPACE) game.platformer.jumpPressed();
+                    if (code == KeyCode.A || code == KeyCode.LEFT) game.platformer.left = true;
+                    if (code == KeyCode.D || code == KeyCode.RIGHT) game.platformer.right = true;
+                    if (code == KeyCode.R) { game.platformer.restart(); game.platformCamera.follow(game.platformer,0,true); }
+                    break;
+                case LEVEL_TRANSITION:
+                case BOSS_TRANSITION:
+                    break;
                 case PLAYING:
                     if (code == KeyCode.SPACE) {
                         // Salto normale se a terra
@@ -95,7 +104,11 @@ final class GameInput {
                     }
                     break;
                 case PAUSED:
-                    if (code == KeyCode.R) game.startGame();
+                    if (code == KeyCode.R) {
+                        if (game.pausedFrom == MasterCat.GameState.PLATFORMER) {
+                            game.platformer.restart(); game.resumeGame();
+                        } else game.startGame();
+                    }
                     else if (code == KeyCode.Q) game.resetToMenu();
                     break;
                 case GAME_OVER:
@@ -113,6 +126,13 @@ final class GameInput {
         // Gestione rilascio tasti per movimento fluido
     void onKeyReleased(KeyCode code) {
             held.remove(code);
+            if (game.platformer != null) {
+                if (code == KeyCode.SPACE) game.platformer.jumpReleased();
+                if (game.state() == MasterCat.GameState.PLATFORMER) {
+                    game.platformer.left = game.platformer.left && (held.contains(KeyCode.LEFT) || held.contains(KeyCode.A));
+                    game.platformer.right = game.platformer.right && (held.contains(KeyCode.RIGHT) || held.contains(KeyCode.D));
+                }
+            }
             switch (game.state()) {
                 case BOSS_FIGHT:
                     if (code == KeyCode.LEFT || code == KeyCode.A) {
