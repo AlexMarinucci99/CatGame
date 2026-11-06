@@ -28,29 +28,6 @@ final class PlatformerRenderer {
                     new Stop(0,Color.web("#101823")),new Stop(1,Color.web("#3b2924"))));
             g.fillRect(0,0,1000,650);
         }
-        // Distant storage racks, crates and pipework move more slowly than the world.
-        for(int i=-1;i<9;i++) {
-            double sx=i*180-(camera.x*.25)%180,sy=120-(camera.y*.12)%100;
-            g.setFill(Color.web("#27303a"));g.fillRect(sx,sy,9,600);
-            for(int row=0;row<5;row++) {
-                double yy=sy+row*110;
-                g.fillRect(sx,yy,170,7);
-                g.setFill(Color.web("#483b30"));g.fillRect(sx+20,yy-58,62,55);g.fillRect(sx+90,yy-45,54,42);
-                g.setFill(Color.web("#27303a"));
-            }
-            g.setFill(Color.web("#ab4a35"));g.fillRect(sx+4,sy+10,8,5);
-        }
-        // Overhead service pipes and floor vents give the warehouse a second depth layer.
-        g.setFill(Color.web("#111820",.22));g.fillRect(0,0,1000,650);
-        g.setStroke(Color.web("#38424b",.82));g.setLineWidth(12);
-        g.strokeLine(0,170-camera.y*.08,1000,170-camera.y*.08);
-        g.setLineWidth(1);
-        for(int i=0;i<5;i++) {
-            double xx=i*240-(camera.x*.45)%240;
-            g.setFill(Color.web("#342823"));g.fillRect(xx,530,70,100);
-            g.setStroke(Color.web("#915c3c"));
-            for(int j=0;j<5;j++)g.strokeLine(xx+10,545+j*12,xx+60,545+j*12);
-        }
         g.save();g.translate(-camera.x,-camera.y);
         for(Body b:l.map.bodies()) {
             Rect r=b.at(l.time);
