@@ -23,6 +23,11 @@ final class GameRenderer {
             case PLAYING:
                 renderGame(gc);
                 break;
+            case PLATFORMER:
+            case LEVEL_TRANSITION:
+            case BOSS_TRANSITION:
+                PlatformerRenderer.render(gc, game);
+                break;
             case BOSS_FIGHT:
                 renderBossFight(gc);
                 break;
@@ -665,14 +670,21 @@ final class GameRenderer {
     }
 
     private void renderPaused(GraphicsContext gc) {
-        if (game.pausedFrom == MasterCat.GameState.BOSS_FIGHT) renderBossFight(gc);
+        if (game.pausedFrom == MasterCat.GameState.PLATFORMER || game.pausedFrom == MasterCat.GameState.LEVEL_TRANSITION
+                || game.pausedFrom == MasterCat.GameState.BOSS_TRANSITION) PlatformerRenderer.render(gc, game);
+        else if (game.pausedFrom == MasterCat.GameState.BOSS_FIGHT) renderBossFight(gc);
         else renderGame(gc);
+        boolean platformPause = game.pausedFrom == MasterCat.GameState.PLATFORMER
+                || game.pausedFrom == MasterCat.GameState.LEVEL_TRANSITION
+                || game.pausedFrom == MasterCat.GameState.BOSS_TRANSITION;
+        double viewWidth = platformPause ? gc.getCanvas().getWidth() : game.WIDTH;
+        double viewHeight = platformPause ? gc.getCanvas().getHeight() : game.HEIGHT;
         gc.setFill(Color.rgb(4, 8, 14, 0.62));
-        gc.fillRect(0, 0, game.WIDTH, game.HEIGHT);
-        double width = Math.min(440, game.WIDTH - 36);
+        gc.fillRect(0, 0, viewWidth, viewHeight);
+        double width = Math.min(440, viewWidth - 36);
         double height = 208;
-        double x = (game.WIDTH - width) / 2;
-        double y = (game.HEIGHT - height) / 2;
+        double x = (viewWidth - width) / 2;
+        double y = (viewHeight - height) / 2;
         hudPanel(gc, x, y, width, height);
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 30));

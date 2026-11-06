@@ -47,14 +47,14 @@ class GameBehaviorTest {
     }
 
     @Test
-    void scoreThresholdStartsBossWithOriginalValues() throws Exception {
+    void scoreThresholdStartsPlatformTransition() throws Exception {
         MasterCat game = game();
         call(game, "startGame", null, null);
         field(game, "score", 9998);
         call(game.updater, "updatePlaying", double.class, 1.0 / 60.0);
-        assertEquals("BOSS_FIGHT", field(game, "currentState").toString());
-        assertEquals(2000.0, (double) field(game, "bossHealth"));
-        assertEquals(50.0, (double) field(game, "energy"));
+        assertEquals("LEVEL_TRANSITION", field(game, "currentState").toString());
+        assertNotNull(game.platformer);
+
     }
 
     @Test
