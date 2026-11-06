@@ -32,6 +32,16 @@ final class PlatformerRenderer {
             }
             g.setFill(Color.web("#ab4a35"));g.fillRect(sx+4,sy+10,8,5);
         }
+        // Overhead service pipes and floor vents give the warehouse a second depth layer.
+        g.setStroke(Color.web("#38424b"));g.setLineWidth(12);
+        g.strokeLine(0,170-camera.y*.08,1000,170-camera.y*.08);
+        g.setLineWidth(1);
+        for(int i=0;i<5;i++) {
+            double xx=i*240-(camera.x*.45)%240;
+            g.setFill(Color.web("#342823"));g.fillRect(xx,530,70,100);
+            g.setStroke(Color.web("#915c3c"));
+            for(int j=0;j<5;j++)g.strokeLine(xx+10,545+j*12,xx+60,545+j*12);
+        }
         g.save();g.translate(-camera.x,-camera.y);
         for(Body b:l.map.bodies()) {
             Rect r=b.at(l.time);
@@ -63,7 +73,8 @@ final class PlatformerRenderer {
                 g.setFill(Color.web("#67727a"));g.fillRect(r.x()+r.w()/2-6,b.y()-80,12,r.y()-b.y()+80);
                 g.setFill(Color.web("#864138"));g.fillRect(r.x(),r.y(),r.w(),r.h());
                 g.setFill(Color.web("#e3a74e"));for(int j=0;j<6;j++)g.fillRect(r.x()+j*12,r.y()+r.h()-12,6,12);
-                g.setFill(Color.web("#f18a66"));g.fillOval(b.x()+b.w()/2-4,b.y()-25,8,8);
+                boolean descending=Math.sin(l.time*2*Math.PI/b.period())>=0;
+                g.setFill(Color.web(descending?"#f18a66":"#d5ba71"));g.fillOval(b.x()+b.w()/2-4,b.y()-25,8,8);
             } else if(b.kind().equals("spikes")) {
                 g.setFill(Color.web("#e1aa87"));
                 for(double xx=r.x();xx<r.x()+r.w();xx+=16)g.fillPolygon(new double[]{xx,xx+8,xx+16},new double[]{r.y()+r.h(),r.y(),r.y()+r.h()},3);
@@ -85,6 +96,8 @@ final class PlatformerRenderer {
         g.fillText("02 / CENTRO DI SMISTAMENTO INFERNALE",34,43);
         g.setFont(Font.font(14));g.setFill(Color.web("#b5bdc4"));
         g.fillText(section+"     Morti: "+l.deaths+"     Tempo: "+String.format(java.util.Locale.ROOT,"%.1f s",l.time),34,69);
+        g.setFill(Color.web("#111a22",.9));g.fillRoundRect(18,600,964,36,8,8);
+        g.setFill(Color.web("#b5bdc4"));
         g.fillText("A/D o ←/→  Muovi    SPAZIO  Salto / wall-jump    P  Pausa    R  Ricomincia",34,625);
         String tip=l.x<820?"Tieni SPAZIO per saltare più in alto":l.x<1760?"Nel pozzo: salta verso la parete opposta e premi di nuovo SPAZIO":l.x<3780?"Osserva le traiettorie e il ritmo delle presse":"Raggiungi il portellone del boss";
         g.fillText(tip,34,112);
@@ -105,7 +118,7 @@ final class PlatformerRenderer {
         if(!game.reducedEffects && l.wall!=0 && l.vy>0)g.rotate(-l.wall*9);
         var image=game.assets.catRunImage;
         if(image!=null && !image.isError()) {
-            int frame=game.reducedEffects?0:PlayerAnimation.frame(l.animation,l.grounded,l.vy);
+            int frame=game.reducedEffects || (l.grounded && Math.abs(l.vx)<5)?0:PlayerAnimation.frame(l.animation,l.grounded,l.vy);
             double[] feet={491,486,477,439,471,472};double size=64.0/458;
             g.drawImage(image,(frame%3)*512,(frame/3)*512,512,512,-256*size,-feet[frame]*size,512*size,512*size);
         } else if(game.assets.catImage!=null)g.drawImage(game.assets.catImage,-32,-64,64,64);

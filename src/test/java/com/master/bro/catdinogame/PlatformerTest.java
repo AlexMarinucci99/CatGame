@@ -111,4 +111,24 @@ class PlatformerTest {
         assertEquals(3,l.map.bodies().stream().filter(b->b.kind().equals("checkpoint")).count());
         assertEquals(1,l.map.bodies().stream().filter(b->b.kind().equals("exit")).count());
     }
+    @Test void pauseDoesNotChangeAirborneVelocityAndDebugEntryIsMenuOnly() {
+        var g=platformGame();g.platformer.vy=-500;
+        g.pauseGame();assertEquals(-500,g.platformer.vy);
+        new GameInput(g).onKeyReleased(KeyCode.SPACE);assertEquals(-500,g.platformer.vy);
+        g.resetToMenu();var input=new GameInput(g);input.onKeyPressed(KeyCode.F2);
+        assertEquals(MasterCat.GameState.LEVEL_TRANSITION,g.state());
+        input.onKeyReleased(KeyCode.F2);input.onKeyPressed(KeyCode.F2);
+        assertEquals(MasterCat.GameState.LEVEL_TRANSITION,g.state());
+    }
+
+    @Test void liftCrushAndBeltMovementAreHandled() {
+        var lift=new Body("moving",0,500,400,30,0,-160,2,0);
+        var l=level(lift,body("solid",0,360,400,30));run(l,2);
+        for(int n=0;n<100 && l.deaths==0;n++)run(l,1);
+        assertEquals(1,l.deaths);
+        var belt=new Body("belt",0,500,400,30,0,0,0,100);
+        l=level(belt);run(l,2);double start=l.x;run(l,60);
+        assertEquals(start+50,l.x,.001);
+    }
+
 }

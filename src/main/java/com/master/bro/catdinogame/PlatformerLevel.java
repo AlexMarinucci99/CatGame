@@ -18,7 +18,7 @@ final class PlatformerLevel {
     Rect bounds() { return new Rect(x,y,WIDTH,HEIGHT); }
     void jumpPressed() { jumpHeld=true; buffer=config.buffer(); }
     void jumpReleased() { jumpHeld=false; if(vy<0) vy*=config.jumpCut(); }
-    void clearInput() { left=false; right=false; jumpReleased(); buffer=0; }
+    void clearInput() { left=false; right=false; jumpHeld=false; buffer=0; }
     void restart() {
         spawnX=100; spawnY=1048; checkpoint=-1; deaths=0; time=0; accumulator=0;
         finished=false; respawn();
@@ -79,7 +79,7 @@ final class PlatformerLevel {
             }
             if(b.kind().equals("exit")) { finished=true; clearInput(); }
         }
-        animation=PlayerAnimation.advance(animation,dt,Math.abs(vx));
+        if (Math.abs(vx)>5) animation=(animation+dt*Math.max(10,Math.min(17,10+Math.abs(vx)/100)))%6;
     }
     private int touchingWall() {
         for(Body b:map.bodies()) if(b.solid()) {

@@ -36,6 +36,11 @@ final class GameInput {
                     if (code == KeyCode.SPACE) {
                         game.startGame();
                     }
+                    else if (code == KeyCode.F2) {
+                        game.startGame();
+                        game.score = game.WINNING_SCORE;
+                        game.startPlatformerTransition();
+                    }
                     // Toggle menu impostazioni solo con tasto I
                     else if (code == KeyCode.I) {
                         game.settingsMenuOpen = !game.settingsMenuOpen;
@@ -106,7 +111,7 @@ final class GameInput {
                 case PAUSED:
                     if (code == KeyCode.R) {
                         if (game.pausedFrom == MasterCat.GameState.PLATFORMER) {
-                            game.platformer.restart(); game.resumeGame();
+                            game.platformer.restart(); game.platformCamera.follow(game.platformer,0,true); game.resumeGame();
                         } else game.startGame();
                     }
                     else if (code == KeyCode.Q) game.resetToMenu();
@@ -127,7 +132,7 @@ final class GameInput {
     void onKeyReleased(KeyCode code) {
             held.remove(code);
             if (game.platformer != null) {
-                if (code == KeyCode.SPACE) game.platformer.jumpReleased();
+                if (code == KeyCode.SPACE && game.state() == MasterCat.GameState.PLATFORMER) game.platformer.jumpReleased();
                 if (game.state() == MasterCat.GameState.PLATFORMER) {
                     game.platformer.left = game.platformer.left && (held.contains(KeyCode.LEFT) || held.contains(KeyCode.A));
                     game.platformer.right = game.platformer.right && (held.contains(KeyCode.RIGHT) || held.contains(KeyCode.D));

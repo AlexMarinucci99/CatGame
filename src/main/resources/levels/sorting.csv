@@ -9,8 +9,7 @@ checkpoint,900,1010,80,90,0,0,0,0
 solid,1450,530,50,470,0,0,0,0
 solid,1500,1100,200,300,0,0,0,0
 solid,1700,620,60,780,0,0,0,0
-# accesso al pozzo da sinistra sotto la parete: apertura inferiore
-# la parete sinistra termina a 1000 (corretto sotto nella definizione)
+# accesso al pozzo sotto la parete sinistra, che termina a quota 1000
 solid,1760,620,640,40,0,0,0,0
 checkpoint,1840,530,80,90,0,0,0,0
 # C: macchine, attraversamento su piattaforma mobile, nastro e pressa

@@ -159,8 +159,9 @@ public class MasterCat extends Application {
                 else { currentState = GameState.PLATFORMER; platformer.clearInput(); resetFrameClock = true; }
             }
         } else if (currentState == GameState.PLATFORMER) {
+            boolean respawning = platformer.deathTimer > 0;
             platformer.advance(dt);
-            platformCamera.follow(platformer, Math.min(dt,.05), platformer.deathTimer > 0);
+            platformCamera.follow(platformer, Math.min(dt,.05), respawning && platformer.deathTimer == 0);
             if (platformer.finished) {
                 platformerCompleted = true;
                 currentState = GameState.BOSS_TRANSITION;
