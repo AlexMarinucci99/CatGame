@@ -20,11 +20,12 @@ Il codice sorgente è disponibile pubblicamente e il gioco può essere avviato s
 ## Indice
 
 - [Caratteristiche](#caratteristiche)
+- [Scarica e gioca](#scarica-e-gioca)
 - [Requisiti di sistema](#requisiti-di-sistema)
-- [Scaricare CatGame](#scaricare-catgame)
-- [Installazione e avvio su Windows](#installazione-e-avvio-su-windows)
-- [Installazione e avvio su Linux](#installazione-e-avvio-su-linux)
-- [Installazione e avvio su macOS](#installazione-e-avvio-su-macos)
+- [Scaricare i sorgenti](#scaricare-i-sorgenti)
+- [Avvio dai sorgenti su Windows](#avvio-dai-sorgenti-su-windows)
+- [Avvio dai sorgenti su Linux](#avvio-dai-sorgenti-su-linux)
+- [Avvio dai sorgenti su macOS](#avvio-dai-sorgenti-su-macos)
 - [Comandi di gioco](#comandi-di-gioco)
 - [Come funziona il gioco](#come-funziona-il-gioco)
 - [Impostazioni e accessibilità](#impostazioni-e-accessibilità)
@@ -54,7 +55,7 @@ Il codice sorgente è disponibile pubblicamente e il gioco può essere avviato s
 
 ## Requisiti di sistema
 
-Per compilare e avviare CatGame sono necessari:
+Per giocare usando gli installer di GitHub Releases non occorre installare Java, JavaFX o Maven. Per compilare e avviare il progetto dai sorgenti servono:
 
 | Componente | Requisito |
 |---|---|
@@ -67,37 +68,47 @@ Per compilare e avviare CatGame sono necessari:
 | Ambiente grafico | Desktop con supporto JavaFX |
 | Audio | Dispositivo audio e librerie multimediali compatibili |
 
-### Cosa bisogna installare?
+## Scarica e gioca
 
-Prima di avviare il gioco, installare:
+Le versioni installabili sono pubblicate nella pagina [GitHub Releases](https://github.com/AlexMarinucci99/CatGame/releases). Scaricare il pacchetto per il proprio sistema e la propria architettura; non occorrono Java, JavaFX o Maven.
 
-**1. Java Development Kit (JDK) 21**
+| Sistema | Pacchetto | Architetture |
+|---|---|---|
+| Windows | Installer `.exe` oppure ZIP portatile | x64 |
+| Linux Debian 12 o Ubuntu 22.04+ | Pacchetto `.deb` oppure ZIP portatile | x64 |
+| macOS | Immagine `.dmg` oppure ZIP dell'app | Intel x64 e Apple Silicon arm64, build separate |
 
-Scaricare Eclipse Temurin 21:
+Il runtime Java 21 e le dipendenze JavaFX con le librerie native della piattaforma sono inclusi. Serve comunque un ambiente desktop grafico compatibile; su Linux il pacchetto richiede GTK 3, ALSA e OpenGL, installati dal gestore dei pacchetti quando necessario. Per l'audio serve un server ALSA/PulseAudio/PipeWire funzionante.
 
-https://adoptium.net/temurin/releases/?version=21
+### Windows
 
-Selezionare il proprio sistema operativo, l'architettura del processore e il pacchetto **JDK**, non JRE.
+Scaricare `CatGame-windows-x64-<versione>.exe`, eseguirlo e seguire l'installer. È disponibile anche lo ZIP portatile: estrarlo ed eseguire `CatGame.exe` dalla cartella estratta. L'installer crea una voce nel menu Start e una scorciatoia.
 
-**2. Apache Maven**
+I pacchetti non sono firmati digitalmente. Windows può mostrare un avviso SmartScreen: verificare che il file provenga dalla pagina Releases ufficiale e scegliere di proseguire solo se ci si fida della provenienza.
 
-Scaricare Maven:
+### Linux Debian e Ubuntu
 
-https://maven.apache.org/download.cgi
+Scaricare `CatGame-linux-x86_64-<versione>.deb` e installarlo con il gestore grafico oppure:
 
-Per l'installazione manuale utilizzare la distribuzione binaria (`Binary zip` o `Binary tar.gz`).
+```bash
+sudo apt install ./CatGame-linux-x86_64-<versione>.deb
+```
 
-**3. Git (facoltativo)**
+Avviare CatGame dal menu applicazioni. Il pacchetto `.deb` dichiara le dipendenze di sistema GTK 3, ALSA e OpenGL. È generato su Ubuntu 22.04 per mantenere compatibilità con Debian 12 e Ubuntu 22.04 o versioni successive. Lo ZIP portatile non installa dipendenze di sistema: estrarlo e avviare `CatGame/bin/CatGame`.
 
-https://git-scm.com/downloads
+### macOS
 
-Git serve per clonare e aggiornare la repository. In alternativa è possibile scaricare direttamente il progetto in formato ZIP.
+Scaricare il `.dmg` che corrisponde al processore: `arm64` per Apple Silicon, `x64` per Mac Intel. Aprire il DMG e trascinare CatGame in Applicazioni. Per lo ZIP portatile, estrarre l'app e spostarla in Applicazioni.
 
-> **Importante:** non è necessario scaricare separatamente JavaFX. Maven gestisce automaticamente le dipendenze JavaFX compatibili con il sistema operativo utilizzato.
+L'app non è firmata con Developer ID né notarizzata. Gatekeeper può impedirne l'apertura o mostrare un avviso. macOS richiede firma e notarizzazione Apple Developer per una distribuzione pubblica senza questi avvisi. Non disattivare Gatekeeper: scaricare soltanto dalla pagina ufficiale e seguire le impostazioni di sicurezza macOS solo dopo avere verificato il file.
+
+I pacchetti macOS sono nativi per ciascuna architettura e non sono universal binary; Rosetta non è richiesta per il pacchetto che corrisponde al Mac.
+
+Ogni release include `SHA256SUMS.txt` per controllare l'integrità dei download. Gli artefatti automatici di collaudo non sono release stabili e non vengono pubblicati come versioni finali.
 
 ---
 
-## Scaricare CatGame
+## Scaricare i sorgenti
 
 ### Metodo 1 — Tramite Git
 
@@ -120,7 +131,7 @@ Non è necessario scaricare manualmente i file sorgente uno alla volta.
 
 ---
 
-## Installazione e avvio su Windows
+## Avvio dai sorgenti su Windows
 
 ### 1. Installare Java 21
 
@@ -200,7 +211,7 @@ Al primo avvio Maven scaricherà le dipendenze necessarie.
 
 ---
 
-## Installazione e avvio su Linux
+## Avvio dai sorgenti su Linux
 
 CatGame utilizza JavaFX e può essere eseguito su distribuzioni Linux compatibili.
 
@@ -271,7 +282,7 @@ Il gioco richiede una sessione desktop grafica; un terminale privo di display no
 
 ---
 
-## Installazione e avvio su macOS
+## Avvio dai sorgenti su macOS
 
 CatGame può essere compilato e avviato su macOS utilizzando Java 21 e Maven.
 
@@ -492,9 +503,7 @@ mvn -DskipTests package
 
 Gli script di avvio utilizzano Maven con la compilazione del progetto e l'esecuzione tramite il plugin JavaFX.
 
-Il file JAR generato nella cartella `target/` non è distribuito come applicazione autonoma pronta per il doppio clic.
-
-Per avviare il gioco utilizzare gli script dedicati oppure `mvn javafx:run`.
+Il JAR Maven in `target/` è un artefatto di sviluppo e non è autonomo. Le app-image e gli installer jpackage includono le dipendenze JavaFX native e un runtime Java dedicato. Per verificare localmente il packaging, dopo `mvn clean verify` usare `scripts/package.sh` su Linux/macOS o `scripts/package.ps1` su Windows; i file vengono creati in `target/distributions/`.
 
 ### Tecnologie
 
