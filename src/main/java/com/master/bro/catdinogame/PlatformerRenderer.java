@@ -17,9 +17,17 @@ final class PlatformerRenderer {
         g.setFill(Color.web("#0c1117"));g.fillRect(0,0,width,height);
         g.translate((width-1000*scale)/2,(height-650*scale)/2);g.scale(scale,scale);
         g.beginPath();g.rect(0,0,1000,650);g.clip();
-        g.setFill(new LinearGradient(0,0,0,650,false,CycleMethod.NO_CYCLE,
-                new Stop(0,Color.web("#101823")),new Stop(1,Color.web("#3b2924"))));
-        g.fillRect(0,0,1000,650);
+        var background = game.assets.platformerBackgroundImage;
+        if (background != null && !background.isError()) {
+            double imageScale = Math.max(1000 / background.getWidth(), 650 / background.getHeight());
+            double imageWidth = background.getWidth() * imageScale;
+            double imageHeight = background.getHeight() * imageScale;
+            g.drawImage(background, (1000-imageWidth)/2, (650-imageHeight)/2, imageWidth, imageHeight);
+        } else {
+            g.setFill(new LinearGradient(0,0,0,650,false,CycleMethod.NO_CYCLE,
+                    new Stop(0,Color.web("#101823")),new Stop(1,Color.web("#3b2924"))));
+            g.fillRect(0,0,1000,650);
+        }
         // Distant storage racks, crates and pipework move more slowly than the world.
         for(int i=-1;i<9;i++) {
             double sx=i*180-(camera.x*.25)%180,sy=120-(camera.y*.12)%100;
@@ -33,7 +41,8 @@ final class PlatformerRenderer {
             g.setFill(Color.web("#ab4a35"));g.fillRect(sx+4,sy+10,8,5);
         }
         // Overhead service pipes and floor vents give the warehouse a second depth layer.
-        g.setStroke(Color.web("#38424b"));g.setLineWidth(12);
+        g.setFill(Color.web("#111820",.22));g.fillRect(0,0,1000,650);
+        g.setStroke(Color.web("#38424b",.82));g.setLineWidth(12);
         g.strokeLine(0,170-camera.y*.08,1000,170-camera.y*.08);
         g.setLineWidth(1);
         for(int i=0;i<5;i++) {
