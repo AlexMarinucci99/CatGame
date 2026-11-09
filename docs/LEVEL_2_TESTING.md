@@ -12,7 +12,7 @@ mvn clean verify
 
 `PlatformerTest` verifica accelerazione, frenata, inversione, salto, salto variabile, coyote time e sua scadenza, buffering, wall-slide/jump, pareti/pavimenti/soffitti, contatti letali, reset input, checkpoint e modalità senza checkpoint, trasporto su piattaforme e nastri, schiacciamento, pausa e debounce, focus, riavvio, camera, progressione e protezione da un Game Over tardivo durante la transizione.
 
-`PlatformerTraversalTest` riproduce `src/test/resources/levels/sorting-replay.txt`: 212 comandi di 0,1 s, generati con una ricerca deterministica sul modello. Il replay parte dallo spawn reale, usa soltanto direzione e pressione/rilascio del salto, attraversa le quattro sezioni e raggiunge l'uscita senza morti in circa 21,19 secondi simulati. Non modifica coordinate, hitbox o trappole. Viene ripetuto a 30, 60 e 144 FPS. La codifica di ogni carattere è `(direzione + 1) * 2 + saltoPremuto`, con direzione -1/0/+1 e salto 0/1.
+`PlatformerTraversalTest` riproduce `src/test/resources/levels/sorting-replay.txt`: 214 comandi di 0,1 s, generati con una ricerca deterministica sul modello. Il replay parte dallo spawn reale, usa soltanto direzione e pressione/rilascio del salto, attraversa le quattro sezioni e raggiunge l'uscita senza morti in circa 21,37 secondi simulati. Non modifica coordinate, hitbox o trappole. Viene ripetuto a 30, 60 e 144 FPS. La codifica di ogni carattere è `(direzione + 1) * 2 + saltoPremuto`, con direzione -1/0/+1 e salto 0/1.
 
 Questo replay dimostra la raggiungibilità della mappa e protegge da regressioni di collisione/fisica. Non è un playthrough umano e non dimostra da solo che difficoltà, finestre di reazione e feeling siano ottimali.
 
@@ -37,3 +37,9 @@ Sono stati eseguiti snapshot reali JavaFX/Linux delle quattro sezioni, con gli a
 ## Limiti
 
 Prototipo con ambiente procedurale e geometrie semplici, una sola mappa, checkpoint in memoria, nessun salvataggio di speedrun. Bilanciamento da rifinire con playtest umano; il replay automatico sfrutta input precisi e non rappresenta il tempo atteso per una prima partita. Firma, installer e certificazione grafica su Windows/macOS restano nel ciclo di distribuzione esistente.
+
+## Revisione movimento e grafica
+
+Sprint mantenuto con SHIFT e doppio salto verificati con test dedicati. Replay aggiornato alla nuova fisica. Pareti estese verso il basso, pannelli metallici e seghe montate su guide danno al livello una struttura a pozzi e camere ispirata ai riferimenti del giocatore. Nessun artwork o mappa dei riferimenti viene importato. Il playtest umano resta necessario per valutare difficoltà e feeling.
+
+Revisione del 9 novembre 2026: `mvn -B -ntp clean verify`, 62 test superati, zero fallimenti/errori. Replay di 214 input completato con la nuova mappa a 30/60/144 FPS.

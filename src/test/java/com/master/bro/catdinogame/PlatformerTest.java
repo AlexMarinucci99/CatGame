@@ -34,7 +34,7 @@ class PlatformerTest {
         var l=level(body("solid",0,500,160,40));run(l,2);l.x=170;
         run(l,5);l.jumpPressed();run(l,1);assertTrue(l.vy<0);
         var late=level(body("solid",0,500,160,40));run(late,2);late.x=170;
-        run(late,20);late.jumpPressed();run(late,1);assertTrue(late.vy>0);
+        run(late,20);late.airJumpAvailable=false;late.jumpPressed();run(late,1);assertTrue(late.vy>0);
     }
     @Test void bufferedJumpExecutesOnLandingWithoutExtraPress() {
         var l=floor();l.y=430;l.vy=200;l.jumpPressed();run(l,12);assertTrue(l.vy<0);
@@ -131,4 +131,22 @@ class PlatformerTest {
         assertEquals(start+50,l.x,.001);
     }
 
+
+    @Test void onlyOneAirJumpAndLandingRechargesIt() {
+        var l=floor();run(l,2);l.jumpPressed();run(l,6);
+        l.jumpReleased();l.jumpPressed();run(l,1);
+        assertFalse(l.airJumpAvailable);assertTrue(l.vy<0);
+        l.jumpReleased();run(l,2);double velocity=l.vy;
+        l.jumpPressed();run(l,1);assertTrue(l.vy>velocity);
+        l.jumpReleased();run(l,180);assertTrue(l.grounded);assertTrue(l.airJumpAvailable);
+        l.die();run(l,28);assertTrue(l.airJumpAvailable);
+    }
+    @Test void sprintIsHeldAndClearedAcrossPauseAndFocusLoss() {
+        var l=floor();l.right=true;l.sprint=true;run(l,50);
+        assertEquals(SPRINT_SPEED,l.vx,.001);l.sprint=false;run(l,30);
+        assertEquals(DEFAULT.speed(),l.vx,.001);
+        var g=platformGame();var i=new GameInput(g);i.onKeyPressed(KeyCode.SHIFT);
+        assertTrue(g.platformer.sprint);i.onKeyReleased(KeyCode.SHIFT);assertFalse(g.platformer.sprint);
+        i.onKeyPressed(KeyCode.SHIFT);i.onFocusLost();assertFalse(g.platformer.sprint);
+    }
 }

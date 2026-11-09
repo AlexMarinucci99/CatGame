@@ -42,7 +42,7 @@ Il codice sorgente è disponibile pubblicamente e il gioco può essere avviato s
 
 Il percorso è **Livello 1 (10.000 punti) → Centro di smistamento infernale → Boss → Vittoria**. Il nuovo magazzino comprende quattro sezioni, wall-jump, seghe e presse periodiche, piattaforme mobili, checkpoint e respawn rapido. Il gatto mantiene gli sprite esistenti; attacchi e scudo restano disponibili nei rispettivi livelli originali.
 
-Nel platform usa **A/D oppure ←/→** per muoverti e **SPAZIO** per saltare: tienilo premuto per salire più in alto, rilascialo per accorciare il salto. Premi di nuovo SPAZIO contro una parete per il wall-jump. **P** mette in pausa, **R** ricomincia il secondo livello azzerando tempo e morti, **M** controlla la musica e **U/ESC** il fullscreen. La morte riparte dall'ultimo checkpoint senza schermata Game Over.
+Nel platform usa **A/D oppure ←/→** per muoverti e tieni **SHIFT** per lo sprint e **SPAZIO** per saltare: tienilo premuto per salire più in alto, rilascialo per accorciare il salto. Premi di nuovo SPAZIO in aria per un doppio salto (uno per atterraggio). Premi SPAZIO contro una parete per il wall-jump. **P** mette in pausa, **R** ricomincia il secondo livello azzerando tempo e morti, **M** controlla la musica e **U/ESC** il fullscreen. La morte riparte dall'ultimo checkpoint senza schermata Game Over.
 
 Per il collaudo rapido, **F2 dal menu** apre il livello 2; **T dal menu** continua ad aprire direttamente il boss. La progressione normale parte sempre con SPAZIO.
 

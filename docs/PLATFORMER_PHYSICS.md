@@ -23,7 +23,7 @@ Tutti i valori sono centralizzati in `PlatformerConfig.DEFAULT`.
 | Blocco direzionale iniziale dopo wall-jump | 0,16 s |
 | Timestep | 1/120 s |
 
-Il salto mantenuto raggiunge circa 143 unità di altezza con l'integrazione discreta, con circa 240 unità di portata orizzontale. Il rilascio di SPAZIO riduce la velocità ascendente; un salto rilasciato prima che il buffer venga consumato parte già corto. Non è previsto doppio salto nel platform: i muri sono necessari per risalire i pozzi.
+Il salto mantenuto raggiunge circa 143 unità di altezza con l'integrazione discreta, con circa 240 unità di portata orizzontale. Il rilascio di SPAZIO riduce la velocità ascendente; un salto rilasciato prima che il buffer venga consumato parte già corto. È disponibile un salto aggiuntivo in aria all’85% dell’impulso normale; si ricarica a terra o al respawn. I wall-jump non consumano e non ricaricano il salto aggiuntivo. SHIFT mantenuto porta la velocità massima a 520 unità/s; al rilascio si torna progressivamente a 340. La pausa, la morte e la perdita del focus azzerano lo sprint.
 
 ## Collisioni e macchine
 

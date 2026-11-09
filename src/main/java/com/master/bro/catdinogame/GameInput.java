@@ -52,6 +52,7 @@ final class GameInput {
                     }
                     break;
                 case PLATFORMER:
+                    if (code == KeyCode.SHIFT) game.platformer.sprint = true;
                     if (code == KeyCode.SPACE) game.platformer.jumpPressed();
                     if (code == KeyCode.A || code == KeyCode.LEFT) game.platformer.left = true;
                     if (code == KeyCode.D || code == KeyCode.RIGHT) game.platformer.right = true;
@@ -131,6 +132,7 @@ final class GameInput {
         // Gestione rilascio tasti per movimento fluido
     void onKeyReleased(KeyCode code) {
             held.remove(code);
+            if (code == KeyCode.SHIFT && game.platformer != null) game.platformer.sprint = false;
             if (game.platformer != null) {
                 if (code == KeyCode.SPACE && game.state() == MasterCat.GameState.PLATFORMER) game.platformer.jumpReleased();
                 if (game.state() == MasterCat.GameState.PLATFORMER) {
