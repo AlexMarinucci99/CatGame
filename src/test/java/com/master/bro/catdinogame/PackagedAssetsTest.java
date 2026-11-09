@@ -7,6 +7,7 @@ class PackagedAssetsTest {
     @Test
     void requiredAssetsAreOnClasspath() {
         String[] resources = {
+            "/levels/sorting.csv",
             "/images/equipment/cardboard-shield-v1.png",
             "/images/player/cat.png",
             "/images/effects/energy-impact-v1.png",
@@ -14,6 +15,7 @@ class PackagedAssetsTest {
             "/images/player/cat-run-v1.png",
             "/images/backgrounds/menu_background.png",
             "/images/backgrounds/game_background.png",
+            "/images/backgrounds/livello2_background.png",
             "/images/backgrounds/gameover_background.png",
             "/images/backgrounds/victory_background.png",
             "/images/backgrounds/boss_background.png",

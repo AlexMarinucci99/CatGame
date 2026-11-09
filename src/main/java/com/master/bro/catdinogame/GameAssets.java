@@ -10,6 +10,7 @@ final class GameAssets {
     Image catRunImage;
     Image menuBackgroundImage;
     Image gameBackgroundImage;
+    Image platformerBackgroundImage;
     Image victoryBackgroundImage;
     Image gameOverBackgroundImage;
     Image bossBackgroundImage;
@@ -21,6 +22,16 @@ final class GameAssets {
 
     void loadResources() {
         System.out.println("🔍 Caricamento risorse grafiche...");
+        try (var stream = getClass().getResourceAsStream("/images/backgrounds/livello2_background.png")) {
+            if (stream != null) {
+                platformerBackgroundImage = new Image(stream);
+                if (platformerBackgroundImage.isError()) platformerBackgroundImage = null;
+            }
+        } catch (Exception e) {
+            platformerBackgroundImage = null;
+        }
+        System.out.println(platformerBackgroundImage != null
+                ? "✅ Sfondo livello 2 caricato!" : "⚠️ Sfondo livello 2 non trovato (uso fondale procedurale)");
         parcelSprites = loadAtlas("/images/blocks/parcels-v2.png",2,1);
         shieldSprites = loadAtlas("/images/equipment/cardboard-shield-v1.png",2,2);
         energySprites = loadAtlas("/images/effects/energy-impact-v1.png",4,2);

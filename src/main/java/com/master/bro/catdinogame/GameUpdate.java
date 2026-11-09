@@ -21,6 +21,11 @@ final class GameUpdate {
     // Every subsystem receives the same accepted simulation time.
     void update(double dt) {
         if (!Double.isFinite(dt) || dt < 0) return;
+        if (game.state() == MasterCat.GameState.PLATFORMER || game.state() == MasterCat.GameState.LEVEL_TRANSITION
+                || game.state() == MasterCat.GameState.BOSS_TRANSITION) {
+            game.updatePlatformer(dt);
+            return;
+        }
         double remaining = Math.min(dt, 0.05);
         MasterCat.GameState initial = game.state();
         do {
@@ -50,7 +55,7 @@ final class GameUpdate {
         
         // Controlla se il giocatore ha raggiunto i 10k punti per iniziare il boss fight
         if (game.score >= game.WINNING_SCORE) {
-            game.startBossFight();
+            game.startPlatformerTransition();
             return;
         }
         

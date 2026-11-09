@@ -37,6 +37,17 @@ Il codice sorgente è disponibile pubblicamente e il gioco può essere avviato s
 
 ---
 
+
+## Secondo livello platform
+
+Il percorso è **Livello 1 (10.000 punti) → Centro di smistamento infernale → Boss → Vittoria**. Il nuovo magazzino comprende quattro sezioni, wall-jump, seghe e presse periodiche, piattaforme mobili, checkpoint e respawn rapido. Il gatto mantiene gli sprite esistenti; attacchi e scudo restano disponibili nei rispettivi livelli originali.
+
+Nel platform usa **A/D oppure ←/→** per muoverti e **SPAZIO** per saltare: tienilo premuto per salire più in alto, rilascialo per accorciare il salto. Premi di nuovo SPAZIO contro una parete per il wall-jump. **P** mette in pausa, **R** ricomincia il secondo livello azzerando tempo e morti, **M** controlla la musica e **U/ESC** il fullscreen. La morte riparte dall'ultimo checkpoint senza schermata Game Over.
+
+Per il collaudo rapido, **F2 dal menu** apre il livello 2; **T dal menu** continua ad aprire direttamente il boss. La progressione normale parte sempre con SPAZIO.
+
+Dettagli: [level design](docs/LEVEL_2_DESIGN.md), [fisica](docs/PLATFORMER_PHYSICS.md), [test e collaudo](docs/LEVEL_2_TESTING.md).
+
 ## Caratteristiche
 
 - Gioco arcade 2D con difficoltà progressiva.
@@ -373,12 +384,12 @@ Il gioco verrà compilato e avviato tramite Maven.
 | Comando | Funzione |
 |---|---|
 | `SPAZIO` | Avvia la partita dal menu |
-| `SPAZIO` | Salto e doppio salto durante il gioco |
+| `SPAZIO` | Salto e doppio salto nel runner/boss; salto variabile e wall-jump nel platform |
 | Tasto sinistro del mouse | Lancia una sfera energetica con energia piena |
 | Tasto destro del mouse | Lancia il pacco esplosivo durante il boss fight, quando la speciale è carica |
 | `X` | Attiva lo scudo durante il boss fight |
-| `←` / `A` | Movimento verso sinistra nel boss fight |
-| `→` / `D` | Movimento verso destra nel boss fight |
+| `←` / `A` | Movimento verso sinistra nel platform e nel boss fight |
+| `→` / `D` | Movimento verso destra nel platform e nel boss fight |
 | `P` | Mette in pausa o riprende la partita |
 | `M` | Attiva o disattiva la musica |
 | `U` / `ESC` | Attiva o disattiva la modalità a schermo intero |
@@ -389,7 +400,7 @@ Il gioco verrà compilato e avviato tramite Maven.
 | Comando | Funzione |
 |---|---|
 | `P` | Riprende la partita |
-| `R` | Riavvia una nuova partita |
+| `R` | Ricomincia il livello 2 se in pausa nel platform; altrimenti riavvia una nuova partita |
 | `Q` | Torna al menu principale |
 
 ### Altri comandi
@@ -416,13 +427,17 @@ Durante questa fase:
 - Il giocatore può utilizzare il doppio salto.
 - L'energia si ricarica durante la partita.
 - Una barra di energia piena consente di lanciare una sfera energetica con il tasto sinistro del mouse.
-- L’HUD mostra separatamente avanzamento verso il boss e ricarica dell’onda.
+- L’HUD mostra separatamente avanzamento verso il secondo livello e ricarica dell’onda.
 
 Il personaggio dispone di animazioni di corsa, salto e atterraggio.
 
-### Fase 2 — Boss fight
+### Fase 2 — Platform
 
-Raggiunti **10.000 punti**, inizia il combattimento finale.
+Raggiunti **10.000 punti**, una breve transizione introduce il centro di smistamento infernale. Attraversa le quattro sezioni usando salto variabile, wall-slide e wall-jump. Il cronometro e il contatore delle morti restano visibili; le trappole riportano rapidamente all'ultimo checkpoint. Raggiungi il portellone per completare il livello.
+
+### Fase 3 — Boss fight
+
+Dopo l'uscita del secondo livello, inizia il combattimento finale.
 
 | Parametro | Valore |
 |---|---|
