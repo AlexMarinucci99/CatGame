@@ -38,6 +38,12 @@ final class PlatformerRenderer {
                     g.strokeLine(b.x()+b.w()/2,b.y()+12,b.x()+b.ax()+b.w()/2,b.y()+b.ay()+12);g.setLineDashes();
                 }
                 g.setFill(Color.web("#303d48"));g.fillRect(r.x(),r.y(),r.w(),r.h());
+                // Modular steel plates give both climbing walls and ledges a readable silhouette.
+                g.setStroke(Color.web("#18242e"));g.setLineWidth(2);
+                for(double xx=r.x();xx<r.x()+r.w();xx+=64)
+                    for(double yy=r.y();yy<r.y()+r.h();yy+=64) {
+                        g.strokeRect(xx+3,yy+3,Math.min(58,r.x()+r.w()-xx-6),Math.min(58,r.y()+r.h()-yy-6));
+                    }
                 g.setFill(Color.web("#a4afb2"));g.fillRect(r.x(),r.y(),r.w(),5);
                 g.setFill(Color.web("#56616b"));
                 for(double xx=r.x()+12;xx<r.x()+r.w();xx+=32)g.fillOval(xx,r.y()+12,4,4);
@@ -48,6 +54,15 @@ final class PlatformerRenderer {
                     }
                 }
             } else if(b.kind().equals("saw")) {
+                // Rail and joint are cosmetic; the visible tooth envelope matches the hazard box.
+                double anchorX=b.x()+b.w()/2, anchorY=b.y()+b.h()/2;
+                double centerX=r.x()+r.w()/2, centerY=r.y()+r.h()/2;
+                g.setStroke(Color.web("#202a32"));g.setLineWidth(10);
+                g.strokeLine(anchorX,anchorY,anchorX+b.ax(),anchorY+b.ay());
+                g.setStroke(Color.web("#8c9698"));g.setLineWidth(3);
+                g.strokeLine(anchorX,anchorY,centerX,centerY);
+                g.setFill(Color.web("#69767c"));g.fillOval(anchorX-8,anchorY-8,16,16);
+                g.setLineWidth(1);
                 g.setStroke(Color.web("#a16952"));g.setLineDashes(4,6);
                 g.strokeLine(b.x()+b.w()/2,b.y()+b.h()/2,b.x()+b.ax()+b.w()/2,b.y()+b.ay()+b.h()/2);g.setLineDashes();
                 g.save();g.translate(r.x()+r.w()/2,r.y()+r.h()/2);g.rotate(game.reducedEffects?0:l.time*220);
@@ -84,8 +99,10 @@ final class PlatformerRenderer {
         g.fillText(section+"     Morti: "+l.deaths+"     Tempo: "+String.format(java.util.Locale.ROOT,"%.1f s",l.time),34,69);
         g.setFill(Color.web("#111a22",.9));g.fillRoundRect(18,600,964,36,8,8);
         g.setFill(Color.web("#b5bdc4"));
-        g.fillText("A/D o ←/→  Muovi    SPAZIO  Salto / wall-jump    P  Pausa    R  Ricomincia",34,625);
-        String tip=l.x<820?"Tieni SPAZIO per saltare più in alto":l.x<1760?"Nel pozzo: salta verso la parete opposta e premi di nuovo SPAZIO":l.x<3780?"Osserva le traiettorie e il ritmo delle presse":"Raggiungi il portellone del boss";
+        g.fillText("A/D o ←/→  Muovi    SPAZIO  Salto / wall-jump    SHIFT  Sprint    P  Pausa    R  Ricomincia",34,625);
+        g.setFill(Color.web("#111a22",.92));g.fillRoundRect(18,94,964,28,6,6);
+        g.setFill(Color.web("#b5bdc4"));
+        String tip=l.x<820?"SPAZIO: salto / doppio salto · SHIFT: sprint":l.x<1760?"Nel pozzo: salta verso la parete opposta e premi di nuovo SPAZIO":l.x<3780?"Osserva le traiettorie e il ritmo delle presse":"Raggiungi il portellone del boss";
         g.fillText(tip,34,112);
         if(l.deathTimer>0 && !game.reducedEffects) {
             g.setFill(Color.web("#c98461",.12));g.fillRect(0,0,1000,650);

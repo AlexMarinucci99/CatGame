@@ -6,6 +6,8 @@ record PlatformerConfig(double speed, double groundAcceleration, double airAccel
         double terminalSpeed, double slideSpeed, double wallX, double wallY, double jumpCut) {
     static final PlatformerConfig DEFAULT = new PlatformerConfig(
             340, 2600, 1800, 3200, 2300, 820, .10, .12, 1000, 125, 360, 850, .45);
+    static final double SPRINT_SPEED = 520;
+    static final double AIR_JUMP_FACTOR = .85;
     static final double STEP = 1.0 / 120;
     static final double WIDTH = 36, HEIGHT = 52;
 }

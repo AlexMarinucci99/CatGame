@@ -9,6 +9,7 @@ final class PlatformerLevel {
     final PlatformerConfig config;
     double x=100, y=1048, vx, vy, time, accumulator, deathTimer, animation;
     double spawnX=100, spawnY=1048, coyote, buffer, wallLock;
+    boolean sprint, airJumpAvailable=true;
     boolean left, right, jumpHeld, grounded, finished, checkpointsEnabled=true, facingLeft;
     int wall, deaths, checkpoint=-1;
     Body support;
@@ -18,14 +19,14 @@ final class PlatformerLevel {
     Rect bounds() { return new Rect(x,y,WIDTH,HEIGHT); }
     void jumpPressed() { jumpHeld=true; buffer=config.buffer(); }
     void jumpReleased() { jumpHeld=false; if(vy<0) vy*=config.jumpCut(); }
-    void clearInput() { left=false; right=false; jumpHeld=false; buffer=0; }
+    void clearInput() { sprint=false; left=false; right=false; jumpHeld=false; buffer=0; }
     void restart() {
         spawnX=100; spawnY=1048; checkpoint=-1; deaths=0; time=0; accumulator=0;
         finished=false; respawn();
     }
     void respawn() {
         x=spawnX; y=spawnY; vx=vy=0; coyote=buffer=wallLock=0; wall=0;
-        grounded=false; support=null; deathTimer=0; clearInput();
+        grounded=false; airJumpAvailable=true; support=null; deathTimer=0; clearInput();
     }
     void die() {
         if(deathTimer>0 || finished) return;
@@ -47,16 +48,18 @@ final class PlatformerLevel {
             move(0,b.y()-a.y(),support);
         }
         wall=touchingWall();
+        if (grounded) airJumpAvailable=true;
         coyote=grounded ? config.coyote() : Math.max(0,coyote-dt);
         buffer=Math.max(0,buffer-dt);
         wallLock=Math.max(0,wallLock-dt);
         int direction=(right?1:0)-(left?1:0);
         if(direction!=0) facingLeft=direction<0;
-        if(wallLock==0) vx=approach(vx,direction*config.speed(),
+        if(wallLock==0) vx=approach(vx,direction*(sprint ? SPRINT_SPEED : config.speed()),
                 (direction==0 ? config.braking() : grounded?config.groundAcceleration():config.airAcceleration())*dt);
-        if(buffer>0 && (coyote>0 || wall!=0)) {
+        if(buffer>0 && (coyote>0 || wall!=0 || airJumpAvailable)) {
             if(coyote<=0 && wall!=0) { vx=-wall*config.wallX(); vy=-config.wallY(); wallLock=.16; }
-            else vy=-config.jump();
+            else if(coyote>0) vy=-config.jump();
+            else { vy=-config.jump()*AIR_JUMP_FACTOR; airJumpAvailable=false; }
             if(!jumpHeld) vy*=config.jumpCut();
             buffer=0; coyote=0; grounded=false; support=null;
         }
